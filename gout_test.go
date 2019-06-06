@@ -1,7 +1,9 @@
 package gout
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -10,6 +12,8 @@ import (
 func TestMethod(t *testing.T) {
 
 	var total int32
+
+	var srv *http.Server
 
 	router := func() {
 		// Creates a gin router with default middleware:
@@ -28,10 +32,13 @@ func TestMethod(t *testing.T) {
 		router.HEAD("/someHead", cb)
 		router.OPTIONS("/someOptions", cb)
 
-		// By default it serves on :8080 unless a
-		// PORT environment variable was defined.
-		router.Run()
-		// router.Run(":3000") for a hard coded port
+		srv = &http.Server{
+			Addr:    ":8080",
+			Handler: router,
+		}
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			t.Errorf("listen: %s\n", err)
+		}
 	}
 
 	go router()
@@ -53,5 +60,11 @@ func TestMethod(t *testing.T) {
 
 	if total != 7 {
 		t.Errorf("got %d want 7\n", total)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		t.Errorf("Server Shutdown:%s\n", err)
 	}
 }
