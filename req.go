@@ -1,6 +1,7 @@
 package gout
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"strings"
@@ -10,12 +11,30 @@ type Req struct {
 	method string
 	url    string
 
-	g *Gout
+	bodyEncoder Encoder
+	bodyDecoder Decoder
+
+	httpCode *int
+	g        *Gout
+}
+
+func (r *Req) Reset() {
+	r.bodyEncoder = nil
+	r.bodyDecoder = nil
+	r.httpCode = nil
 }
 
 func (r *Req) Do() (err error) {
+	b := &bytes.Buffer{}
 
-	req, err := http.NewRequest(r.method, r.url, nil)
+	defer r.Reset()
+	if r.bodyEncoder != nil {
+		if err := r.bodyEncoder.Encode(b); err != nil {
+			return err
+		}
+	}
+
+	req, err := http.NewRequest(r.method, r.url, b)
 	if err != nil {
 		return err
 	}
@@ -26,6 +45,16 @@ func (r *Req) Do() (err error) {
 	}
 
 	defer resp.Body.Close()
+	if r.bodyDecoder != nil {
+		if err := r.bodyDecoder.Decode(resp.Body); err != nil {
+			return err
+		}
+	}
+
+	if r.httpCode != nil {
+		*r.httpCode = resp.StatusCode
+	}
+
 	return nil
 }
 
