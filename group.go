@@ -1,5 +1,10 @@
 package gout
 
+import (
+	"github.com/guonaihong/gout/decode"
+	"github.com/guonaihong/gout/encode"
+)
+
 const (
 	GET     = "GET"
 	POST    = "POST"
@@ -56,6 +61,21 @@ func (g *routerGroup) HEAD(url string) *routerGroup {
 
 func (g *routerGroup) OPTIONS(url string) *routerGroup {
 	g.Req = NewReq(OPTIONS, joinPaths(g.basePath, url), g.out)
+	return g
+}
+
+func (g *routerGroup) ToJSON(obj interface{}) *routerGroup {
+	g.Req.bodyEncoder = encode.NewJsonEncode(obj)
+	return g
+}
+
+func (g *routerGroup) ShouldBindJSON(obj interface{}) *routerGroup {
+	g.Req.bodyDecoder = decode.NewJsonDecode(obj)
+	return g
+}
+
+func (g *routerGroup) Code(httpCode *int) *routerGroup {
+	g.Req.httpCode = httpCode
 	return g
 }
 

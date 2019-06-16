@@ -84,3 +84,61 @@ func TestGroupNew(t *testing.T) {
 		t.Errorf("/v2/v1/login fail\n")
 	}
 }
+
+type data struct {
+	Id   int    `json:"id"`
+	Data string `json:"data"`
+}
+
+type BindTest struct {
+	InBody   interface{}
+	OutBody  interface{}
+	httpCode int
+}
+
+func TestShouldBindJSON(t *testing.T) {
+	var d3 data
+	go func() {
+		router := gin.Default()
+
+		router.POST("/test.json", func(c *gin.Context) {
+			c.ShouldBindJSON(&d3)
+			c.JSON(200, d3)
+		})
+
+		// Listen and serve on 0.0.0.0:8080
+		router.Run(":8080")
+	}()
+
+	time.Sleep(250 * time.Millisecond)
+	g := New(nil)
+
+	tests := []BindTest{
+		{InBody: data{Id: 9, Data: "早上测试结构体"}, OutBody: data{}},
+		{InBody: H{"id": 10, "data": "早上测试map"}, OutBody: data{}},
+	}
+
+	for k, _ := range tests {
+		t.Logf("outbody type:%T:%p\n", tests[k].OutBody, &tests[k].OutBody)
+
+		err := g.POST(":8080/test.json").ToJSON(&tests[k].InBody).ShouldBindJSON(&tests[k].OutBody).Code(&tests[k].httpCode).Do()
+		if err != nil {
+			t.Errorf("send fail:%s\n", err)
+		}
+
+		if tests[k].httpCode != 200 {
+			t.Errorf("got:%d, want:200\n", tests[k].httpCode)
+		}
+
+		if tests[k].OutBody.(map[string]interface{})["id"].(float64) != float64(d3.Id) {
+			t.Errorf("got:%#v(P:%p), want:%#v(T:%T)\n", tests[k].OutBody, &tests[k].OutBody, tests[k].InBody, tests[k].InBody)
+		}
+
+		/*
+			if !reflect.DeepEqual(&tests[k].InBody, &tests[k].OutBody) {
+				t.Errorf("got:%#v(P:%p), want:%#v(T:%T)\n", tests[k].OutBody, &tests[k].OutBody, tests[k].InBody, tests[k].InBody)
+			}
+		*/
+
+	}
+}
