@@ -4,8 +4,8 @@ import (
 	"reflect"
 )
 
-type Encoder interface {
-	Encode(key, val string) error
+type Adder interface {
+	Add(key, val string) error
 	Name() string
 }
 
@@ -13,7 +13,7 @@ type Encoder interface {
 // struct
 // map
 // []string
-func Encode(in interface{}, enc Encoder) error {
+func Encode(in interface{}, a Adder) error {
 	v := reflect.ValueOf(in)
 
 	if v.Kind() == reflect.Ptr {
@@ -27,7 +27,7 @@ func Encode(in interface{}, enc Encoder) error {
 	switch v.Kind() {
 	case reflect.Map:
 	case reflect.Struct:
-		encode(v, enc)
+		encode(v, a)
 	case reflect.Slice, reflect.Array:
 	}
 }
@@ -48,11 +48,13 @@ func valToStr(v reflect.Value) string {
 	if v.Type() == timeType {
 		v.Interface().(time.Time).Format()
 	}
+
+	return fmt.Sprint(v.Interface())
 }
 
-func parseTagAndSet(val reflect.Value, sf reflect.StructField, enc Encoder) {
+func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 
-	tagName := sf.Tag.Get(enc.Name())
+	tagName := sf.Tag.Get(a.Name())
 	tag, opts := parseTag(tagName)
 
 	if tagName == "" {
@@ -64,7 +66,7 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, enc Encoder) {
 	}
 }
 
-func encode(val reflect.Value, enc Encoder) string {
+func encode(val reflect.Value, a Adder) string {
 	vKind := val.Kind()
 
 	if vKind == reflect.Struct {
@@ -79,14 +81,14 @@ func encode(val reflect.Value, enc Encoder) string {
 				continue
 			}
 
-			tag := sf.Tag.Get(enc.Name())
+			tag := sf.Tag.Get(a.Name())
 
 			if tag == "-" {
 				continue
 
 			}
 
-			parseTagAndSet(enc)
+			parseTagAndSet(a)
 
 		}
 	}
