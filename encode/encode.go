@@ -1,7 +1,10 @@
 package encode
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
+	"time"
 )
 
 type Adder interface {
@@ -26,10 +29,31 @@ func Encode(in interface{}, a Adder) error {
 
 	switch v.Kind() {
 	case reflect.Map:
+		iter := v.MapRange()
+		for iter.Next() {
+			a.Add(valToStr(iter.Key()), valToStr(iter.Value()))
+		}
+
 	case reflect.Struct:
-		encode(v, a)
+		//encode(v, a)
+
 	case reflect.Slice, reflect.Array:
+		if !(v.Len() > 0 && v.Len()%2 == 0 && v.Index(0).Kind() == reflect.String) {
+			//todo return error
+			return nil
+		}
+
+		for i, l := 0, v.Len(); i < l; i += 2 {
+			if v.Index(i).Kind() != reflect.String {
+				// todo return error
+				return nil
+			}
+
+			a.Add(valToStr(v.Index(i)), valToStr(v.Index(i+1)))
+		}
 	}
+
+	return nil
 }
 
 func parseTag(tag string) (string, tagOptions) {
@@ -46,7 +70,7 @@ func valToStr(v reflect.Value) string {
 	}
 
 	if v.Type() == timeType {
-		v.Interface().(time.Time).Format()
+		return v.Interface().(time.Time).Format(time.RFC3339)
 	}
 
 	return fmt.Sprint(v.Interface())
@@ -64,9 +88,10 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 	if opts.Contains("omitempty") && valueIsEmpty(val) {
 		return
 	}
+	a.Add(tag, valToStr(val))
 }
 
-func encode(val reflect.Value, a Adder) string {
+func encode(val reflect.Value, a Adder) error {
 	vKind := val.Kind()
 
 	if vKind == reflect.Struct {
@@ -88,10 +113,12 @@ func encode(val reflect.Value, a Adder) string {
 
 			}
 
-			parseTagAndSet(a)
+			parseTagAndSet(val.Field(i), sf, a)
 
 		}
 	}
+
+	return nil
 }
 
 type tagOptions []string
@@ -111,17 +138,17 @@ var timeType = reflect.TypeOf(time.Time{})
 func valueIsEmpty(v reflect.Value) bool {
 
 	switch v.Kind() {
-	case v.Uint, v.Uint8, v.Uint16, v.Uint32, v.Uint64, v.UintPtr:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		return v.Uint() == 0
-	case v.Int, v.Int8, v.Int16, v.Int32, v.Int64:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return v.Int() == 0
-	case v.Slice, v.Array, v.Map, v.String:
-		return v.Len()
-	case v.Bool:
+	case reflect.Slice, reflect.Array, reflect.Map, reflect.String:
+		return v.Len() == 0
+	case reflect.Bool:
 		return !v.Bool()
-	case v.Float32, v.Float64:
+	case reflect.Float32, reflect.Float64:
 		return v.Float() == 0
-	case v.Interface, v.reflect.Ptr:
+	case reflect.Interface, reflect.Ptr:
 		return v.IsNil()
 	}
 

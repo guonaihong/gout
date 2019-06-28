@@ -5,15 +5,16 @@ import (
 )
 
 type HeaderEncode struct {
-	header http.Header
+	r *http.Request
 }
 
 func NewHeaderEnocde(req *http.Request) *HeaderEncode {
-	return &HeaderEnocde{obj: obj, header: req.Header}
+	return &HeaderEncode{r: req}
 }
 
 func (h *HeaderEncode) Add(key, val string) error {
-	h.Add(key, val)
+	h.r.Header.Add(key, val)
+	return nil
 }
 
 func (h *HeaderEncode) Name() string {
