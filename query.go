@@ -6,17 +6,23 @@ import (
 )
 
 type QueryEncode struct {
-	URL *url.URL
+	r    *http.Request
+	vals url.Values
 }
 
 func NewQueryEncode(req *http.Request) *QueryEncode {
-	return &QueryEncode{URL: req.URL}
+	return &QueryEncode{vals: make(url.Values)}
 }
 
 func (q *QueryEncode) Add(key, val string) error {
-	q.URL.Add(key, val)
+	q.vals.Add(key, val)
+	return nil
 }
 
 func (q *QueryEncode) Name() string {
 	return "query"
+}
+
+func (q *QueryEncode) End() {
+	_ = q.vals.Encode()
 }
