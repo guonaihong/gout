@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var emptyField = reflect.StructField{}
+
 type Adder interface {
 	Add(key, val string) error
 	Name() string
@@ -35,7 +37,7 @@ func Encode(in interface{}, a Adder) error {
 		}
 
 	case reflect.Struct:
-		//encode(v, a)
+		encode(v, emptyField, a)
 
 	case reflect.Slice, reflect.Array:
 		if !(v.Len() > 0 && v.Len()%2 == 0 && v.Index(0).Kind() == reflect.String) {
@@ -91,8 +93,12 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 	a.Add(tag, valToStr(val))
 }
 
-func encode(val reflect.Value, a Adder) error {
+func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
 	vKind := val.Kind()
+
+	if vKind != reflect.Struct || !sf.Anonymous {
+		parseTagAndSet(val, sf, a)
+	}
 
 	if vKind == reflect.Struct {
 
@@ -102,7 +108,7 @@ func encode(val reflect.Value, a Adder) error {
 
 			sf := typ.Field(i)
 
-			if sf.PkgPath != "" && sf.Anonymous {
+			if sf.PkgPath != "" && !sf.Anonymous {
 				continue
 			}
 
@@ -113,8 +119,7 @@ func encode(val reflect.Value, a Adder) error {
 
 			}
 
-			parseTagAndSet(val.Field(i), sf, a)
-
+			encode(val.Field(i), sf, a)
 		}
 	}
 
