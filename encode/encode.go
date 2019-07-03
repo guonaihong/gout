@@ -81,16 +81,21 @@ func valToStr(v reflect.Value) string {
 func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 
 	tagName := sf.Tag.Get(a.Name())
-	tag, opts := parseTag(tagName)
+	tagName, opts := parseTag(tagName)
 
 	if tagName == "" {
 		tagName = sf.Name
 	}
 
+	if tagName == "" {
+		return
+	}
+
 	if opts.Contains("omitempty") && valueIsEmpty(val) {
 		return
 	}
-	a.Add(tag, valToStr(val))
+
+	a.Add(tagName, valToStr(val))
 }
 
 func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
