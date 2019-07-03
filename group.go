@@ -64,6 +64,16 @@ func (g *routerGroup) OPTIONS(url string) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) ToHeader(obj interface{}) *routerGroup {
+	g.Req.headerEncode = obj
+	return g
+}
+
+func (g *routerGroup) ShouldBindHeader(obj interface{}) *routerGroup {
+	g.Req.headerDecode = obj
+	return g
+}
+
 func (g *routerGroup) ToJSON(obj interface{}) *routerGroup {
 	g.Req.bodyEncoder = encode.NewJsonEncode(obj)
 	return g
