@@ -7,20 +7,33 @@ import (
 
 type setter interface {
 	Set(value reflect.Value,
+
 		sf reflect.StructField,
+
 		tagValue string) error
 }
 
 type decData map[string][]string
 
+// todo return value
 func (d decData) Set(
+
 	value reflect.Value,
+
 	sf reflect.StructField,
+
 	tagValue string) {
 
+	setForm(d, value, sf, tagValue)
 }
 
-func setForm(m map[string][]string, value reflect.Value, sf reflect.StructField, tagValue string) {
+func setForm(m map[string][]string,
+	value reflect.Value,
+	sf reflect.StructField,
+	tagValue string,
+) {
+
+	vs, ok := m[tagValue]
 }
 
 func decode(d decData, obj interface{}, tagName string) error {
@@ -32,7 +45,28 @@ func decode(d decData, obj interface{}, tagName string) error {
 	decodeCore(d, reflect.StructField{}, v, tagName)
 }
 
-func decodeCore(val reflect.Value, sf reflect.StructField, d decData, tagName string) error {
+// todo delete
+func parseTag(tag string) (string, tagOptions) {
+	s := strings.Split(tag, ",")
+	return s[0], s[1:]
+}
+
+func parseTagAndSet(val reflect.Value, sf reflect.StructField, setter setter, tagName string) {
+	tagName = sf.Tag.Get(tagName)
+	tagName, _ = parseTag(tagName)
+
+	if tagName == "" {
+		tagName = sf.Name
+	}
+
+	if tagName == "" {
+		return
+	}
+
+	setter.Set(val, sf, tagName)
+}
+
+func decodeCore(val reflect.Value, sf reflect.StructField, setter setter, tagName string) error {
 	vKind := v.Kind()
 
 	// elem pointer
@@ -41,7 +75,8 @@ func decodeCore(val reflect.Value, sf reflect.StructField, d decData, tagName st
 	}
 
 	if vKind == reflect.Struct || !sf.Anonymous {
-		// todo set
+		parseTagAndSet(val, sf, setter, tagName)
+		return
 	}
 
 	if vKind == reflect.Struct {
@@ -57,7 +92,7 @@ func decodeCore(val reflect.Value, sf reflect.StructField, d decData, tagName st
 			}
 
 			tag := sf.Tag.Get()
-			decodeCore(val.Field(i), sf, d)
+			decodeCore(val.Field(i), sf, d, tag)
 		}
 	}
 
