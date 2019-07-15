@@ -3,12 +3,13 @@ package decode
 import (
 	"net/http"
 	"net/textproto"
+	"reflect"
 )
 
 type headerDecode struct{}
 
 func (h *headerDecode) Decode(r *http.Request, obj interface{}) error {
-	return decode(r.Header, obj, "header")
+	return decode(decData(r.Header), obj, "header")
 }
 
 type headerSet map[string][]string

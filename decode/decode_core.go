@@ -1,8 +1,13 @@
 package decode
 
 import (
-	"net/http"
+	//"net/http"
+	"errors"
+	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type setter interface {
@@ -15,6 +20,8 @@ type setter interface {
 
 type decData map[string][]string
 
+var emptyField = reflect.StructField{}
+
 // todo return value
 func (d decData) Set(
 
@@ -22,26 +29,39 @@ func (d decData) Set(
 
 	sf reflect.StructField,
 
-	tagValue string) {
+	tagValue string) error {
 
-	setForm(d, value, sf, tagValue)
+	return setForm(d, value, sf, tagValue)
 }
 
 func setForm(m map[string][]string,
 	value reflect.Value,
 	sf reflect.StructField,
 	tagValue string,
-) {
+) error {
 
 	vs, ok := m[tagValue]
 	if !ok {
-		return
+		return nil
 	}
 
 	switch value.Kind() {
 	case reflect.Slice:
+		return setSlice(vs, sf, value)
 	case reflect.Array:
+		if len(vs) != value.Len() {
+			return fmt.Errorf("%q is not valid value for %s", vs, value.Type().String())
+		}
+
+		return setArray(vs, sf, value)
 	}
+
+	var val string
+	if len(vs) > 0 {
+		val = vs[0]
+	}
+
+	return setBase(val, sf, value)
 }
 
 func decode(d decData, obj interface{}, tagName string) error {
@@ -50,11 +70,11 @@ func decode(d decData, obj interface{}, tagName string) error {
 		return errors.New("Wrong parameter")
 	}
 
-	decodeCore(d, reflect.StructField{}, v, tagName)
+	return decodeCore(v, emptyField, d, tagName)
 }
 
 // todo delete
-func parseTag(tag string) (string, tagOptions) {
+func parseTag(tag string) (string, []string) {
 	s := strings.Split(tag, ",")
 	return s[0], s[1:]
 }
@@ -75,16 +95,16 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, setter setter, ta
 }
 
 func decodeCore(val reflect.Value, sf reflect.StructField, setter setter, tagName string) error {
-	vKind := v.Kind()
+	vKind := val.Kind()
 
 	// elem pointer
 	for vKind == reflect.Ptr {
-		v = v.Elem()
+		val = val.Elem()
 	}
 
 	if vKind == reflect.Struct || !sf.Anonymous {
 		parseTagAndSet(val, sf, setter, tagName)
-		return
+		return nil
 	}
 
 	if vKind == reflect.Struct {
@@ -100,7 +120,7 @@ func decodeCore(val reflect.Value, sf reflect.StructField, setter setter, tagNam
 			}
 
 			tag := sf.Tag.Get(tagName)
-			decodeCore(val.Field(i), sf, d, tag)
+			decodeCore(val.Field(i), sf, setter, tag)
 		}
 	}
 
@@ -112,7 +132,7 @@ type convert struct {
 	cb      func(val string, bitSize int, sf reflect.StructField, field reflect.Value) error
 }
 
-var bitSize = map[reflect.Kind]convert{
+var convertFunc = map[reflect.Kind]convert{
 	reflect.Uint:   {bitSize: 0, cb: setIntField},
 	reflect.Uint8:  {bitSize: 8, cb: setIntField},
 	reflect.Uint16: {bitSize: 16, cb: setIntField},
@@ -126,7 +146,7 @@ var bitSize = map[reflect.Kind]convert{
 	reflect.Bool:   {bitSize: 0, cb: setBoolField},
 }
 
-func setIntField(val string, bitSize int, field reflect.Value) error {
+func setIntField(val string, bitSize int, sf reflect.StructField, field reflect.Value) error {
 	if val == "" {
 		val = "0"
 	}
@@ -137,7 +157,7 @@ func setIntField(val string, bitSize int, field reflect.Value) error {
 	return err
 }
 
-func setUintField(val string, bitSize int, field reflect.Value) error {
+func setUintField(val string, bitSize int, sf reflect.StructField, field reflect.Value) error {
 	if val == "" {
 		val = "0"
 	}
@@ -148,7 +168,7 @@ func setUintField(val string, bitSize int, field reflect.Value) error {
 	return err
 }
 
-func setBoolField(val string, field reflect.Value) error {
+func setBoolField(val string, bitSize int, sf reflect.StructField, field reflect.Value) error {
 	if val == "" {
 		val = "false"
 	}
@@ -159,7 +179,7 @@ func setBoolField(val string, field reflect.Value) error {
 	return err
 }
 
-func setFloatField(val string, bitSize int, field reflect.Value) error {
+func setFloatField(val string, bitSize int, sf reflect.StructField, field reflect.Value) error {
 	if val == "" {
 		val = "0.0"
 	}
@@ -170,7 +190,7 @@ func setFloatField(val string, bitSize int, field reflect.Value) error {
 	return err
 }
 
-func setTimeField(val string, structField reflect.StructField, value reflect.Value) error {
+func setTimeField(val string, bitSize int, structField reflect.StructField, value reflect.Value) error {
 	timeFormat := structField.Tag.Get("time_format")
 	if timeFormat == "" {
 		timeFormat = time.RFC3339
@@ -221,10 +241,9 @@ func setTimeField(val string, structField reflect.StructField, value reflect.Val
 	return nil
 }
 
-/*
-func setArray(vals []string, value reflect.Value, field reflect.StructField) error {
+func setArray(vals []string, sf reflect.StructField, value reflect.Value) error {
 	for i, s := range vals {
-		err := setWithProperType(s, value.Index(i), field)
+		err := setBase(s, sf, value.Index(i))
 		if err != nil {
 			return err
 		}
@@ -232,16 +251,15 @@ func setArray(vals []string, value reflect.Value, field reflect.StructField) err
 	return nil
 }
 
-func setSlice(vals []string, value reflect.Value, field reflect.StructField) error {
+func setSlice(vals []string, sf reflect.StructField, value reflect.Value) error {
 	slice := reflect.MakeSlice(value.Type(), len(vals), len(vals))
-	err := setArray(vals, slice, field)
+	err := setArray(vals, sf, slice)
 	if err != nil {
 		return err
 	}
 	value.Set(slice)
 	return nil
 }
-*/
 
 func setTimeDuration(val string, bitSize int, value reflect.Value) error {
 	d, err := time.ParseDuration(val)
@@ -252,5 +270,12 @@ func setTimeDuration(val string, bitSize int, value reflect.Value) error {
 	return nil
 }
 
-func setBase(value string, ptr reflect.Value) error {
+func setBase(val string, sf reflect.StructField, value reflect.Value) error {
+	fn, ok := convertFunc[value.Kind()]
+	if ok {
+		fn.cb(val, fn.bitSize, sf, value)
+		return nil
+	}
+
+	return nil
 }
