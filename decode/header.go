@@ -9,11 +9,13 @@ import (
 type headerDecode struct{}
 
 func (h *headerDecode) Decode(r *http.Request, obj interface{}) error {
-	return decode(decData(r.Header), obj, "header")
+	return decode(headerSet(r.Header), obj, "header")
 }
 
 type headerSet map[string][]string
 
-func (h *headerSet) Set(value reflect.Value, sf reflect.StructField, tagValue string) {
-	setForm(*h, value, sf, textproto.CanonicalMIMEHeaderKey(tagValue))
+var _ setter = headerSet(nil)
+
+func (h headerSet) Set(value reflect.Value, sf reflect.StructField, tagValue string) error {
+	return setForm(h, value, sf, textproto.CanonicalMIMEHeaderKey(tagValue))
 }

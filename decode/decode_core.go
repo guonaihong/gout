@@ -2,6 +2,7 @@ package decode
 
 import (
 	//"net/http"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -18,12 +19,11 @@ type setter interface {
 		tagValue string) error
 }
 
-type decData map[string][]string
+type defaultSet map[string][]string
 
 var emptyField = reflect.StructField{}
 
-// todo return value
-func (d decData) Set(
+func (d defaultSet) Set(
 
 	value reflect.Value,
 
@@ -42,6 +42,7 @@ func setForm(m map[string][]string,
 
 	vs, ok := m[tagValue]
 	if !ok {
+		fmt.Printf("tagName = %s:%v\n", tagValue, m)
 		return nil
 	}
 
@@ -64,7 +65,7 @@ func setForm(m map[string][]string,
 	return setBase(val, sf, value)
 }
 
-func decode(d decData, obj interface{}, tagName string) error {
+func decode(d setter, obj interface{}, tagName string) error {
 	v := reflect.ValueOf(obj)
 	if obj == nil || v.IsNil() {
 		return errors.New("Wrong parameter")
@@ -79,7 +80,7 @@ func parseTag(tag string) (string, []string) {
 	return s[0], s[1:]
 }
 
-func parseTagAndSet(val reflect.Value, sf reflect.StructField, setter setter, tagName string) {
+func parseTagAndSet(val reflect.Value, sf reflect.StructField, setter setter, tagName string) error {
 	tagName = sf.Tag.Get(tagName)
 	tagName, _ = parseTag(tagName)
 
@@ -88,23 +89,30 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, setter setter, ta
 	}
 
 	if tagName == "" {
-		return
+		return nil
 	}
 
-	setter.Set(val, sf, tagName)
+	return setter.Set(val, sf, tagName)
 }
 
-func decodeCore(val reflect.Value, sf reflect.StructField, setter setter, tagName string) error {
+func decodeCore(val reflect.Value, sf reflect.StructField, setter setter, tagName string) (err error) {
 	vKind := val.Kind()
 
 	// elem pointer
 	for vKind == reflect.Ptr {
 		val = val.Elem()
+		vKind = val.Kind()
 	}
 
-	if vKind == reflect.Struct || !sf.Anonymous {
-		parseTagAndSet(val, sf, setter, tagName)
-		return nil
+	// 每个类型都会先尝试set
+	// 如果不是结构体才设置。那time.Time类型该如何呢?
+	// (time.Time是标准库里面用于表示时间的类型, 用结构体实现)？
+	if vKind != reflect.Struct || !sf.Anonymous {
+		//todo 是否已经设置过
+		err := parseTagAndSet(val, sf, setter, tagName)
+		if err != nil {
+			return err
+		}
 	}
 
 	if vKind == reflect.Struct {
@@ -120,7 +128,9 @@ func decodeCore(val reflect.Value, sf reflect.StructField, setter setter, tagNam
 			}
 
 			tag := sf.Tag.Get(tagName)
-			decodeCore(val.Field(i), sf, setter, tag)
+			if err = decodeCore(val.Field(i), sf, setter, tag); err != nil {
+				return
+			}
 		}
 	}
 
@@ -133,17 +143,30 @@ type convert struct {
 }
 
 var convertFunc = map[reflect.Kind]convert{
-	reflect.Uint:   {bitSize: 0, cb: setIntField},
-	reflect.Uint8:  {bitSize: 8, cb: setIntField},
-	reflect.Uint16: {bitSize: 16, cb: setIntField},
-	reflect.Uint32: {bitSize: 32, cb: setIntField},
-	reflect.Uint64: {bitSize: 64, cb: setIntField},
-	reflect.Int:    {bitSize: 0, cb: setIntField},
-	reflect.Int8:   {bitSize: 8, cb: setUintField},
-	reflect.Int16:  {bitSize: 16, cb: setUintField},
-	reflect.Int32:  {bitSize: 32, cb: setUintField},
-	reflect.Int64:  {bitSize: 64, cb: setUintField},
-	reflect.Bool:   {bitSize: 0, cb: setBoolField},
+	reflect.Uint:    {bitSize: 0, cb: setUintField},
+	reflect.Uint8:   {bitSize: 8, cb: setUintField},
+	reflect.Uint16:  {bitSize: 16, cb: setUintField},
+	reflect.Uint32:  {bitSize: 32, cb: setUintField},
+	reflect.Uint64:  {bitSize: 64, cb: setUintField},
+	reflect.Int:     {bitSize: 0, cb: setIntField},
+	reflect.Int8:    {bitSize: 8, cb: setIntField},
+	reflect.Int16:   {bitSize: 16, cb: setIntField},
+	reflect.Int32:   {bitSize: 32, cb: setIntField},
+	reflect.Int64:   {bitSize: 64, cb: setIntDurationField},
+	reflect.Bool:    {bitSize: 0, cb: setBoolField},
+	reflect.Float32: {bitSize: 32, cb: setFloatField},
+	reflect.Float64: {bitSize: 64, cb: setFloatField},
+	reflect.Struct:  {bitSize: 0, cb: setStructField},
+	reflect.Map:     {bitSize: 0, cb: setMapField},
+}
+
+func setIntDurationField(val string, bitSize int, sf reflect.StructField, value reflect.Value) error {
+	switch value.Interface().(type) {
+	case time.Duration:
+		return setTimeDuration(val, bitSize, sf, value)
+	}
+
+	return setIntField(val, bitSize, sf, value)
 }
 
 func setIntField(val string, bitSize int, sf reflect.StructField, field reflect.Value) error {
@@ -241,6 +264,14 @@ func setTimeField(val string, bitSize int, structField reflect.StructField, valu
 	return nil
 }
 
+func setStructField(val string, bitSize int, sf reflect.StructField, value reflect.Value) error {
+	switch value.Interface().(type) {
+	case time.Time:
+		return setTimeField(val, bitSize, sf, value)
+	}
+	return json.Unmarshal([]byte(val), value.Addr().Interface())
+}
+
 func setArray(vals []string, sf reflect.StructField, value reflect.Value) error {
 	for i, s := range vals {
 		err := setBase(s, sf, value.Index(i))
@@ -261,7 +292,11 @@ func setSlice(vals []string, sf reflect.StructField, value reflect.Value) error 
 	return nil
 }
 
-func setTimeDuration(val string, bitSize int, value reflect.Value) error {
+func setMapField(val string, bitSize int, sf reflect.StructField, value reflect.Value) error {
+	return json.Unmarshal([]byte(val), value.Addr().Interface())
+}
+
+func setTimeDuration(val string, bitSize int, sf reflect.StructField, value reflect.Value) error {
 	d, err := time.ParseDuration(val)
 	if err != nil {
 		return err
@@ -273,9 +308,9 @@ func setTimeDuration(val string, bitSize int, value reflect.Value) error {
 func setBase(val string, sf reflect.StructField, value reflect.Value) error {
 	fn, ok := convertFunc[value.Kind()]
 	if ok {
-		fn.cb(val, fn.bitSize, sf, value)
-		return nil
+		return fn.cb(val, fn.bitSize, sf, value)
 	}
 
+	//todo
 	return nil
 }
