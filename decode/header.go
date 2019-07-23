@@ -8,8 +8,8 @@ import (
 
 type headerDecode struct{}
 
-func (h *headerDecode) Decode(r *http.Request, obj interface{}) error {
-	return decode(headerSet(r.Header), obj, "header")
+func (h *headerDecode) Decode(rsp *http.Response, obj interface{}) error {
+	return decode(headerSet(rsp.Header), obj, "header")
 }
 
 type headerSet map[string][]string
