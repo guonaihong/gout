@@ -3,6 +3,7 @@ package gout
 import (
 	"bytes"
 	"fmt"
+	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	"net/http"
 	"strings"
@@ -28,12 +29,15 @@ func (r *Req) Reset() {
 	r.bodyEncoder = nil
 	r.bodyDecoder = nil
 	r.httpCode = nil
+	r.headerDecode = nil
+	r.headerEncode = nil
 }
 
 func (r *Req) Do() (err error) {
 	b := &bytes.Buffer{}
 
 	defer r.Reset()
+	// set http body
 	if r.bodyEncoder != nil {
 		if err := r.bodyEncoder.Encode(b); err != nil {
 			return err
@@ -45,6 +49,7 @@ func (r *Req) Do() (err error) {
 		return err
 	}
 
+	// parse http body
 	if r.headerEncode != nil {
 		err = encode.Encode(r.headerEncode, encode.NewHeaderEnocde(req))
 		if err != nil {
@@ -58,6 +63,13 @@ func (r *Req) Do() (err error) {
 	}
 
 	defer resp.Body.Close()
+	if r.headerDecode != nil {
+		err = decode.Header.Decode(resp, r.headerDecode)
+		if err != nil {
+			return err
+		}
+	}
+
 	if r.bodyDecoder != nil {
 		if err := r.bodyDecoder.Decode(resp.Body); err != nil {
 			return err
