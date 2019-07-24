@@ -42,7 +42,7 @@ func setForm(m map[string][]string,
 
 	vs, ok := m[tagValue]
 	if !ok {
-		fmt.Printf("tagName = %s:%v\n", tagValue, m)
+		//fmt.Printf("tagName = %s:%v\n", tagValue, m)
 		return nil
 	}
 
@@ -306,6 +306,11 @@ func setTimeDuration(val string, bitSize int, sf reflect.StructField, value refl
 }
 
 func setBase(val string, sf reflect.StructField, value reflect.Value) error {
+	if value.Kind() == reflect.String {
+		value.SetString(val)
+		return nil
+	}
+
 	fn, ok := convertFunc[value.Kind()]
 	if ok {
 		return fn.cb(val, fn.bitSize, sf, value)

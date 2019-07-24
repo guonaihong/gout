@@ -172,7 +172,8 @@ func TestShouldBindHeader(t *testing.T) {
 	}
 
 	var tHeader testHeader
-	g.GET(ts.URL + "/test.header").ShouldBindHeader(&t).Code(&tHeader.Code).Do()
+	err := g.GET(ts.URL + "/test.header").ShouldBindHeader(&tHeader).Code(&tHeader.Code).Do()
+	assert.NoError(t, err)
 	assert.Equal(t, tHeader.Code, 200)
 	assert.Equal(t, tHeader.Sid, "sid-ok")
 }
