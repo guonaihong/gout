@@ -23,6 +23,6 @@ func (q *QueryEncode) Name() string {
 	return "query"
 }
 
-func (q *QueryEncode) End() {
-	//todo
+func (q *QueryEncode) End() string {
+	return q.values.Encode()
 }

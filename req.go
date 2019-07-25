@@ -21,6 +21,9 @@ type Req struct {
 	headerEncode interface{}
 	headerDecode interface{}
 
+	// query
+	queryEncode interface{}
+
 	httpCode *int
 	g        *Gout
 }
@@ -31,6 +34,7 @@ func (r *Req) Reset() {
 	r.httpCode = nil
 	r.headerDecode = nil
 	r.headerEncode = nil
+	r.queryEncode = nil
 }
 
 func (r *Req) Do() (err error) {
@@ -44,12 +48,25 @@ func (r *Req) Do() (err error) {
 		}
 	}
 
+	// set query header
+	if r.queryEncode != nil {
+		q := encode.NewQueryEncode(req)
+		err = encode.Encode(r.queryEncode, q)
+		if err != nil {
+			return err
+		}
+
+		if query := q.End(); len(query) > 0 {
+			r.url += query
+		}
+	}
+
 	req, err := http.NewRequest(r.method, r.url, b)
 	if err != nil {
 		return err
 	}
 
-	// parse http body
+	// set http header
 	if r.headerEncode != nil {
 		err = encode.Encode(r.headerEncode, encode.NewHeaderEnocde(req))
 		if err != nil {

@@ -2,6 +2,7 @@ package encode
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
 )
@@ -17,21 +18,13 @@ func TestHeaderStringSlice(t *testing.T) {
 		"header3", "value3",
 	}, NewHeaderEnocde(req))
 
-	if err != nil {
-		t.Errorf("encode http header err([]string):%s\n", err)
-		return
-	}
+	assert.NoError(t, err)
 
-	if v := req.Header.Get("header1"); v != "value1" {
-		t.Errorf("got (%s) want value1\n", v)
-	}
+	needVal := []string{"value1", "value2", "value3"}
 
-	if v := req.Header.Get("header2"); v != "value2" {
-		t.Errorf("got (%s) want value2\n", v)
-	}
-
-	if v := req.Header.Get("header3"); v != "value3" {
-		t.Errorf("got (%s) want value3\n", v)
+	for k, v := range needVal {
+		s := fmt.Sprintf("header%d", k+1)
+		assert.Equal(t, req.Header.Get(s), v)
 	}
 }
 
@@ -45,21 +38,13 @@ func TestHeaderMap(t *testing.T) {
 		"header3": 3.14,
 	}, NewHeaderEnocde(req))
 
-	if err != nil {
-		t.Errorf("encode http header err(gout.H):%s\n", err)
-		return
-	}
+	assert.NoError(t, err)
 
-	if v := req.Header.Get("header1"); v != "1" {
-		t.Errorf("got %s want 1\n", v)
-	}
+	needVal := []string{"1", "value2", "3.14"}
 
-	if v := req.Header.Get("header2"); v != "value2" {
-		t.Errorf("got %s want value2\n", v)
-	}
-
-	if v := req.Header.Get("header3"); v != "3.14" {
-		t.Errorf("got %s want 3.14\n", v)
+	for k, v := range needVal {
+		s := fmt.Sprintf("header%d", k+1)
+		assert.Equal(t, req.Header.Get(s), v)
 	}
 }
 
@@ -90,17 +75,12 @@ func TestHeaderStruct(t *testing.T) {
 		NewHeaderEnocde(req),
 	)
 
-	if err != nil {
-		t.Errorf("encode http header err(struct):%s\n", err)
-		return
-	}
+	assert.NoError(t, err)
 
 	needVal := []string{"test-header-1", "2", "3.3", "4", "5"}
 
 	for k, v := range needVal {
 		s := fmt.Sprintf("h%d", k+1)
-		if v1 := req.Header.Get(s); v1 != v {
-			t.Errorf("got %s want %s\n", v1, v)
-		}
+		assert.Equal(t, req.Header.Get(s), v)
 	}
 }
