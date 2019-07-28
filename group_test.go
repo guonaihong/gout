@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"sync/atomic"
 	"testing"
+	"time"
 )
 
 type testGroup struct {
@@ -176,4 +177,110 @@ func TestShouldBindHeader(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, tHeader.Code, 200)
 	assert.Equal(t, tHeader.Sid, "sid-ok")
+}
+
+func TestToHeaderStruct(t *testing.T) {
+	type testHeader2 struct {
+		Q8 uint8 `header:"h8"`
+	}
+
+	type testHeader struct {
+		Q1 string    `header:"h1"`
+		Q2 int       `header:"h2"`
+		Q3 float32   `header:"h3"`
+		Q4 float64   `header:"h4"`
+		Q5 time.Time `header:"h5" time_format:"unix"`
+		Q6 time.Time `header:"h6" time_format:"unixNano"`
+		Q7 time.Time `header:"h7" time_format:"2006-01-02"`
+		testHeader2
+	}
+
+	h := testHeader{
+		Q1: "v1",
+		Q2: 2,
+		Q3: 3.14,
+		Q4: 3.1415,
+		Q5: time.Date(2019, 7, 28, 14, 36, 0, 0, time.Local),
+		Q6: time.Date(2019, 7, 28, 14, 36, 0, 1000, time.Local),
+		Q7: time.Date(2019, 7, 28, 0, 0, 0, 0, time.Local),
+		testHeader2: testHeader2{
+			Q8: 8,
+		},
+	}
+
+	router := func() *gin.Engine {
+		router := gin.Default()
+		router.GET("/test.header", func(c *gin.Context) {
+			h2 := testHeader{}
+			err := c.ShouldBindHeader(&h2)
+			assert.NoError(t, err)
+
+			assert.Equal(t, h, h2)
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+	code := 0
+
+	err := g.GET(ts.URL + "/test.header").ToHeader(h).Code(&code).Do()
+
+	assert.NoError(t, err)
+}
+
+func TestToQueryStruct(t *testing.T) {
+	type testQuery2 struct {
+		Q8 uint8 `query:"q8" form:"q8"`
+	}
+
+	type testQuery struct {
+		Q1 string    `query:"q1" form:"q1"`
+		Q2 int       `query:"q2" form:"q2"`
+		Q3 float32   `query:"q3" form:"q3"`
+		Q4 float64   `query:"q4" form:"q4"`
+		Q5 time.Time `query:"q5" form:"q5" time_format:"unix"`
+		Q6 time.Time `query:"q6" form:"q6" time_format:"unixNano"`
+		Q7 time.Time `query:"q7" form:"q7" time_format:"2006-01-02"`
+		testQuery2
+	}
+
+	q := testQuery{
+		Q1: "v1",
+		Q2: 2,
+		Q3: 3.14,
+		Q4: 3.1415,
+		Q5: time.Date(2019, 7, 28, 14, 36, 0, 0, time.Local),
+		Q6: time.Date(2019, 7, 28, 14, 36, 0, 1000, time.Local),
+		Q7: time.Date(2019, 7, 28, 0, 0, 0, 0, time.Local),
+		testQuery2: testQuery2{
+			Q8: 8,
+		},
+	}
+
+	router := func() *gin.Engine {
+		router := gin.Default()
+		router.GET("/test.query", func(c *gin.Context) {
+			q2 := testQuery{}
+			err := c.ShouldBindQuery(&q2)
+			assert.NoError(t, err)
+
+			assert.Equal(t, q, q2)
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+	code := 0
+
+	err := g.GET(ts.URL + "/test.query").ToQuery(q).Code(&code).Do()
+
+	assert.NoError(t, err)
 }

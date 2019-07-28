@@ -50,14 +50,14 @@ func (r *Req) Do() (err error) {
 
 	// set query header
 	if r.queryEncode != nil {
-		q := encode.NewQueryEncode(req)
+		q := encode.NewQueryEncode(nil)
 		err = encode.Encode(r.queryEncode, q)
 		if err != nil {
 			return err
 		}
 
 		if query := q.End(); len(query) > 0 {
-			r.url += query
+			r.url += "?" + query
 		}
 	}
 
