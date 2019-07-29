@@ -6,6 +6,7 @@ import (
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -37,6 +38,23 @@ func (r *Req) Reset() {
 	r.queryEncode = nil
 }
 
+func isString(x interface{}) (string, bool) {
+	p := reflect.ValueOf(x)
+
+	for p.Kind() == reflect.Ptr {
+		p = p.Elem()
+	}
+
+	if p.Kind() == reflect.String {
+		s := p.Interface().(string)
+		if strings.HasPrefix(s, "?") {
+			s = s[1:]
+		}
+		return s, true
+	}
+	return "", false
+}
+
 func (r *Req) Do() (err error) {
 	b := &bytes.Buffer{}
 
@@ -50,13 +68,20 @@ func (r *Req) Do() (err error) {
 
 	// set query header
 	if r.queryEncode != nil {
-		q := encode.NewQueryEncode(nil)
-		err = encode.Encode(r.queryEncode, q)
-		if err != nil {
-			return err
+		var query string
+		if q, ok := isString(r.queryEncode); ok {
+			query = q
+		} else {
+			q := encode.NewQueryEncode(nil)
+			err = encode.Encode(r.queryEncode, q)
+			if err != nil {
+				return err
+			}
+
+			query = q.End()
 		}
 
-		if query := q.End(); len(query) > 0 {
+		if len(query) > 0 {
 			r.url += "?" + query
 		}
 	}
