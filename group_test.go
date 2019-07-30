@@ -361,6 +361,25 @@ func testQuerySliceAndArrayCore(t *testing.T, x interface{}) {
 	assert.Equal(t, code, 200)
 }
 
+func testQueryFail(t *testing.T, x interface{}) {
+	q := queryDefault()
+	router := setupQuery(t, q)
+
+	ts := httptest.NewServer(http.HandlerFunc(router().ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+
+	code := 0
+	err := g.GET(ts.URL + "/test.query").ToQuery(x).Code(&code).Do()
+	assert.Error(t, err)
+	assert.NotEqual(t, code, 200)
+}
+
+func TestQueryFail(t *testing.T) {
+	testQueryFail(t, []string{"q1"})
+}
+
 func TestQuerySliceAndArray(t *testing.T) {
 	q := queryDefault()
 	testQuerySliceAndArrayCore(t, []string{"q1", "v1", "q2", "2", "q3", "3.14", "q4", "3.1415", "q5",

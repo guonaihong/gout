@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-//todo
-func TestQueryString(t *testing.T) {
-}
-
 func TestQueryStringSlice(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 

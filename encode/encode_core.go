@@ -41,16 +41,11 @@ func Encode(in interface{}, a Adder) error {
 		encode(v, emptyField, a)
 
 	case reflect.Slice, reflect.Array:
-		if !(v.Len() > 0 && v.Len()%2 == 0 && v.Index(0).Kind() == reflect.String) {
-			//todo return error
-			return nil
+		if !(v.Len() > 0 && v.Len()%2 == 0) {
+			return fmt.Errorf("The %T length of the code must be even", v.Kind())
 		}
 
 		for i, l := 0, v.Len(); i < l; i += 2 {
-			if v.Index(i).Kind() != reflect.String {
-				// todo return error
-				return nil
-			}
 
 			a.Add(valToStr(v.Index(i), emptyField), valToStr(v.Index(i+1), emptyField))
 		}
