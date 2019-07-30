@@ -1,12 +1,14 @@
 package gout
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
 	"testing"
+	"time"
 )
 
 type testGroup struct {
@@ -176,4 +178,217 @@ func TestShouldBindHeader(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, tHeader.Code, 200)
 	assert.Equal(t, tHeader.Sid, "sid-ok")
+}
+
+func TestToHeaderMap(t *testing.T) {
+}
+
+func TestToHeaderStruct(t *testing.T) {
+	type testHeader2 struct {
+		Q8 uint8 `header:"h8"`
+	}
+
+	type testHeader struct {
+		Q1 string    `header:"h1"`
+		Q2 int       `header:"h2"`
+		Q3 float32   `header:"h3"`
+		Q4 float64   `header:"h4"`
+		Q5 time.Time `header:"h5" time_format:"unix"`
+		Q6 time.Time `header:"h6" time_format:"unixNano"`
+		Q7 time.Time `header:"h7" time_format:"2006-01-02"`
+		testHeader2
+	}
+
+	h := testHeader{
+		Q1: "v1",
+		Q2: 2,
+		Q3: 3.14,
+		Q4: 3.1415,
+		Q5: time.Date(2019, 7, 28, 14, 36, 0, 0, time.Local),
+		Q6: time.Date(2019, 7, 28, 14, 36, 0, 1000, time.Local),
+		Q7: time.Date(2019, 7, 28, 0, 0, 0, 0, time.Local),
+		testHeader2: testHeader2{
+			Q8: 8,
+		},
+	}
+
+	router := func() *gin.Engine {
+		router := gin.Default()
+		router.GET("/test.header", func(c *gin.Context) {
+			h2 := testHeader{}
+			err := c.ShouldBindHeader(&h2)
+			assert.NoError(t, err)
+
+			assert.Equal(t, h, h2)
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+	code := 0
+
+	err := g.GET(ts.URL + "/test.header").ToHeader(h).Code(&code).Do()
+
+	assert.NoError(t, err)
+}
+
+type testQuery2 struct {
+	Q8 uint8 `query:"q8" form:"q8"`
+}
+
+type testQuery struct {
+	Q1 string    `query:"q1" form:"q1"`
+	Q2 int       `query:"q2" form:"q2"`
+	Q3 float32   `query:"q3" form:"q3"`
+	Q4 float64   `query:"q4" form:"q4"`
+	Q5 time.Time `query:"q5" form:"q5" time_format:"unix"`
+	Q6 time.Time `query:"q6" form:"q6" time_format:"unixNano"`
+	Q7 time.Time `query:"q7" form:"q7" time_format:"2006-01-02"`
+	testQuery2
+}
+
+func queryDefault() *testQuery {
+	return &testQuery{
+		Q1: "v1",
+		Q2: 2,
+		Q3: 3.14,
+		Q4: 3.1415,
+		Q5: time.Date(2019, 7, 28, 14, 36, 0, 0, time.Local),
+		Q6: time.Date(2019, 7, 28, 14, 36, 0, 1000, time.Local),
+		Q7: time.Date(2019, 7, 28, 0, 0, 0, 0, time.Local),
+		testQuery2: testQuery2{
+			Q8: 8,
+		},
+	}
+}
+
+func TestToQueryStruct(t *testing.T) {
+	q := queryDefault()
+	router := func() *gin.Engine {
+		router := gin.Default()
+		router.GET("/test.query", func(c *gin.Context) {
+			q2 := testQuery{}
+			err := c.ShouldBindQuery(&q2)
+			assert.NoError(t, err)
+
+			assert.Equal(t, q, &q2)
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+	code := 0
+
+	err := g.GET(ts.URL + "/test.query").ToQuery(q).Code(&code).Do()
+
+	assert.NoError(t, err)
+}
+
+func TestQueryString(t *testing.T) {
+	s := "q1=v1&q2=2&q3=3.14&q4=3.1415&q5=1564295760&q6=1564295760000001000&q7=2019-07-28&q8=8"
+	testQueryStringCore(t, s, false)
+	testQueryStringCore(t, s, true)
+}
+
+func testQueryStringCore(t *testing.T, qStr string, isPtr bool) {
+	q := queryDefault()
+	router := func() *gin.Engine {
+		router := gin.Default()
+		router.GET("/test.query", func(c *gin.Context) {
+			q2 := testQuery{}
+			err := c.ShouldBindQuery(&q2)
+			assert.NoError(t, err)
+
+			assert.Equal(t, *q, q2)
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+	code := 0
+
+	var err error
+	if isPtr {
+		err = g.GET(ts.URL + "/test.query").ToQuery(&qStr).Code(&code).Do()
+	} else {
+		err = g.GET(ts.URL + "/test.query").ToQuery(qStr).Code(&code).Do()
+	}
+
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+}
+
+func setupQuery(t *testing.T, q *testQuery) func() *gin.Engine {
+	return func() *gin.Engine {
+		router := gin.Default()
+		router.GET("/test.query", func(c *gin.Context) {
+			q2 := testQuery{}
+			err := c.ShouldBindQuery(&q2)
+			assert.NoError(t, err)
+
+			assert.Equal(t, *q, q2)
+		})
+
+		return router
+	}
+}
+
+func testQuerySliceAndArrayCore(t *testing.T, x interface{}) {
+	q := queryDefault()
+	router := setupQuery(t, q)
+
+	ts := httptest.NewServer(http.HandlerFunc(router().ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+
+	code := 0
+	err := g.GET(ts.URL + "/test.query").ToQuery(x).Code(&code).Do()
+
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+}
+
+func testQueryFail(t *testing.T, x interface{}) {
+	q := queryDefault()
+	router := setupQuery(t, q)
+
+	ts := httptest.NewServer(http.HandlerFunc(router().ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+
+	code := 0
+	err := g.GET(ts.URL + "/test.query").ToQuery(x).Code(&code).Do()
+	assert.Error(t, err)
+	assert.NotEqual(t, code, 200)
+}
+
+func TestQueryFail(t *testing.T) {
+	testQueryFail(t, []string{"q1"})
+}
+
+func TestQuerySliceAndArray(t *testing.T) {
+	q := queryDefault()
+	testQuerySliceAndArrayCore(t, []string{"q1", "v1", "q2", "2", "q3", "3.14", "q4", "3.1415", "q5",
+		fmt.Sprint(q.Q5.Unix()), "q6", fmt.Sprint(q.Q6.UnixNano()), "q7", q.Q7.Format("2006-01-02"), "q8", "8"})
+	testQuerySliceAndArrayCore(t, [8 * 2]string{"q1", "v1", "q2", "2", "q3", "3.14", "q4", "3.1415", "q5",
+		fmt.Sprint(q.Q5.Unix()), "q6", fmt.Sprint(q.Q6.UnixNano()), "q7", q.Q7.Format("2006-01-02"), "q8", "8"})
+
+	testQuerySliceAndArrayCore(t, &[]string{"q1", "v1", "q2", "2", "q3", "3.14", "q4", "3.1415", "q5",
+		fmt.Sprint(q.Q5.Unix()), "q6", fmt.Sprint(q.Q6.UnixNano()), "q7", q.Q7.Format("2006-01-02"), "q8", "8"})
+	testQuerySliceAndArrayCore(t, &[8 * 2]string{"q1", "v1", "q2", "2", "q3", "3.14", "q4", "3.1415", "q5",
+		fmt.Sprint(q.Q5.Unix()), "q6", fmt.Sprint(q.Q6.UnixNano()), "q7", q.Q7.Format("2006-01-02"), "q8", "8"})
 }

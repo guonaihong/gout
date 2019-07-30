@@ -3,6 +3,7 @@ package encode
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -33,25 +34,20 @@ func Encode(in interface{}, a Adder) error {
 	case reflect.Map:
 		iter := v.MapRange()
 		for iter.Next() {
-			a.Add(valToStr(iter.Key()), valToStr(iter.Value()))
+			a.Add(valToStr(iter.Key(), emptyField), valToStr(iter.Value(), emptyField))
 		}
 
 	case reflect.Struct:
 		encode(v, emptyField, a)
 
 	case reflect.Slice, reflect.Array:
-		if !(v.Len() > 0 && v.Len()%2 == 0 && v.Index(0).Kind() == reflect.String) {
-			//todo return error
-			return nil
+		if !(v.Len() > 0 && v.Len()%2 == 0) {
+			return fmt.Errorf("The %T length of the code must be even", v.Kind())
 		}
 
 		for i, l := 0, v.Len(); i < l; i += 2 {
-			if v.Index(i).Kind() != reflect.String {
-				// todo return error
-				return nil
-			}
 
-			a.Add(valToStr(v.Index(i)), valToStr(v.Index(i+1)))
+			a.Add(valToStr(v.Index(i), emptyField), valToStr(v.Index(i+1), emptyField))
 		}
 	}
 
@@ -63,7 +59,31 @@ func parseTag(tag string) (string, tagOptions) {
 	return s[0], s[1:]
 }
 
-func valToStr(v reflect.Value) string {
+func timeToStr(v reflect.Value, sf reflect.StructField) string {
+
+	t := v.Interface().(time.Time)
+	timeFormat := sf.Tag.Get("time_format")
+	if timeFormat == "" {
+		timeFormat = time.RFC3339
+	}
+
+	switch tf := strings.ToLower(timeFormat); tf {
+	case "unix", "unixnano":
+		var tv int64
+		if tf == "unix" {
+			tv = t.Unix()
+		} else {
+			tv = t.UnixNano()
+		}
+
+		return strconv.FormatInt(tv, 10)
+	}
+
+	return t.Format(timeFormat)
+
+}
+
+func valToStr(v reflect.Value, sf reflect.StructField) string {
 	for v.Kind() == reflect.Ptr {
 		if v.IsNil() {
 			return ""
@@ -72,7 +92,7 @@ func valToStr(v reflect.Value) string {
 	}
 
 	if v.Type() == timeType {
-		return v.Interface().(time.Time).Format(time.RFC3339)
+		return timeToStr(v, sf)
 	}
 
 	return fmt.Sprint(v.Interface())
@@ -95,7 +115,7 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 		return
 	}
 
-	a.Add(tagName, valToStr(val))
+	a.Add(tagName, valToStr(val, sf))
 }
 
 func encode(val reflect.Value, sf reflect.StructField, a Adder) error {

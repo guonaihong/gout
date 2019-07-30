@@ -64,6 +64,11 @@ func (g *routerGroup) OPTIONS(url string) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) ToQuery(obj interface{}) *routerGroup {
+	g.Req.queryEncode = obj
+	return g
+}
+
 func (g *routerGroup) ToHeader(obj interface{}) *routerGroup {
 	g.Req.headerEncode = obj
 	return g
