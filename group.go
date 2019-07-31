@@ -84,8 +84,18 @@ func (g *routerGroup) ToJSON(obj interface{}) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) ToXML(obj interface{}) *routerGroup {
+	g.Req.bodyEncoder = encode.NewXmlEncode(obj)
+	return g
+}
+
 func (g *routerGroup) ShouldBindJSON(obj interface{}) *routerGroup {
 	g.Req.bodyDecoder = decode.NewJsonDecode(obj)
+	return g
+}
+
+func (g *routerGroup) ShouldBindXML(obj interface{}) *routerGroup {
+	g.Req.bodyDecoder = decode.NewXmlDecode(obj)
 	return g
 }
 

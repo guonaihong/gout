@@ -97,14 +97,44 @@ func TestGroupNew(t *testing.T) {
 }
 
 type data struct {
-	Id   int    `json:"id"`
-	Data string `json:"data"`
+	Id   int    `json:"id" xml:"id"`
+	Data string `json:"data xml:"data""`
 }
 
 type BindTest struct {
 	InBody   interface{}
 	OutBody  interface{}
 	httpCode int
+}
+
+func TestShouldBindXML(t *testing.T) {
+	var d, d2 data
+	router := func() *gin.Engine {
+		router := gin.Default()
+
+		router.POST("/test.xml", func(c *gin.Context) {
+			var d3 data
+			c.ShouldBindXML(&d3)
+			c.XML(200, d3)
+		})
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+
+	d.Id = 3
+	d.Data = "test data"
+
+	code := 200
+
+	err := g.POST(ts.URL + "/test.xml").ToXML(&d).ShouldBindXML(&d2).Code(&code).Do()
+
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+	assert.Equal(t, d, d2)
 }
 
 func TestShouldBindJSON(t *testing.T) {

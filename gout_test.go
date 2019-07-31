@@ -1,21 +1,19 @@
 package gout
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/http/httptest"
 	"sync/atomic"
 	"testing"
-	"time"
 )
 
 func TestMethod(t *testing.T) {
 
 	var total int32
 
-	var srv *http.Server
-
-	router := func() {
+	router := func() *gin.Engine {
 		// Creates a gin router with default middleware:
 		// logger and recovery (crash-free) middleware
 		router := gin.Default()
@@ -32,39 +30,23 @@ func TestMethod(t *testing.T) {
 		router.HEAD("/someHead", cb)
 		router.OPTIONS("/someOptions", cb)
 
-		srv = &http.Server{
-			Addr:    ":8080",
-			Handler: router,
-		}
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			t.Errorf("listen: %s\n", err)
-		}
-	}
+		return router
+	}()
 
-	go router()
-
-	time.Sleep(time.Millisecond * 250)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
 
 	out := New(nil)
-	err := out.GET(":8080/someGet").Next().
-		POST(":8080/somePost").Next().
-		PUT(":8080/somePut").Next().
-		DELETE(":8080/someDelete").Next().
-		PATCH(":8080/somePatch").Next().
-		HEAD(":8080/someHead").Next().
-		OPTIONS(":8080/someOptions").Next().Do()
+	err := out.GET(ts.URL + "/someGet").Next().
+		POST(ts.URL + "/somePost").Next().
+		PUT(ts.URL + "/somePut").Next().
+		DELETE(ts.URL + "/someDelete").Next().
+		PATCH(ts.URL + "/somePatch").Next().
+		HEAD(ts.URL + "/someHead").Next().
+		OPTIONS(ts.URL + "/someOptions").Next().Do()
 
-	if err != nil {
-		t.Errorf("http client fail:%v\n", err)
-	}
+	assert.NoError(t, err)
 
-	if total != 7 {
-		t.Errorf("got %d want 7\n", total)
-	}
+	assert.Equal(t, int(total), 7)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		t.Errorf("Server Shutdown:%s\n", err)
-	}
 }
