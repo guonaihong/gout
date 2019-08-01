@@ -114,7 +114,8 @@ func TestShouldBindXML(t *testing.T) {
 
 		router.POST("/test.xml", func(c *gin.Context) {
 			var d3 data
-			c.ShouldBindXML(&d3)
+			err := c.ShouldBindXML(&d3)
+			assert.NoError(t, err)
 			c.XML(200, d3)
 		})
 		return router
@@ -131,6 +132,37 @@ func TestShouldBindXML(t *testing.T) {
 	code := 200
 
 	err := g.POST(ts.URL + "/test.xml").ToXML(&d).ShouldBindXML(&d2).Code(&code).Do()
+
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+	assert.Equal(t, d, d2)
+}
+
+func TestShouldBindYAML(t *testing.T) {
+	var d, d2 data
+	router := func() *gin.Engine {
+		router := gin.Default()
+
+		router.POST("/test.yaml", func(c *gin.Context) {
+			var d3 data
+			err := c.ShouldBindYAML(&d3)
+			assert.NoError(t, err)
+			c.YAML(200, d3)
+		})
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+
+	d.Id = 3
+	d.Data = "test yaml data"
+
+	code := 200
+
+	err := g.POST(ts.URL + "/test.yaml").ToYAML(&d).ShouldBindYAML(&d2).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
