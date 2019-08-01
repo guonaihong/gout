@@ -89,6 +89,11 @@ func (g *routerGroup) ToXML(obj interface{}) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) ToYAML(obj interface{}) *routerGroup {
+	g.Req.bodyEncoder = encode.NewYamlEncode(obj)
+	return g
+}
+
 func (g *routerGroup) ShouldBindJSON(obj interface{}) *routerGroup {
 	g.Req.bodyDecoder = decode.NewJsonDecode(obj)
 	return g
@@ -96,6 +101,11 @@ func (g *routerGroup) ShouldBindJSON(obj interface{}) *routerGroup {
 
 func (g *routerGroup) ShouldBindXML(obj interface{}) *routerGroup {
 	g.Req.bodyDecoder = decode.NewXmlDecode(obj)
+	return g
+}
+
+func (g *routerGroup) ShouldBindYAML(obj interface{}) *routerGroup {
+	g.Req.bodyDecoder = decode.NewYamlDecode(obj)
 	return g
 }
 
