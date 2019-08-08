@@ -11,7 +11,7 @@ import (
 var emptyField = reflect.StructField{}
 
 type Adder interface {
-	Add(key, val string) error
+	Add(key string, v reflect.Value, sf reflect.StructField) error
 	Name() string
 }
 
@@ -34,7 +34,7 @@ func Encode(in interface{}, a Adder) error {
 	case reflect.Map:
 		iter := v.MapRange()
 		for iter.Next() {
-			a.Add(valToStr(iter.Key(), emptyField), valToStr(iter.Value(), emptyField))
+			a.Add(valToStr(iter.Key(), emptyField), iter.Value(), emptyField)
 		}
 
 	case reflect.Struct:
@@ -47,7 +47,7 @@ func Encode(in interface{}, a Adder) error {
 
 		for i, l := 0, v.Len(); i < l; i += 2 {
 
-			a.Add(valToStr(v.Index(i), emptyField), valToStr(v.Index(i+1), emptyField))
+			a.Add(valToStr(v.Index(i), emptyField), v.Index(i+1), emptyField)
 		}
 	}
 
@@ -115,7 +115,7 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 		return
 	}
 
-	a.Add(tagName, valToStr(val, sf))
+	a.Add(tagName, val, sf)
 }
 
 func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
