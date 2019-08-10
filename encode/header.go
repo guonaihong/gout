@@ -11,7 +11,7 @@ type HeaderEncode struct {
 	r *http.Request
 }
 
-func NewHeaderEnocde(req *http.Request) *HeaderEncode {
+func NewHeaderEncode(req *http.Request) *HeaderEncode {
 	return &HeaderEncode{r: req}
 }
 

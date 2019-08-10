@@ -93,7 +93,7 @@ func (r *Req) Do() (err error) {
 
 	// set http header
 	if r.headerEncode != nil {
-		err = encode.Encode(r.headerEncode, encode.NewHeaderEnocde(req))
+		err = encode.Encode(r.headerEncode, encode.NewHeaderEncode(req))
 		if err != nil {
 			return err
 		}
