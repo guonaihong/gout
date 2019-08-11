@@ -242,6 +242,41 @@ func TestShouldBindHeader(t *testing.T) {
 	assert.Equal(t, tHeader.Sid, "sid-ok")
 }
 
+type testForm struct {
+	Mode  string `form:"mode"`
+	Text  string `form:"text"`
+	Voice []byte `form:"voice" form-mem:"true"`
+}
+
+func TestToForm(t *testing.T) {
+	reqTestForm := testForm{
+		Mode:  "A",
+		Text:  "good morning",
+		Voice: "pcm data",
+	}
+
+	router := func() *gin.Engine {
+		router := gin.Default()
+		router.GET("/test.form", func(g *gin.Context) {
+
+			t2 := testForm{}
+			err := c.ShouldBind(t2)
+			assert.NoError(t, err)
+			assert.Equal(t, reqTestForm, t2)
+		})
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+	code := 0
+	err := g.GET(ts.URL + "/test.form").ToForm().Code(&code).Do()
+
+	assert.NoError(t, err)
+}
+
 func TestToHeaderMap(t *testing.T) {
 }
 

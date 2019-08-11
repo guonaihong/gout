@@ -7,11 +7,11 @@ import (
 )
 
 type FormEncode struct {
-	w multipart.Writer
+	*multipart.Writer
 }
 
-func NewFormEncode() *FormEncode {
-	return &FormEncode{w: multipart.NewWriter(&bytes.Buffer{})}
+func NewFormEncode(b *bytes.Buffer) *FormEncode {
+	return &FormEncode{Writer: multipart.NewWriter(b)}
 }
 
 func stringToBytes(s string) []byte {
@@ -57,7 +57,7 @@ func (f *FormEncode) partWrite(key string, v reflect.Value, openFile bool) (err 
 		}
 	}
 
-	part, err := f.w.CreateFormFile(key, filepath.Base(key))
+	part, err := f.CreateFormFile(key, filepath.Base(key))
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) er
 		return partWrite(key, v, false)
 	}
 
-	part, err := f.w.CreateFormField(key)
+	part, err := f.CreateFormField(key)
 
 	if all, err = toBytes(v); err != nil {
 		return err

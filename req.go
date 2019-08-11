@@ -14,6 +14,8 @@ type Req struct {
 	method string
 	url    string
 
+	formEncode interface{}
+
 	// http body
 	bodyEncoder Encoder
 	bodyDecoder Decoder
@@ -30,6 +32,7 @@ type Req struct {
 }
 
 func (r *Req) Reset() {
+	r.formEncode = nil
 	r.bodyEncoder = nil
 	r.bodyDecoder = nil
 	r.httpCode = nil
@@ -59,6 +62,7 @@ func (r *Req) Do() (err error) {
 	b := &bytes.Buffer{}
 
 	defer r.Reset()
+
 	// set http body
 	if r.bodyEncoder != nil {
 		if err := r.bodyEncoder.Encode(b); err != nil {
@@ -73,8 +77,7 @@ func (r *Req) Do() (err error) {
 			query = q
 		} else {
 			q := encode.NewQueryEncode(nil)
-			err = encode.Encode(r.queryEncode, q)
-			if err != nil {
+			if err = encode.Encode(r.queryEncode, q); err != nil {
 				return err
 			}
 
@@ -86,9 +89,21 @@ func (r *Req) Do() (err error) {
 		}
 	}
 
+	var f *encode.FormEncode
+	if r.formEncode != nil {
+		f = encode.NewFormEncode(b)
+		if err := encode.Encode(r.formEncode, f); err != nil {
+			return err
+		}
+	}
+
 	req, err := http.NewRequest(r.method, r.url, b)
 	if err != nil {
 		return err
+	}
+
+	if r.formEncode != nil {
+		req.Header.Add("Content-Type", f.FormDataContentType())
 	}
 
 	// set http header
