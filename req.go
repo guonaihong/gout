@@ -90,11 +90,14 @@ func (r *Req) Do() (err error) {
 	}
 
 	var f *encode.FormEncode
+
 	if r.formEncode != nil {
 		f = encode.NewFormEncode(b)
 		if err := encode.Encode(r.formEncode, f); err != nil {
 			return err
 		}
+
+		f.End()
 	}
 
 	req, err := http.NewRequest(r.method, r.url, b)

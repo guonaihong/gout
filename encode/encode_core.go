@@ -121,12 +121,12 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
 	vKind := val.Kind()
 
-	if v.Kind() == reflect.Ptr {
-		if v.IsNil() {
+	if val.Kind() == reflect.Ptr {
+		if val.IsNil() {
 			return nil
 		}
 
-		v = v.Elem()
+		val = val.Elem()
 	}
 
 	if vKind != reflect.Struct || !sf.Anonymous {

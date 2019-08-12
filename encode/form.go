@@ -2,9 +2,16 @@ package encode
 
 import (
 	"bytes"
+	"fmt"
+	"io/ioutil"
 	"mime/multipart"
+	"path/filepath"
 	"reflect"
+	"strconv"
+	"unsafe"
 )
+
+var _ Adder = (*FormEncode)(nil)
 
 type FormEncode struct {
 	*multipart.Writer
@@ -27,16 +34,16 @@ func bytesToString(b []byte) string {
 func toBytes(v reflect.Value) (all []byte, err error) {
 	if s, ok := v.Interface().(string); ok {
 		all = stringToBytes(s)
-	} else if b, ok := v.Interface([]byte); ok {
+	} else if b, ok := v.Interface().([]byte); ok {
 		all = b
 	} else {
-		return nil, fmt.Errorf("unkown type partWrite:%T, openFile:%t", v, openFile)
+		return nil, fmt.Errorf("unkown type toBytes:%T", v)
 	}
 	return all, nil
 }
 
 func (f *FormEncode) partWrite(key string, v reflect.Value, openFile bool) (err error) {
-	var all []Bytes
+	var all []byte
 	if openFile {
 		var fileName string
 		if s, ok := v.Interface().(string); ok {
@@ -47,8 +54,7 @@ func (f *FormEncode) partWrite(key string, v reflect.Value, openFile bool) (err 
 			return fmt.Errorf("unkown type partWrite:%T, openFile:%t", v, openFile)
 		}
 
-		all, err := ioutil.ReadAll(fileName)
-		if err != nil {
+		if all, err = ioutil.ReadFile(fileName); err != nil {
 			return err
 		}
 	} else {
@@ -62,35 +68,37 @@ func (f *FormEncode) partWrite(key string, v reflect.Value, openFile bool) (err 
 		return err
 	}
 
-	part.Write(all)
+	_, err = part.Write(all)
+	return err
 }
 
-func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) error {
+func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (err error) {
 	formFile := sf.Tag.Get("form-file")
 	formMem := sf.Tag.Get("form-mem")
 	b := false
+	all := []byte{}
 
 	if len(formFile) > 0 {
-		if b, err := strconv.ParseBool(formMem); err != nil {
+		if b, err = strconv.ParseBool(formFile); err != nil {
 			return err
 		}
 		if !b {
 			return nil
 		}
 
-		return partWrite(key, v, b)
+		return f.partWrite(key, v, b)
 
 	}
 
 	if len(formMem) > 0 {
-		if b, err := strconv.ParseBool(); err != nil {
-			return
+		if b, err = strconv.ParseBool(formMem); err != nil {
+			return err
 		}
 		if !b {
 			return nil
 		}
 
-		return partWrite(key, v, false)
+		return f.partWrite(key, v, false)
 	}
 
 	part, err := f.CreateFormField(key)
@@ -99,6 +107,14 @@ func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) er
 		return err
 	}
 
-	part.Write(all)
-	return nil
+	_, err = part.Write(all)
+	return err
+}
+
+func (f *FormEncode) End() error {
+	return f.Close()
+}
+
+func (f *FormEncode) Name() string {
+	return "form"
 }

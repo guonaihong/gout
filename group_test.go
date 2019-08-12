@@ -252,15 +252,15 @@ func TestToForm(t *testing.T) {
 	reqTestForm := testForm{
 		Mode:  "A",
 		Text:  "good morning",
-		Voice: "pcm data",
+		Voice: []byte("pcm data"),
 	}
 
 	router := func() *gin.Engine {
 		router := gin.Default()
-		router.GET("/test.form", func(g *gin.Context) {
+		router.POST("/test.form", func(c *gin.Context) {
 
 			t2 := testForm{}
-			err := c.ShouldBind(t2)
+			err := c.ShouldBind(&t2)
 			assert.NoError(t, err)
 			assert.Equal(t, reqTestForm, t2)
 		})
@@ -272,7 +272,7 @@ func TestToForm(t *testing.T) {
 
 	g := New(nil)
 	code := 0
-	err := g.GET(ts.URL + "/test.form").ToForm().Code(&code).Do()
+	err := g.POST(ts.URL + "/test.form").ToForm(&reqTestForm).Code(&code).Do()
 
 	assert.NoError(t, err)
 }
