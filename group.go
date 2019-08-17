@@ -64,6 +64,11 @@ func (g *routerGroup) OPTIONS(url string) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) ToForm(obj interface{}) *routerGroup {
+	g.Req.formEncode = obj
+	return g
+}
+
 func (g *routerGroup) ToQuery(obj interface{}) *routerGroup {
 	g.Req.queryEncode = obj
 	return g
@@ -71,11 +76,6 @@ func (g *routerGroup) ToQuery(obj interface{}) *routerGroup {
 
 func (g *routerGroup) ToHeader(obj interface{}) *routerGroup {
 	g.Req.headerEncode = obj
-	return g
-}
-
-func (g *routerGroup) ShouldBindHeader(obj interface{}) *routerGroup {
-	g.Req.headerDecode = obj
 	return g
 }
 
@@ -91,6 +91,11 @@ func (g *routerGroup) ToXML(obj interface{}) *routerGroup {
 
 func (g *routerGroup) ToYAML(obj interface{}) *routerGroup {
 	g.Req.bodyEncoder = encode.NewYamlEncode(obj)
+	return g
+}
+
+func (g *routerGroup) ShouldBindHeader(obj interface{}) *routerGroup {
+	g.Req.headerDecode = obj
 	return g
 }
 

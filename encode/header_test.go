@@ -16,7 +16,7 @@ func TestHeaderStringSlice(t *testing.T) {
 		"header1", "value1",
 		"header2", "value2",
 		"header3", "value3",
-	}, NewHeaderEnocde(req))
+	}, NewHeaderEncode(req))
 
 	assert.NoError(t, err)
 
@@ -36,7 +36,7 @@ func TestHeaderMap(t *testing.T) {
 		"header1": 1,
 		"header2": "value2",
 		"header3": 3.14,
-	}, NewHeaderEnocde(req))
+	}, NewHeaderEncode(req))
 
 	assert.NoError(t, err)
 
@@ -72,7 +72,7 @@ func TestHeaderStruct(t *testing.T) {
 			H5: int32(5),
 		},
 	},
-		NewHeaderEnocde(req),
+		NewHeaderEncode(req),
 	)
 
 	assert.NoError(t, err)
