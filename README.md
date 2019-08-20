@@ -4,6 +4,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 ## 内容
 - [安装](#安装)
 - [API示例](#api-示例)
+    - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [json](#json)
     - [yaml](#yaml)
     - [xml](#xml)
@@ -16,8 +17,37 @@ gout 是go写的http 客户端，为提高工作效率而开发
 ```
 env GOPATH=`pwd` go get github.com/guonaihong/gout
 ```
+## GET POST PUT DELETE PATH HEAD OPTIONS
+```go
+// 创建一个实例
+g := gout.New(nil)
+
+// 发送GET方法
+g.GET(url).Do()
+
+// 发送POST方法
+g.POST(url).Do()
+
+// 发送PUT方法
+g.PUT(url).Do()
+
+// 发送DELETE方法
+g.DELETE(url).Do()
+
+// 发送PATH方法
+g.PATH(url).Do()
+
+// 发送HEAD方法
+g.HEAD(url).Do()
+
+// 发送OPTIONS
+g.OPTIONS(url).Do()
+```
 
 ## json
+
+* ToJSON()  设置请求http body为json
+* ShouldBindJSON()  解析响应http body里面的json到结构体里面
 
 发送json到服务端，然后把服务端返回的json结果解析到结构体里面
 ```go
@@ -39,6 +69,9 @@ if err != nil || httpCode != 200{
 ```
 
 ## yaml
+* ToYAML() 设置请求http body为yaml
+* ShouldBindYAML() 解析响应http body里面的yaml到结构体里面
+
 发送yaml到服务端，然后把服务端返回的yaml结果解析到结构体里面
 ```go
 type data struct {
@@ -60,6 +93,9 @@ if err != nil || httpCode != 200{
 ```
 
 ## xml
+* ToXML() 设置请求http body为xml
+* ShouldBindXML() 解析响应http body里面的xml到结构体里面
+
 发送xml到服务端，然后把服务端返回的xml结果解析到结构体里面
 ```go
 type data struct {
@@ -81,6 +117,8 @@ if err != nil || httpCode != 200{
 ```
 
 ## form
+* ToForm() 设置http body 为multipart/form-data格式数据
+
 客户端发送multipart/form-data到服务端,curl用法等同go代码
 ```bash
 curl -F mode=A -F text="good" -F voice=@./test.pcm -f voice2=@./test2.pcm url
@@ -111,6 +149,8 @@ if err != nil {
 
 
 ## query
+* ToQuery() 设置http 查询字符串
+
 ```go
 out := gout.New(nil)
 code := 0
@@ -148,7 +188,10 @@ ToQuery(&testQuery{CheckIn:2019-06-18, CheckOut:2019-06-18})
 ToQuery([]string{"active", "enable", "action", "drop"})`
 ```
 
-## http-header
+## http header
+* ToHeader() 设置http header
+* ShouldBindHeader() 解析响应http header
+
 对gout来说，既支持客户端发送http header,也支持解码服务端返回的http header
 ```go
 //ShouldBindHeader支持的类型有
