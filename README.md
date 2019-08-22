@@ -256,7 +256,7 @@ t := testForm{}
 r := rsp{}
 code := 0
 
-err := gout.New(nil).ToForm(&t).ShoudBindJSON(&r).Code(&code).Do()
+err := gout.New(nil).POST(url).ToForm(&t).ShoudBindJSON(&r).Code(&code).Do()
 if err != nil {
 
 }
