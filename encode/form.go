@@ -3,6 +3,7 @@ package encode
 import (
 	"bytes"
 	"fmt"
+	"github.com/guonaihong/gout/core"
 	"io/ioutil"
 	"mime/multipart"
 	"path/filepath"
@@ -42,7 +43,7 @@ func toBytes(v reflect.Value) (all []byte, err error) {
 	return all, nil
 }
 
-func (f *FormEncode) partWrite(key string, v reflect.Value, openFile bool) (err error) {
+func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (err error) {
 	var all []byte
 	if openFile {
 		var fileName string
@@ -51,7 +52,7 @@ func (f *FormEncode) partWrite(key string, v reflect.Value, openFile bool) (err 
 		} else if b, ok := v.Interface().([]byte); ok {
 			fileName = bytesToString(b)
 		} else {
-			return fmt.Errorf("unkown type partWrite:%T, openFile:%t", v, openFile)
+			return fmt.Errorf("unkown type formFileWrite:%T, openFile:%t", v, openFile)
 		}
 
 		if all, err = ioutil.ReadFile(fileName); err != nil {
@@ -72,11 +73,33 @@ func (f *FormEncode) partWrite(key string, v reflect.Value, openFile bool) (err 
 	return err
 }
 
+func (f *FormEncode) mapFormFile(key string, v reflect.Value, sf reflect.StructField) (next bool, err error) {
+	openFile := false
+	switch v.Interface().(type) {
+	case core.FormFile:
+		openFile = true
+	case core.FormMem:
+	default:
+		return true, nil
+	}
+
+	err = f.formFileWrite(key, v, openFile)
+	return true, err
+}
+
 func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (err error) {
 	formFile := sf.Tag.Get("form-file")
 	formMem := sf.Tag.Get("form-mem")
 	b := false
-	all := []byte{}
+
+	next, err := f.mapFormFile(key, v, sf)
+	if err != nil {
+		return err
+	}
+
+	if !next {
+		return nil
+	}
 
 	if len(formFile) > 0 {
 		if b, err = strconv.ParseBool(formFile); err != nil {
@@ -86,7 +109,7 @@ func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (e
 			return nil
 		}
 
-		return f.partWrite(key, v, b)
+		return f.formFileWrite(key, v, b)
 
 	}
 
@@ -98,10 +121,15 @@ func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (e
 			return nil
 		}
 
-		return f.partWrite(key, v, false)
+		return f.formFileWrite(key, v, false)
 	}
 
+	return f.formFieldWrite(key, v)
+}
+
+func (f *FormEncode) formFieldWrite(key string, v reflect.Value) error {
 	part, err := f.CreateFormField(key)
+	var all []byte
 
 	if all, err = toBytes(v); err != nil {
 		return err

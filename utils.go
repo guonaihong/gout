@@ -1,6 +1,7 @@
 package gout
 
 import (
+	"github.com/guonaihong/gout/core"
 	"path"
 	"strings"
 )
@@ -11,6 +12,9 @@ const (
 )
 
 type H map[string]interface{}
+
+type FileFile = core.FormFile
+type FileMem = core.FormMem
 
 func lastChar(str string) uint8 {
 	if str == "" {
