@@ -34,11 +34,15 @@ func Encode(in interface{}, a Adder) error {
 	case reflect.Map:
 		iter := v.MapRange()
 		for iter.Next() {
-			a.Add(valToStr(iter.Key(), emptyField), iter.Value(), emptyField)
+			if err := a.Add(valToStr(iter.Key(), emptyField), iter.Value(), emptyField); err != nil {
+				return err
+			}
 		}
 
 	case reflect.Struct:
-		encode(v, emptyField, a)
+		if err := encode(v, emptyField, a); err != nil {
+			return err
+		}
 
 	case reflect.Slice, reflect.Array:
 		if !(v.Len() > 0 && v.Len()%2 == 0) {
@@ -47,7 +51,9 @@ func Encode(in interface{}, a Adder) error {
 
 		for i, l := 0, v.Len(); i < l; i += 2 {
 
-			a.Add(valToStr(v.Index(i), emptyField), v.Index(i+1), emptyField)
+			if err := a.Add(valToStr(v.Index(i), emptyField), v.Index(i+1), emptyField); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -98,7 +104,7 @@ func valToStr(v reflect.Value, sf reflect.StructField) string {
 	return fmt.Sprint(v.Interface())
 }
 
-func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
+func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) error {
 
 	tagName := sf.Tag.Get(a.Name())
 	tagName, opts := parseTag(tagName)
@@ -108,14 +114,14 @@ func parseTagAndSet(val reflect.Value, sf reflect.StructField, a Adder) {
 	}
 
 	if tagName == "" {
-		return
+		return nil
 	}
 
 	if opts.Contains("omitempty") && valueIsEmpty(val) {
-		return
+		return nil
 	}
 
-	a.Add(tagName, val, sf)
+	return a.Add(tagName, val, sf)
 }
 
 func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
@@ -130,7 +136,9 @@ func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
 	}
 
 	if vKind != reflect.Struct || !sf.Anonymous {
-		parseTagAndSet(val, sf, a)
+		if err := parseTagAndSet(val, sf, a); err != nil {
+			return err
+		}
 	}
 
 	if vKind == reflect.Struct {
@@ -152,7 +160,9 @@ func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
 
 			}
 
-			encode(val.Field(i), sf, a)
+			if err := encode(val.Field(i), sf, a); err != nil {
+				return err
+			}
 		}
 	}
 

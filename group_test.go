@@ -3,7 +3,10 @@ package gout
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"sync/atomic"
@@ -248,26 +251,96 @@ type testForm struct {
 	//Voice []byte `form:"voice" form-mem:"true"` //todo open
 }
 
-func TestToForm(t *testing.T) {
+func setupForm(t *testing.T, reqTestForm testForm) *gin.Engine {
+	router := gin.Default()
+	router.POST("/test.form", func(c *gin.Context) {
+
+		t2 := testForm{}
+		err := c.ShouldBind(&t2)
+		assert.NoError(t, err)
+		//assert.Equal(t, reqTestForm, t2)
+		assert.Equal(t, reqTestForm.Mode, t2.Mode)
+		assert.Equal(t, reqTestForm.Text, t2.Text)
+	})
+	return router
+}
+
+type testForm2 struct {
+	Mode      string                `form:"mode"`
+	Text      string                `form:"text"`
+	Voice     *multipart.FileHeader `form:"voice"`
+	Voice2    *multipart.FileHeader `form:"voice2"`
+	ReqVoice  []byte
+	ReqVoice2 []byte
+}
+
+func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
+	router := gin.Default()
+	router.POST("/test.form", func(c *gin.Context) {
+
+		t2 := testForm2{}
+		err := c.ShouldBind(&t2)
+		assert.NoError(t, err)
+		//assert.Equal(t, reqTestForm, t2)
+		assert.Equal(t, reqTestForm.Mode, t2.Mode)
+		assert.Equal(t, reqTestForm.Text, t2.Text)
+
+		assert.NotNil(t, t2.Voice)
+		fd, err := t2.Voice.Open()
+		assert.NoError(t, err)
+		defer fd.Close()
+
+		all, err := ioutil.ReadAll(fd)
+		assert.NoError(t, err)
+
+		assert.Equal(t, reqTestForm.ReqVoice, all)
+		//=============
+
+		assert.NotNil(t, t2.Voice2)
+		fd2, err := t2.Voice2.Open()
+		assert.NoError(t, err)
+		defer fd2.Close()
+
+		all2, err := ioutil.ReadAll(fd2)
+		assert.NoError(t, err)
+		assert.Equal(t, reqTestForm.ReqVoice2, all2)
+	})
+
+	return router
+}
+
+func TestToFormMap(t *testing.T) {
+	reqTestForm := testForm2{
+		Mode:      "A",
+		Text:      "good morning",
+		ReqVoice2: []byte("pcm pcm"),
+	}
+
+	var err error
+	reqTestForm.ReqVoice, err = ioutil.ReadFile("testdata/voice.pcm")
+	assert.NoError(t, err)
+
+	router := setupForm2(t, reqTestForm)
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	g := New(nil)
+	code := 0
+	err = g.POST(ts.URL + "/test.form").ToForm(H{"mode": "A", "text": "good morning",
+		"voice": core.FormFile("testdata/voice.pcm"), "voice2": core.FormMem("pcm pcm")}).Code(&code).Do()
+
+	assert.NoError(t, err)
+}
+
+func TestToFormStruct(t *testing.T) {
 	reqTestForm := testForm{
 		Mode: "A",
 		Text: "good morning",
 		//Voice: []byte("pcm data"),
 	}
 
-	router := func() *gin.Engine {
-		router := gin.Default()
-		router.POST("/test.form", func(c *gin.Context) {
-
-			t2 := testForm{}
-			err := c.ShouldBind(&t2)
-			assert.NoError(t, err)
-			//assert.Equal(t, reqTestForm, t2)
-			assert.Equal(t, reqTestForm.Mode, t2.Mode)
-			assert.Equal(t, reqTestForm.Text, t2.Text)
-		})
-		return router
-	}()
+	router := setupForm(t, reqTestForm)
 
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 	defer ts.Close()

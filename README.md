@@ -51,24 +51,18 @@ g.OPTIONS(url).Do()
 ```go
 out := New(nil)
 
-// http://127.0.0.1:80/v1/login
-// http://127.0.0.1:80/v1/submit
-// http://127.0.0.1:80/v1/read
 v1 := out.Group(ts.URL + "/v1")
-err := v1.POST("/login").Next().
-    POST("/submit").Next().
-    POST("/read").Do()
+err := v1.POST("/login").Next(). // http://127.0.0.1:80/v1/login
+    POST("/submit").Next().      // http://127.0.0.1:80/v1/submit
+    POST("/read").Do()           // http://127.0.0.1:80/v1/read
 
 if err != nil {
 }
 
-// http://127.0.0.1:80/v2/login
-// http://127.0.0.1:80/v2/submit
-// http://127.0.0.1:80/v2/read
 v2 := out.Group(ts.URL + "/v2")
-err = v2.POST("/login").Next().
-    POST("/submit").Next().
-    POST("/read").Do()
+err = v2.POST("/login").Next(). // http://127.0.0.1:80/v2/login
+    POST("/submit").Next().     // http://127.0.0.1:80/v2/submit
+    POST("/read").Do()          // http://127.0.0.1:80/v2/read
 
 if err != nil {
 }
@@ -239,6 +233,25 @@ if err != nil || httpCode != 200{
 curl -F mode=A -F text="good" -F voice=@./test.pcm -f voice2=@./test2.pcm url
 ```
 
+* 使用gout.H
+```go
+code := 0
+err := gout.New(nil).
+    POST(":8080/test").
+    ToForm(gout.H{"mode": "A",
+        "text":   "good",
+        "voice":  gout.FileFile("test.pcm"),
+        "voice2": gout.FileMem("pcm")}).Code(&code).Do()
+
+if err != nil {
+    fmt.Printf("%s\n", err)
+}   
+
+if code != 200 {
+}   
+```
+
+* 使用结构体
 ```go
 type testForm struct {
     Mode string `form:"mode"`
