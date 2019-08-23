@@ -234,7 +234,7 @@ curl -F mode=A -F text="good" -F voice=@./test.pcm -f voice2=@./test2.pcm url
 ```
 
 * 使用gout.H
-```
+```go
 code := 0
 err := gout.New(nil).
     POST(":8080/test").
