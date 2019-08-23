@@ -74,17 +74,28 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 }
 
 func (f *FormEncode) mapFormFile(key string, v reflect.Value, sf reflect.StructField) (next bool, err error) {
-	openFile := false
+	var all []byte
+
 	switch v.Interface().(type) {
 	case core.FormFile:
-		openFile = true
+		all, err = ioutil.ReadFile(string(v.Interface().(core.FormFile)))
+		if err != nil {
+			return false, err
+		}
+
 	case core.FormMem:
+		all = []byte(v.Interface().(core.FormMem))
 	default:
 		return true, nil
 	}
 
-	err = f.formFileWrite(key, v, openFile)
-	return true, err
+	part, err := f.CreateFormFile(key, filepath.Base(key))
+	if err != nil {
+		return false, err
+	}
+
+	_, err = part.Write(all)
+	return false, err
 }
 
 func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (err error) {

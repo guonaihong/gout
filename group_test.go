@@ -285,7 +285,7 @@ func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
 		assert.Equal(t, reqTestForm.Mode, t2.Mode)
 		assert.Equal(t, reqTestForm.Text, t2.Text)
 
-		return //TODO debug panic
+		assert.NotNil(t, t2.Voice)
 		fd, err := t2.Voice.Open()
 		assert.NoError(t, err)
 		defer fd.Close()
@@ -296,7 +296,8 @@ func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
 		assert.Equal(t, reqTestForm.ReqVoice, all)
 		//=============
 
-		fd2, err := t2.Voice.Open()
+		assert.NotNil(t, t2.Voice2)
+		fd2, err := t2.Voice2.Open()
 		assert.NoError(t, err)
 		defer fd2.Close()
 
