@@ -49,9 +49,9 @@ g.OPTIONS(url).Do()
 ## group
 路由组
 ```go
-out := New(nil)
+g := New(nil)
 
-v1 := out.Group(ts.URL + "/v1")
+v1 := g.Group(ts.URL + "/v1")
 err := v1.POST("/login").Next(). // http://127.0.0.1:80/v1/login
     POST("/submit").Next().      // http://127.0.0.1:80/v1/submit
     POST("/read").Do()           // http://127.0.0.1:80/v1/read
@@ -59,7 +59,7 @@ err := v1.POST("/login").Next(). // http://127.0.0.1:80/v1/login
 if err != nil {
 }
 
-v2 := out.Group(ts.URL + "/v2")
+v2 := g.Group(ts.URL + "/v2")
 err = v2.POST("/login").Next(). // http://127.0.0.1:80/v2/login
     POST("/submit").Next().     // http://127.0.0.1:80/v2/submit
     POST("/read").Do()          // http://127.0.0.1:80/v2/read
@@ -71,10 +71,10 @@ if err != nil {
 * ToQuery() 设置http 查询字符串
 
 ```go
-out := gout.New(nil)
+g := gout.New(nil)
 code := 0
 
-if err := out.GET(":8080/testquery").ToQuery(/*看下面支持的情况*/).Code(&code).Do(); err != nil {
+if err := g.GET(":8080/testquery").ToQuery(/*看下面支持的情况*/).Code(&code).Do(); err != nil {
 }
 
 /*
@@ -113,8 +113,6 @@ ToQuery([]string{"active", "enable", "action", "drop"})`
 
 对gout来说，既支持客户端发送http header,也支持解码服务端返回的http header
 ```go
-//ShouldBindHeader支持的类型有
-// 结构体
 type testHeader struct {
     CheckIn string `header:checkin`
     CheckOut string `header:checkout`
@@ -122,17 +120,29 @@ type testHeader struct {
 
 t := testheader{}
 
-out := gout.New(nil)
+g := gout.New(nil)
 code := 0
 
-if err := out.GET(":8080/testquery").Code(&code).ToHeader(/*看下面支持的类型*/).ShoudBindHeader(&t).Do(); err != nil {
+if err := g.GET(":8080/testquery").Code(&code).ToHeader(/*看下面支持的类型*/).ShoudBindHeader(&t).Do(); err != nil {
 }
 ```
+* ShouldBindHeader支持的类型有
+```go
+// struct
+type testHeader struct {
+    CheckIn string `header:checkin`
+    CheckOut string `header:checkout`
+}
+```
+ 结构体
 * ToHeader支持的类型有
 ```go
+/*
 map[string]interface{}，可以使用gout.H别名
 struct
 array, slice(长度必须是偶数)
+*/
+
 // gout.H 或者 map[string]interface{}
 ToHeader(gout.H{
     "check_in":"2019-06-18",
