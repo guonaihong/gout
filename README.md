@@ -4,6 +4,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 [![Build Status](https://travis-ci.org/guonaihong/gout.png)](https://travis-ci.org/guonaihong/gout)
 ## 内容
 - [安装](#安装)
+- [技能树](#技能树)
 - [API示例](#api-示例)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [group](#group)
@@ -20,6 +21,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
 ```
 env GOPATH=`pwd` go get github.com/guonaihong/gout
 ```
+## 技能树
+![gout.png](https://github.com/guonaihong/images/blob/master/gout/gout.png)
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
 // 创建一个实例
