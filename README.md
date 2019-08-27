@@ -41,7 +41,7 @@ g.PUT(url).Do()
 g.DELETE(url).Do()
 
 // 发送PATH方法
-g.PATH(url).Do()
+g.PATCH(url).Do()
 
 // 发送HEAD方法
 g.HEAD(url).Do()
