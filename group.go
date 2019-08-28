@@ -64,52 +64,52 @@ func (g *routerGroup) OPTIONS(url string) *routerGroup {
 	return g
 }
 
-func (g *routerGroup) ToForm(obj interface{}) *routerGroup {
+func (g *routerGroup) SetForm(obj interface{}) *routerGroup {
 	g.Req.formEncode = obj
 	return g
 }
 
-func (g *routerGroup) ToQuery(obj interface{}) *routerGroup {
+func (g *routerGroup) SetQuery(obj interface{}) *routerGroup {
 	g.Req.queryEncode = obj
 	return g
 }
 
-func (g *routerGroup) ToHeader(obj interface{}) *routerGroup {
+func (g *routerGroup) SetHeader(obj interface{}) *routerGroup {
 	g.Req.headerEncode = obj
 	return g
 }
 
-func (g *routerGroup) ToJSON(obj interface{}) *routerGroup {
+func (g *routerGroup) SetJSON(obj interface{}) *routerGroup {
 	g.Req.bodyEncoder = encode.NewJsonEncode(obj)
 	return g
 }
 
-func (g *routerGroup) ToXML(obj interface{}) *routerGroup {
+func (g *routerGroup) SetXML(obj interface{}) *routerGroup {
 	g.Req.bodyEncoder = encode.NewXmlEncode(obj)
 	return g
 }
 
-func (g *routerGroup) ToYAML(obj interface{}) *routerGroup {
+func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
 	g.Req.bodyEncoder = encode.NewYamlEncode(obj)
 	return g
 }
 
-func (g *routerGroup) ShouldBindHeader(obj interface{}) *routerGroup {
+func (g *routerGroup) BindHeader(obj interface{}) *routerGroup {
 	g.Req.headerDecode = obj
 	return g
 }
 
-func (g *routerGroup) ShouldBindJSON(obj interface{}) *routerGroup {
+func (g *routerGroup) BindJSON(obj interface{}) *routerGroup {
 	g.Req.bodyDecoder = decode.NewJsonDecode(obj)
 	return g
 }
 
-func (g *routerGroup) ShouldBindXML(obj interface{}) *routerGroup {
+func (g *routerGroup) BindXML(obj interface{}) *routerGroup {
 	g.Req.bodyDecoder = decode.NewXmlDecode(obj)
 	return g
 }
 
-func (g *routerGroup) ShouldBindYAML(obj interface{}) *routerGroup {
+func (g *routerGroup) BindYAML(obj interface{}) *routerGroup {
 	g.Req.bodyDecoder = decode.NewYamlDecode(obj)
 	return g
 }

@@ -110,14 +110,14 @@ type BindTest struct {
 	httpCode int
 }
 
-func TestShouldBindXML(t *testing.T) {
+func TestBindXML(t *testing.T) {
 	var d, d2 data
 	router := func() *gin.Engine {
 		router := gin.Default()
 
 		router.POST("/test.xml", func(c *gin.Context) {
 			var d3 data
-			err := c.ShouldBindXML(&d3)
+			err := c.BindXML(&d3)
 			assert.NoError(t, err)
 			c.XML(200, d3)
 		})
@@ -134,21 +134,21 @@ func TestShouldBindXML(t *testing.T) {
 
 	code := 200
 
-	err := g.POST(ts.URL + "/test.xml").ToXML(&d).ShouldBindXML(&d2).Code(&code).Do()
+	err := g.POST(ts.URL + "/test.xml").SetXML(&d).BindXML(&d2).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 	assert.Equal(t, d, d2)
 }
 
-func TestShouldBindYAML(t *testing.T) {
+func TestBindYAML(t *testing.T) {
 	var d, d2 data
 	router := func() *gin.Engine {
 		router := gin.Default()
 
 		router.POST("/test.yaml", func(c *gin.Context) {
 			var d3 data
-			err := c.ShouldBindYAML(&d3)
+			err := c.BindYAML(&d3)
 			assert.NoError(t, err)
 			c.YAML(200, d3)
 		})
@@ -165,20 +165,20 @@ func TestShouldBindYAML(t *testing.T) {
 
 	code := 200
 
-	err := g.POST(ts.URL + "/test.yaml").ToYAML(&d).ShouldBindYAML(&d2).Code(&code).Do()
+	err := g.POST(ts.URL + "/test.yaml").SetYAML(&d).BindYAML(&d2).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 	assert.Equal(t, d, d2)
 }
 
-func TestShouldBindJSON(t *testing.T) {
+func TestBindJSON(t *testing.T) {
 	var d3 data
 	router := func() *gin.Engine {
 		router := gin.Default()
 
 		router.POST("/test.json", func(c *gin.Context) {
-			c.ShouldBindJSON(&d3)
+			c.BindJSON(&d3)
 			c.JSON(200, d3)
 		})
 
@@ -198,7 +198,7 @@ func TestShouldBindJSON(t *testing.T) {
 	for k, _ := range tests {
 		t.Logf("outbody type:%T:%p\n", tests[k].OutBody, &tests[k].OutBody)
 
-		err := g.POST(ts.URL + "/test.json").ToJSON(&tests[k].InBody).ShouldBindJSON(&tests[k].OutBody).Code(&tests[k].httpCode).Do()
+		err := g.POST(ts.URL + "/test.json").SetJSON(&tests[k].InBody).BindJSON(&tests[k].OutBody).Code(&tests[k].httpCode).Do()
 		if err != nil {
 			t.Errorf("send fail:%s\n", err)
 		}
@@ -218,7 +218,7 @@ func TestShouldBindJSON(t *testing.T) {
 	}
 }
 
-func TestShouldBindHeader(t *testing.T) {
+func TestBindHeader(t *testing.T) {
 	router := func() *gin.Engine {
 		router := gin.Default()
 
@@ -239,7 +239,7 @@ func TestShouldBindHeader(t *testing.T) {
 	}
 
 	var tHeader testHeader
-	err := g.GET(ts.URL + "/test.header").ShouldBindHeader(&tHeader).Code(&tHeader.Code).Do()
+	err := g.GET(ts.URL + "/test.header").BindHeader(&tHeader).Code(&tHeader.Code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, tHeader.Code, 200)
 	assert.Equal(t, tHeader.Sid, "sid-ok")
@@ -256,7 +256,7 @@ func setupForm(t *testing.T, reqTestForm testForm) *gin.Engine {
 	router.POST("/test.form", func(c *gin.Context) {
 
 		t2 := testForm{}
-		err := c.ShouldBind(&t2)
+		err := c.Bind(&t2)
 		assert.NoError(t, err)
 		//assert.Equal(t, reqTestForm, t2)
 		assert.Equal(t, reqTestForm.Mode, t2.Mode)
@@ -279,7 +279,7 @@ func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
 	router.POST("/test.form", func(c *gin.Context) {
 
 		t2 := testForm2{}
-		err := c.ShouldBind(&t2)
+		err := c.Bind(&t2)
 		assert.NoError(t, err)
 		//assert.Equal(t, reqTestForm, t2)
 		assert.Equal(t, reqTestForm.Mode, t2.Mode)
@@ -309,7 +309,7 @@ func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
 	return router
 }
 
-func TestToFormMap(t *testing.T) {
+func TestSetFormMap(t *testing.T) {
 	reqTestForm := testForm2{
 		Mode:      "A",
 		Text:      "good morning",
@@ -327,13 +327,13 @@ func TestToFormMap(t *testing.T) {
 
 	g := New(nil)
 	code := 0
-	err = g.POST(ts.URL + "/test.form").ToForm(H{"mode": "A", "text": "good morning",
+	err = g.POST(ts.URL + "/test.form").SetForm(H{"mode": "A", "text": "good morning",
 		"voice": core.FormFile("testdata/voice.pcm"), "voice2": core.FormMem("pcm pcm")}).Code(&code).Do()
 
 	assert.NoError(t, err)
 }
 
-func TestToFormStruct(t *testing.T) {
+func TestSetFormStruct(t *testing.T) {
 	reqTestForm := testForm{
 		Mode: "A",
 		Text: "good morning",
@@ -347,15 +347,15 @@ func TestToFormStruct(t *testing.T) {
 
 	g := New(nil)
 	code := 0
-	err := g.POST(ts.URL + "/test.form").ToForm(&reqTestForm).Code(&code).Do()
+	err := g.POST(ts.URL + "/test.form").SetForm(&reqTestForm).Code(&code).Do()
 
 	assert.NoError(t, err)
 }
 
-func TestToHeaderMap(t *testing.T) {
+func TestSetHeaderMap(t *testing.T) {
 }
 
-func TestToHeaderStruct(t *testing.T) {
+func TestSetHeaderStruct(t *testing.T) {
 	type testHeader2 struct {
 		Q8 uint8 `header:"h8"`
 	}
@@ -388,7 +388,7 @@ func TestToHeaderStruct(t *testing.T) {
 		router := gin.Default()
 		router.GET("/test.header", func(c *gin.Context) {
 			h2 := testHeader{}
-			err := c.ShouldBindHeader(&h2)
+			err := c.BindHeader(&h2)
 			assert.NoError(t, err)
 
 			assert.Equal(t, h, h2)
@@ -403,7 +403,7 @@ func TestToHeaderStruct(t *testing.T) {
 	g := New(nil)
 	code := 0
 
-	err := g.GET(ts.URL + "/test.header").ToHeader(h).Code(&code).Do()
+	err := g.GET(ts.URL + "/test.header").SetHeader(h).Code(&code).Do()
 
 	assert.NoError(t, err)
 }
@@ -443,13 +443,13 @@ func queryDefault() *testQuery {
 	}
 }
 
-func TestToQueryStruct(t *testing.T) {
+func TestSetQueryStruct(t *testing.T) {
 	q := queryDefault()
 	router := func() *gin.Engine {
 		router := gin.Default()
 		router.GET("/test.query", func(c *gin.Context) {
 			q2 := testQuery{}
-			err := c.ShouldBindQuery(&q2)
+			err := c.BindQuery(&q2)
 			assert.NoError(t, err)
 
 			testQueryEqual(t, *q, q2)
@@ -465,7 +465,7 @@ func TestToQueryStruct(t *testing.T) {
 	g := New(nil)
 	code := 0
 
-	err := g.GET(ts.URL + "/test.query").ToQuery(q).Code(&code).Do()
+	err := g.GET(ts.URL + "/test.query").SetQuery(q).Code(&code).Do()
 
 	assert.NoError(t, err)
 }
@@ -502,7 +502,7 @@ func testQueryStringCore(t *testing.T, qStr string, isPtr bool) {
 		router := gin.Default()
 		router.GET("/test.query", func(c *gin.Context) {
 			q2 := testQuery{}
-			err := c.ShouldBindQuery(&q2)
+			err := c.BindQuery(&q2)
 
 			//todo
 			//fmt.Printf("------->q7(%t)\n", reflect.DeepEqual(q1.Q5, q2.Q5), reflect.DeepEqual(q1.Q6, q2.Q6), reflect.DeepEqual(q1.Q7, q2.Q7))
@@ -523,9 +523,9 @@ func testQueryStringCore(t *testing.T, qStr string, isPtr bool) {
 
 	var err error
 	if isPtr {
-		err = g.GET(ts.URL + "/test.query").ToQuery(&qStr).Code(&code).Do()
+		err = g.GET(ts.URL + "/test.query").SetQuery(&qStr).Code(&code).Do()
 	} else {
-		err = g.GET(ts.URL + "/test.query").ToQuery(qStr).Code(&code).Do()
+		err = g.GET(ts.URL + "/test.query").SetQuery(qStr).Code(&code).Do()
 	}
 
 	assert.NoError(t, err)
@@ -537,7 +537,7 @@ func setupQuery(t *testing.T, q *testQuery) func() *gin.Engine {
 		router := gin.Default()
 		router.GET("/test.query", func(c *gin.Context) {
 			q2 := testQuery{}
-			err := c.ShouldBindQuery(&q2)
+			err := c.BindQuery(&q2)
 			assert.NoError(t, err)
 
 			testQueryEqual(t, *q, q2)
@@ -558,7 +558,7 @@ func testQuerySliceAndArrayCore(t *testing.T, x interface{}) {
 	g := New(nil)
 
 	code := 0
-	err := g.GET(ts.URL + "/test.query").ToQuery(x).Code(&code).Do()
+	err := g.GET(ts.URL + "/test.query").SetQuery(x).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
@@ -574,7 +574,7 @@ func testQueryFail(t *testing.T, x interface{}) {
 	g := New(nil)
 
 	code := 0
-	err := g.GET(ts.URL + "/test.query").ToQuery(x).Code(&code).Do()
+	err := g.GET(ts.URL + "/test.query").SetQuery(x).Code(&code).Do()
 	assert.Error(t, err)
 	assert.NotEqual(t, code, 200)
 }
