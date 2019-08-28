@@ -71,17 +71,17 @@ if err != nil {
 }
 ```
 ## query
-* ToQuery() 设置http 查询字符串
+* SetQuery() 设置http 查询字符串
 
 ```go
 g := gout.New(nil)
 code := 0
 
-if err := g.GET(":8080/testquery").ToQuery(/*看下面支持的情况*/).Code(&code).Do(); err != nil {
+if err := g.GET(":8080/testquery").SetQuery(/*看下面支持的情况*/).Code(&code).Do(); err != nil {
 }
 
 /*
-ToQuery支持的类型有
+SetQuery支持的类型有
 * string
 * map[string]interface{}，可以使用gout.H别名
 * struct
@@ -89,10 +89,10 @@ ToQuery支持的类型有
 */
 
 // string
-ToQuery("check_in=2019-06-18&check_out=2018-06-18")
+SetQuery("check_in=2019-06-18&check_out=2018-06-18")
 
 // gout.H 或者 map[string]interface{}
-ToQuery(gout.H{
+SetQuery(gout.H{
     "check_in":"2019-06-18",
     "check_out":"2019-06-18",
 })
@@ -103,16 +103,16 @@ type testQuery struct {
     CheckOut string `query:checkout`
 }
 
-ToQuery(&testQuery{CheckIn:2019-06-18, CheckOut:2019-06-18})
+SetQuery(&testQuery{CheckIn:2019-06-18, CheckOut:2019-06-18})
 
 // array or slice
 // ?active=enable&action=drop
-ToQuery([]string{"active", "enable", "action", "drop"})`
+SetQuery([]string{"active", "enable", "action", "drop"})`
 ```
 
 ## http header
-* ToHeader() 设置http header
-* ShouldBindHeader() 解析响应http header
+* SetHeader() 设置http header
+* BindHeader() 解析响应http header
 
 对gout来说，既支持客户端发送http header,也支持解码服务端返回的http header
 ```go
@@ -126,10 +126,10 @@ t := testheader{}
 g := gout.New(nil)
 code := 0
 
-if err := g.GET(":8080/testquery").Code(&code).ToHeader(/*看下面支持的类型*/).ShoudBindHeader(&t).Do(); err != nil {
+if err := g.GET(":8080/testquery").Code(&code).SetHeader(/*看下面支持的类型*/).BindHeader(&t).Do(); err != nil {
 }
 ```
-* ShouldBindHeader支持的类型有
+* BindHeader支持的类型有
 ```go
 // struct
 type testHeader struct {
@@ -138,7 +138,7 @@ type testHeader struct {
 }
 ```
  结构体
-* ToHeader支持的类型有
+* SetHeader支持的类型有
 ```go
 /*
 map[string]interface{}，可以使用gout.H别名
@@ -147,7 +147,7 @@ array, slice(长度必须是偶数)
 */
 
 // gout.H 或者 map[string]interface{}
-ToHeader(gout.H{
+SetHeader(gout.H{
     "check_in":"2019-06-18",
     "check_out":"2019-06-18",
 })
@@ -158,18 +158,18 @@ type testHeader struct {
     CheckOut string `header:checkout`
 }
 
-ToHeader(&testHeader{CheckIn:2019-06-18, CheckOut:2019-06-18})
+SetHeader(&testHeader{CheckIn:2019-06-18, CheckOut:2019-06-18})
 
 // array or slice
 // -H active:enable -H action:drop
-ToHeader([]string{"active", "enable", "action", "drop"})
+SetHeader([]string{"active", "enable", "action", "drop"})
 ```
 
 ## http body
 ### json
 
-* ToJSON()  设置请求http body为json
-* ShouldBindJSON()  解析响应http body里面的json到结构体里面
+* SetJSON()  设置请求http body为json
+* BindJSON()  解析响应http body里面的json到结构体里面
 
 发送json到服务端，然后把服务端返回的json结果解析到结构体里面
 ```go
@@ -184,15 +184,15 @@ var httpCode int
 
 g := gout.New(nil)
 
-err := g.POST(":8080/test.json").ToJSON(&d1).ShouldBindJSON(&d2).Code(&httpCode).Do()
+err := g.POST(":8080/test.json").SetJSON(&d1).BindJSON(&d2).Code(&httpCode).Do()
 if err != nil || httpCode != 200{
     fmt.Printf("send fail:%s\n", err)
 }
 ```
 
 ### yaml
-* ToYAML() 设置请求http body为yaml
-* ShouldBindYAML() 解析响应http body里面的yaml到结构体里面
+* SetYAML() 设置请求http body为yaml
+* BindYAML() 解析响应http body里面的yaml到结构体里面
 
 发送yaml到服务端，然后把服务端返回的yaml结果解析到结构体里面
 ```go
@@ -207,7 +207,7 @@ var httpCode int
 
 g := gout.New(nil)
 
-err := g.POST(":8080/test.yaml").ToYAML(&d1).ShouldBindYAML(&d2).Code(&httpCode).Do()
+err := g.POST(":8080/test.yaml").SetYAML(&d1).BindYAML(&d2).Code(&httpCode).Do()
 if err != nil || httpCode != 200{
     fmt.Printf("send fail:%s\n", err)
 }
@@ -215,8 +215,8 @@ if err != nil || httpCode != 200{
 ```
 
 ### xml
-* ToXML() 设置请求http body为xml
-* ShouldBindXML() 解析响应http body里面的xml到结构体里面
+* SetXML() 设置请求http body为xml
+* BindXML() 解析响应http body里面的xml到结构体里面
 
 发送xml到服务端，然后把服务端返回的xml结果解析到结构体里面
 ```go
@@ -231,7 +231,7 @@ var httpCode int
 
 g := gout.New(nil)
 
-err := g.POST(":8080/test.xml").ToXML(&d1).ShouldBindXML(&d2).Code(&httpCode).Do()
+err := g.POST(":8080/test.xml").SetXML(&d1).BindXML(&d2).Code(&httpCode).Do()
 if err != nil || httpCode != 200{
     fmt.Printf("send fail:%s\n", err)
 }
@@ -239,7 +239,7 @@ if err != nil || httpCode != 200{
 ```
 
 ### form
-* ToForm() 设置http body 为multipart/form-data格式数据
+* SetForm() 设置http body 为multipart/form-data格式数据
 
 客户端发送multipart/form-data到服务端,curl用法等同go代码
 ```bash
@@ -251,7 +251,7 @@ curl -F mode=A -F text="good" -F voice=@./test.pcm -f voice2=@./test2.pcm url
 code := 0
 err := gout.New(nil).
     POST(":8080/test").
-    ToForm(gout.H{"mode": "A",
+    SetForm(gout.H{"mode": "A",
         "text":   "good",
         "voice":  gout.FileFile("test.pcm"),
         "voice2": gout.FileMem("pcm")}).Code(&code).Do()
@@ -282,7 +282,7 @@ t := testForm{}
 r := rsp{}
 code := 0
 
-err := gout.New(nil).POST(url).ToForm(&t).ShoudBindJSON(&r).Code(&code).Do()
+err := gout.New(nil).POST(url).SetForm(&t).ShoudBindJSON(&r).Code(&code).Do()
 if err != nil {
 
 }
