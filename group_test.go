@@ -595,3 +595,6 @@ func TestQuerySliceAndArray(t *testing.T) {
 	testQuerySliceAndArrayCore(t, &[8 * 2]string{"q1", "v1", "q2", "2", "q3", "3.14", "q4", "3.1415", "q5",
 		fmt.Sprint(q.Q5.Unix()), "q6", fmt.Sprint(q.Q6.UnixNano()), "q7", q.Q7.Format("2006-01-02"), "q8", "8"})
 }
+
+func TestSetBody(t *testing.T) {
+}
