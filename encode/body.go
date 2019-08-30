@@ -20,13 +20,15 @@ func NewBodyEncode(obj interface{}) *BodyEncode {
 }
 
 func (b *BodyEncode) Encode(w io.Writer) error {
-
-	switch t := reflect.ValueOf(b.obj).Kind(); t {
+	val := reflect.ValueOf(b.obj)
+	switch t := val.Kind(); t {
 	case reflect.Slice, reflect.Array, reflect.Map, reflect.Interface:
-		return fmt.Errorf("type(%T) %s:", t, core.ErrUnkownType.Error())
+		if _, ok := val.Interface().([]byte); !ok {
+			return fmt.Errorf("type(%T) %s:", b.obj, core.ErrUnkownType.Error())
+		}
 	}
 
-	v := valToStr(reflect.ValueOf(b.obj), emptyField)
+	v := valToStr(val, emptyField)
 	_, err := io.WriteString(w, v)
 	return err
 }
