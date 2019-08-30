@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 var emptyField = reflect.StructField{}
@@ -99,6 +100,10 @@ func valToStr(v reflect.Value, sf reflect.StructField) string {
 
 	if v.Type() == timeType {
 		return timeToStr(v, sf)
+	}
+
+	if b, ok := v.Interface().([]byte); ok {
+		return *(*string)(unsafe.Pointer(&b))
 	}
 
 	return fmt.Sprint(v.Interface())

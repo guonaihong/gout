@@ -1,10 +1,12 @@
 package gout
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -594,4 +596,136 @@ func TestQuerySliceAndArray(t *testing.T) {
 		fmt.Sprint(q.Q5.Unix()), "q6", fmt.Sprint(q.Q6.UnixNano()), "q7", q.Q7.Format("2006-01-02"), "q8", "8"})
 	testQuerySliceAndArrayCore(t, &[8 * 2]string{"q1", "v1", "q2", "2", "q3", "3.14", "q4", "3.1415", "q5",
 		fmt.Sprint(q.Q5.Unix()), "q6", fmt.Sprint(q.Q6.UnixNano()), "q7", q.Q7.Format("2006-01-02"), "q8", "8"})
+}
+
+type testBodyNeed struct {
+	Float32 bool `form:"float32"`
+	Float64 bool `form:"float64"`
+	Uint    bool `form:"uint"`
+	Uint8   bool `form:"uint8"`
+	Uint16  bool `form:"uint16"`
+	Uint32  bool `form:"uint32"`
+	Uint64  bool `form:"uint64"`
+	Int     bool `form:"int"`
+	Int8    bool `form:"int8"`
+	Int16   bool `form:"int16"`
+	Int32   bool `form:"int32"`
+	Int64   bool `form:"int64"`
+	String  bool `form:"string"`
+	Bytes   bool `form:"bytes"`
+}
+
+func TestSetBody(t *testing.T) {
+
+	router := func() *gin.Engine {
+		router := gin.Default()
+		router.POST("/", func(c *gin.Context) {
+
+			testBody := testBodyNeed{}
+
+			c.ShouldBindQuery(&testBody)
+
+			var s string
+			b := bytes.NewBuffer(nil)
+			io.Copy(b, c.Request.Body)
+			defer c.Request.Body.Close()
+
+			s = b.String()
+			switch {
+			case testBody.Int:
+				assert.Equal(t, s, "1")
+			case testBody.Int8:
+				assert.Equal(t, s, "2")
+			case testBody.Int16:
+				assert.Equal(t, s, "3")
+			case testBody.Int32:
+				assert.Equal(t, s, "4")
+			case testBody.Int64:
+				assert.Equal(t, s, "5")
+			case testBody.Uint:
+				assert.Equal(t, s, "6")
+			case testBody.Uint8:
+				assert.Equal(t, s, "7")
+			case testBody.Uint16:
+				assert.Equal(t, s, "8")
+			case testBody.Uint32:
+				assert.Equal(t, s, "9")
+			case testBody.Uint64:
+				assert.Equal(t, s, "10")
+			case testBody.String:
+				assert.Equal(t, s, "test string")
+			case testBody.Bytes:
+				assert.Equal(t, s, "test bytes")
+			case testBody.Float32:
+				assert.Equal(t, s, "11")
+			case testBody.Float64:
+				assert.Equal(t, s, "12")
+			default:
+				c.JSON(500, "unkown type")
+			}
+
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	code := 0
+	err := New(nil).POST(ts.URL).SetQuery(H{"int": true}).SetBody(1).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"int8": true}).SetBody(int8(2)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"int16": true}).SetBody(int16(3)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"int32": true}).SetBody(int32(4)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"int64": true}).SetBody(int64(5)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+	//=====================uint start
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"uint": true}).SetBody(6).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"uint8": true}).SetBody(uint8(7)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"uint16": true}).SetBody(uint16(8)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"uint32": true}).SetBody(uint32(9)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"uint64": true}).SetBody(uint64(10)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+	//============================== float start
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"float32": true}).SetBody(float32(11)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"float64": true}).SetBody(float64(12)).Code(&code).Do()
+
+	err = New(nil).POST(ts.URL).SetQuery(H{"string": true}).SetBody("test string").Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	// test bytes string
+	err = New(nil).POST(ts.URL).SetQuery(H{"bytes": true}).SetBody([]byte("test bytes")).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
 }

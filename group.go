@@ -64,6 +64,11 @@ func (g *routerGroup) OPTIONS(url string) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) SetBody(obj interface{}) *routerGroup {
+	g.Req.bodyEncoder = encode.NewBodyEncode(obj)
+	return g
+}
+
 func (g *routerGroup) SetForm(obj interface{}) *routerGroup {
 	g.Req.formEncode = obj
 	return g
