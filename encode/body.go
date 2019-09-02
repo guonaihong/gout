@@ -21,8 +21,13 @@ func NewBodyEncode(obj interface{}) *BodyEncode {
 
 func (b *BodyEncode) Encode(w io.Writer) error {
 	val := reflect.ValueOf(b.obj)
+	val = core.LoopElem(val)
 	switch t := val.Kind(); t {
-	case reflect.Slice, reflect.Array, reflect.Map, reflect.Interface:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	case reflect.Float32, reflect.Float64:
+	case reflect.String:
+	default:
 		if _, ok := val.Interface().([]byte); !ok {
 			return fmt.Errorf("type(%T) %s:", b.obj, core.ErrUnkownType.Error())
 		}
