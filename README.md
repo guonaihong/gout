@@ -11,6 +11,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [query](#query)
     - [http header](#http-header)
     - [http body](#http-body)
+        - [body](#body)
         - [json](#json)
         - [yaml](#yaml)
         - [xml](#xml)
@@ -166,6 +167,24 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 ```
 
 ## http body
+### body
+* SetBody 设置string, []byte等类型数据到http body里面
+```go
+
+err := gout.New(nil).SetBody(/*支持的类型如下*/).Do()
+
+```
+## 支持的类型有
+* int, int8, int16, int32, int64
+* uint, uint8, uint16, uint32, uint64
+* string
+* []byte
+* float32, float64
+
+## 明确不支持的类型有
+* struct
+* array, slice
+
 ### json
 
 * SetJSON()  设置请求http body为json
