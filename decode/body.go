@@ -58,5 +58,5 @@ func (b *BodyDecode) Decode(r io.Reader) error {
 		return fn.cb(core.BytesToString(all), fn.bitSize, emptyField, value)
 	}
 
-	return fmt.Errorf("type (%T) %s", core.ErrUnkownType)
+	return fmt.Errorf("type (%T) %s", value, core.ErrUnkownType)
 }
