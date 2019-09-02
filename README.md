@@ -169,9 +169,13 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 ## http body
 ### body
 * SetBody 设置string, []byte等类型数据到http body里面
+* BindBody bind body到string, []byte等类型变量里面
 ```go
 
 err := gout.New(nil).POST(url).SetBody(/*支持的类型如下*/).Do()
+
+var s string
+err := gout.New(nil).GET(url).BindBody(&s/*支持的指针类型变量如下*/).Do()
 
 ```
 ## 支持的类型有

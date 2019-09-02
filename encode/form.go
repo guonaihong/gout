@@ -28,10 +28,6 @@ func stringToBytes(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&bp))
 }
 
-func bytesToString(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b[0]))
-}
-
 func toBytes(v reflect.Value) (all []byte, err error) {
 	if s, ok := v.Interface().(string); ok {
 		all = stringToBytes(s)
@@ -50,7 +46,7 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 		if s, ok := v.Interface().(string); ok {
 			fileName = s
 		} else if b, ok := v.Interface().([]byte); ok {
-			fileName = bytesToString(b)
+			fileName = core.BytesToString(b)
 		} else {
 			return fmt.Errorf("unkown type formFileWrite:%T, openFile:%t", v, openFile)
 		}

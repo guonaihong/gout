@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"reflect"
+	"unsafe"
 )
 
 type FormFile string
@@ -20,4 +21,8 @@ func LoopElem(v reflect.Value) reflect.Value {
 	}
 
 	return v
+}
+
+func BytesToString(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
 }
