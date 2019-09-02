@@ -99,6 +99,11 @@ func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) BindBody(obj interface{}) *routerGroup {
+	g.Req.bodyDecoder = decode.NewBodyDecode(obj)
+	return g
+}
+
 func (g *routerGroup) BindHeader(obj interface{}) *routerGroup {
 	g.Req.headerDecode = obj
 	return g

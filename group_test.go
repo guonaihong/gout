@@ -615,6 +615,130 @@ type testBodyNeed struct {
 	Bytes   bool `form:"bytes"`
 }
 
+type testBodyBind struct {
+	Type string `uri:"type"`
+}
+
+func TestBindBody(t *testing.T) {
+	router := func() *gin.Engine {
+		router := gin.Default()
+
+		bodyBind := testBodyBind{}
+
+		router.GET("/:type", func(c *gin.Context) {
+			c.ShouldBindUri(&bodyBind)
+
+			switch bodyBind.Type {
+			case "uint":
+				c.String(200, "1")
+			case "uint8":
+				c.String(200, "2")
+			case "uint16":
+				c.String(200, "3")
+			case "uint32":
+				c.String(200, "4")
+			case "uint64":
+				c.String(200, "5")
+			case "int":
+				c.String(200, "6")
+			case "int8":
+				c.String(200, "7")
+			case "int16":
+				c.String(200, "8")
+			case "int32":
+				c.String(200, "9")
+			case "int64":
+				c.String(200, "10")
+			case "float32":
+				c.String(200, "11")
+			case "float64":
+				c.String(200, "12")
+			case "string":
+				c.String(200, "string")
+			case "bytes":
+				c.String(200, "bytes")
+			default:
+				c.String(500, "unkown")
+			}
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	code := 0
+
+	var u uint
+	err := New(nil).GET(ts.URL + "/uint").BindBody(&u).Code(&code).Do()
+	assert.Equal(t, u, uint(1))
+	assert.NoError(t, err)
+
+	var u8 uint8
+	err = New(nil).GET(ts.URL + "/uint8").BindBody(&u8).Code(&code).Do()
+	assert.Equal(t, u8, uint8(2))
+	assert.NoError(t, err)
+
+	var u16 uint16
+	err = New(nil).GET(ts.URL + "/uint16").BindBody(&u16).Code(&code).Do()
+	assert.Equal(t, u16, uint16(3))
+	assert.NoError(t, err)
+
+	var u32 uint32
+	err = New(nil).GET(ts.URL + "/uint32").BindBody(&u32).Code(&code).Do()
+	assert.Equal(t, u32, uint32(4))
+	assert.NoError(t, err)
+
+	var u64 uint64
+	err = New(nil).GET(ts.URL + "/uint64").BindBody(&u64).Code(&code).Do()
+	assert.Equal(t, u64, uint64(5))
+	assert.NoError(t, err)
+
+	var i int
+	err = New(nil).GET(ts.URL + "/int").BindBody(&i).Code(&code).Do()
+	assert.Equal(t, i, int(6))
+	assert.NoError(t, err)
+
+	var i8 int8
+	err = New(nil).GET(ts.URL + "/int8").BindBody(&i8).Code(&code).Do()
+	assert.Equal(t, i8, int8(7))
+	assert.NoError(t, err)
+
+	var i16 int16
+	err = New(nil).GET(ts.URL + "/int16").BindBody(&i16).Code(&code).Do()
+	assert.Equal(t, i16, int16(8))
+	assert.NoError(t, err)
+
+	var i32 int32
+	err = New(nil).GET(ts.URL + "/int32").BindBody(&i32).Code(&code).Do()
+	assert.Equal(t, i32, int32(9))
+	assert.NoError(t, err)
+
+	var i64 int64
+	err = New(nil).GET(ts.URL + "/int64").BindBody(&i64).Code(&code).Do()
+	assert.Equal(t, i64, int64(10))
+	assert.NoError(t, err)
+
+	var f32 float32
+	err = New(nil).GET(ts.URL + "/float32").BindBody(&f32).Code(&code).Do()
+	assert.Equal(t, f32, float32(11))
+	assert.NoError(t, err)
+
+	var f64 float64
+	err = New(nil).GET(ts.URL + "/float64").BindBody(&f64).Code(&code).Do()
+	assert.Equal(t, f64, float64(12))
+	assert.NoError(t, err)
+
+	var s string
+	err = New(nil).GET(ts.URL + "/string").BindBody(&s).Code(&code).Do()
+	assert.Equal(t, s, "string")
+	assert.NoError(t, err)
+
+	var b []byte
+	err = New(nil).GET(ts.URL + "/bytes").BindBody(&b).Code(&code).Do()
+	assert.Equal(t, b, []byte("bytes"))
+	assert.NoError(t, err)
+}
+
 func TestSetBody(t *testing.T) {
 
 	router := func() *gin.Engine {
