@@ -18,3 +18,8 @@ func New(c *http.Client) *Gout {
 	out.routerGroup.out = out
 	return out
 }
+
+// default
+func Def() *Gout {
+	return New(nil)
+}
