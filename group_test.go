@@ -658,7 +658,7 @@ func TestBindBody(t *testing.T) {
 			case "bytes":
 				c.String(200, "bytes")
 			default:
-				c.String(500, "unkown")
+				c.String(500, "unknown")
 			}
 		})
 
@@ -785,7 +785,7 @@ func TestSetBody(t *testing.T) {
 			case testBody.Float64:
 				assert.Equal(t, s, "12")
 			default:
-				c.JSON(500, "unkown type")
+				c.JSON(500, "unknown type")
 			}
 
 		})

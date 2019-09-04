@@ -34,7 +34,7 @@ func toBytes(v reflect.Value) (all []byte, err error) {
 	} else if b, ok := v.Interface().([]byte); ok {
 		all = b
 	} else {
-		return nil, fmt.Errorf("unkown type toBytes:%T", v)
+		return nil, fmt.Errorf("unknown type toBytes:%T", v)
 	}
 	return all, nil
 }
@@ -48,7 +48,7 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 		} else if b, ok := v.Interface().([]byte); ok {
 			fileName = core.BytesToString(b)
 		} else {
-			return fmt.Errorf("unkown type formFileWrite:%T, openFile:%t", v, openFile)
+			return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
 		}
 
 		if all, err = ioutil.ReadFile(fileName); err != nil {
