@@ -10,7 +10,7 @@ type FormFile string
 
 type FormMem []byte
 
-var ErrUnkownType = errors.New("unkown type")
+var ErrUnknownType = errors.New("unknown type")
 
 func LoopElem(v reflect.Value) reflect.Value {
 	for v.Kind() == reflect.Ptr {

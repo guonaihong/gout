@@ -29,7 +29,7 @@ func (b *BodyEncode) Encode(w io.Writer) error {
 	case reflect.String:
 	default:
 		if _, ok := val.Interface().([]byte); !ok {
-			return fmt.Errorf("type(%T) %s:", b.obj, core.ErrUnkownType.Error())
+			return fmt.Errorf("type(%T) %s:", b.obj, core.ErrUnknownType.Error())
 		}
 	}
 
