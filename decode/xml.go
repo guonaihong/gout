@@ -20,3 +20,8 @@ func (x *XmlDecode) Decode(r io.Reader) error {
 	decode := xml.NewDecoder(r)
 	return decode.Decode(x.obj)
 }
+
+func DecodeXML(r io.Reader, obj interface{}) error {
+	decode := xml.NewDecoder(r)
+	return decode.Decode(obj)
+}

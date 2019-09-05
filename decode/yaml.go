@@ -20,3 +20,8 @@ func (x *YamlDecode) Decode(r io.Reader) error {
 	decode := yaml.NewDecoder(r)
 	return decode.Decode(x.obj)
 }
+
+func DecodeYAML(r io.Reader, obj interface{}) error {
+	decode := yaml.NewDecoder(r)
+	return decode.Decode(obj)
+}

@@ -29,7 +29,13 @@ type Req struct {
 
 	httpCode *int
 	g        *Gout
+
+	callback func(*Context) error
 }
+
+// req 结构布局说明，以decode为例
+// body 可以支持text, json, yaml, xml，所以定义成接口形式
+// headerDecode只有一个可能，就定义为具体类型。这里他们的decode实现也不一样
 
 func (r *Req) Reset() {
 	r.formEncode = nil
@@ -138,6 +144,13 @@ func (r *Req) Do() (err error) {
 
 	if r.httpCode != nil {
 		*r.httpCode = resp.StatusCode
+	}
+
+	if r.callback != nil {
+		c := Context{Code: resp.StatusCode, Resp: resp}
+		if err := r.callback(&c); err != nil {
+			return err
+		}
 	}
 
 	return nil

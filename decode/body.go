@@ -36,12 +36,16 @@ var convertBodyFunc = map[reflect.Kind]convert{
 }
 
 func (b *BodyDecode) Decode(r io.Reader) error {
+	return DecodeBody(r, b.obj)
+}
+
+func DecodeBody(r io.Reader, obj interface{}) error {
 	all, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
 
-	value := core.LoopElem(reflect.ValueOf(b.obj))
+	value := core.LoopElem(reflect.ValueOf(obj))
 
 	if value.Kind() == reflect.String {
 		value.SetString(core.BytesToString(all))

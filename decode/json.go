@@ -20,3 +20,8 @@ func (j *JsonDecode) Decode(r io.Reader) error {
 	decode := json.NewDecoder(r)
 	return decode.Decode(j.obj)
 }
+
+func DecodeJSON(r io.Reader, obj interface{}) error {
+	decode := json.NewDecoder(r)
+	return decode.Decode(obj)
+}
