@@ -36,6 +36,7 @@ type Req struct {
 // req 结构布局说明，以decode为例
 // body 可以支持text, json, yaml, xml，所以定义成接口形式
 // headerDecode只有一个可能，就定义为具体类型。这里他们的decode实现也不一样
+// 有没有必要，归一化成一种???
 
 func (r *Req) Reset() {
 	r.formEncode = nil
