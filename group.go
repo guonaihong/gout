@@ -129,6 +129,11 @@ func (g *routerGroup) Code(httpCode *int) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) Callback(cb func(*Context) error) *routerGroup {
+	g.Req.callback = cb
+	return g
+}
+
 func (g *routerGroup) Do() (err error) {
 	defer func() {
 		g.Req = nil

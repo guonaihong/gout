@@ -16,6 +16,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [yaml](#yaml)
         - [xml](#xml)
         - [form](#form)
+        - [callback](#callback)
     
 
 ## 安装
@@ -311,3 +312,22 @@ if err != nil {
 }
 ```
 
+### callback
+callback主要用在，服务端会返回多种格式body的场景
+```go
+g := gout.New(nil)
+
+r , errCode := Result{}, 0
+
+g.GET(url).Callback(func(c *gout.Context) error {
+
+    switch c.Code {
+        case 200:
+            c.BindJSON(&Result)
+        case 500:
+            c.BindBody(&errCode)
+    }
+
+    return nil
+})
+```
