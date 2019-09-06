@@ -315,11 +315,11 @@ if err != nil {
 ### callback
 callback主要用在，服务端会返回多种格式body的场景
 ```go
-g := gin.New(nil)
+g := gout.New(nil)
 
 r , errCode := Result{}, 0
 
-g.GET(url).Callback(func(c *gout.Context) error{
+g.GET(url).Callback(func(c *gout.Context) error {
 
     switch c.Code {
         case 200:
@@ -327,5 +327,7 @@ g.GET(url).Callback(func(c *gout.Context) error{
         case 500:
             c.BindBody(&errCode)
     }
+
+    return nil
 })
 ```
