@@ -31,6 +31,8 @@ type Req struct {
 	g        *Gout
 
 	callback func(*Context) error
+
+	err error
 }
 
 // req 结构布局说明，以decode为例
@@ -39,6 +41,7 @@ type Req struct {
 // 有没有必要，归一化成一种???
 
 func (r *Req) Reset() {
+	r.err = nil
 	r.formEncode = nil
 	r.bodyEncoder = nil
 	r.bodyDecoder = nil
@@ -66,6 +69,10 @@ func isString(x interface{}) (string, bool) {
 }
 
 func (r *Req) Do() (err error) {
+	if r.err != nil {
+		return r.err
+	}
+
 	b := &bytes.Buffer{}
 
 	defer r.Reset()

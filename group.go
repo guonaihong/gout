@@ -1,8 +1,11 @@
 package gout
 
 import (
+	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	"net/http"
+	"net/url"
 )
 
 const (
@@ -96,6 +99,27 @@ func (g *routerGroup) SetXML(obj interface{}) *routerGroup {
 
 func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
 	g.Req.bodyEncoder = encode.NewYamlEncode(obj)
+	return g
+}
+
+func (g *routerGroup) SetProxy(proxyURL string) *routerGroup {
+	proxy, err := url.Parse(proxyURL)
+	if err != nil {
+		g.Req.err = err
+		return g
+	}
+
+	if g.out.Client.Transport == nil {
+		g.out.Client.Transport = &http.Transport{}
+	}
+
+	transport, ok := g.out.Client.Transport.(*http.Transport)
+	if !ok {
+		g.Req.err = fmt.Errorf("not found http.transport:%T", g.out.Client.Transport)
+		return g
+	}
+
+	transport.Proxy = http.ProxyURL(proxy)
 	return g
 }
 
