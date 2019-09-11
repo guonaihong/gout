@@ -103,7 +103,7 @@ func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
 }
 
 func (g *routerGroup) SetProxy(proxyURL string) *routerGroup {
-	proxy, err := url.Parse(proxyURL)
+	proxy, err := url.Parse(modifyURL(proxyURL))
 	if err != nil {
 		g.Req.err = err
 		return g
@@ -120,6 +120,7 @@ func (g *routerGroup) SetProxy(proxyURL string) *routerGroup {
 	}
 
 	transport.Proxy = http.ProxyURL(proxy)
+
 	return g
 }
 

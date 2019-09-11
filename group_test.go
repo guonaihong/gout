@@ -854,26 +854,31 @@ func TestSetBody(t *testing.T) {
 	assert.Equal(t, code, 200)
 }
 
-func setupProxy() *gin.Engine {
+func setupProxy(t *testing.T) *gin.Engine {
 	r := gin.Default()
 
-	r.GET("/proxy", func(c *gin.Context) {
-		c.String(200, "ok")
+	r.GET("/:a", func(c *gin.Context) {
+		all, err := ioutil.ReadAll(c.Request.Body)
+
+		assert.NoError(t, err)
+		c.String(200, string(all))
 	})
 
-	r.GET("/login", func(c *gin.Context) {
-		c.String(200, "login")
-	})
 	return r
 }
 
 func TestProxy(t *testing.T) {
-	router := setupProxy()
+	router := setupProxy(t)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+	proxyTs := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer proxyTs.Close()
 
 	code := 0
-	err := Def().GET(ts.URL + "/login").SetProxy(ts.URL + "/proxy").SetBody("hello world").Code(&code).Do()
+	var s string
+	err := Def().GET(ts.URL + "/login").SetBody(proxyTs.URL).SetProxy(proxyTs.URL).BindBody(&s).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, code)
+	assert.Equal(t, s, proxyTs.URL)
 }

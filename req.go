@@ -164,7 +164,7 @@ func (r *Req) Do() (err error) {
 	return nil
 }
 
-func modifyUrl(url string) string {
+func modifyURL(url string) string {
 	if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
 		return url
 	}
@@ -181,5 +181,5 @@ func modifyUrl(url string) string {
 }
 
 func NewReq(method string, url string, g *Gout) *Req {
-	return &Req{method: method, url: modifyUrl(url), g: g}
+	return &Req{method: method, url: modifyURL(url), g: g}
 }
