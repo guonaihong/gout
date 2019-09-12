@@ -9,10 +9,12 @@ type Gout struct {
 	routerGroup
 }
 
+var DefaultClient = http.Client{}
+
 func New(c *http.Client) *Gout {
 	out := &Gout{Client: c}
 	if c == nil {
-		out.Client = &http.Client{}
+		out.Client = &DefaultClient
 	}
 
 	out.routerGroup.out = out

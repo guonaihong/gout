@@ -17,6 +17,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [xml](#xml)
         - [form](#form)
         - [callback](#callback)
+    - [proxy](#proxy)
     
 
 ## 安装
@@ -330,4 +331,27 @@ g.GET(url).Callback(func(c *gout.Context) error {
 
     return nil
 })
+```
+
+### proxy
+* SetProxy 设置代理服务地址
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"log"
+)
+
+func main() {
+	var s string
+	err := gout.Def().GET("www.qq.com").SetProxy("http://127.0.0.1:7000").BindBody(&s).Do()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	fmt.Println(s)
+}
 ```
