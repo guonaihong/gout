@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	GET     = "GET"
-	POST    = "POST"
-	PUT     = "PUT"
-	DELETE  = "DELETE"
-	PATCH   = "PATCH"
-	HEAD    = "HEAD"
-	OPTIONS = "OPTIONS"
+	Get     = "GET"
+	Post    = "POST"
+	Put     = "PUT"
+	Delete  = "DELETE"
+	Patch   = "PATCH"
+	Head    = "HEAD"
+	Options = "OPTIONS"
 )
 
 type routerGroup struct {
@@ -33,37 +33,37 @@ func (g *routerGroup) Group(relativePath string) *routerGroup {
 }
 
 func (g *routerGroup) GET(url string) *routerGroup {
-	g.Req = NewReq(GET, joinPaths(g.basePath, url), g.out)
+	g.Req = NewReq(Get, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) POST(url string) *routerGroup {
-	g.Req = NewReq(POST, joinPaths(g.basePath, url), g.out)
+	g.Req = NewReq(Post, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) PUT(url string) *routerGroup {
-	g.Req = NewReq(PUT, joinPaths(g.basePath, url), g.out)
+	g.Req = NewReq(Put, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) DELETE(url string) *routerGroup {
-	g.Req = NewReq(DELETE, joinPaths(g.basePath, url), g.out)
+	g.Req = NewReq(Delete, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) PATCH(url string) *routerGroup {
-	g.Req = NewReq(PATCH, joinPaths(g.basePath, url), g.out)
+	g.Req = NewReq(Patch, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) HEAD(url string) *routerGroup {
-	g.Req = NewReq(HEAD, joinPaths(g.basePath, url), g.out)
+	g.Req = NewReq(Head, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) OPTIONS(url string) *routerGroup {
-	g.Req = NewReq(OPTIONS, joinPaths(g.basePath, url), g.out)
+	g.Req = NewReq(Options, joinPaths(g.basePath, url), g.out)
 	return g
 }
 

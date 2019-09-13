@@ -29,6 +29,9 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
 // 创建一个实例
+// 也可以直接调用包里面的GET, POST方法
+// 比如gout.GET(url)
+
 g := gout.New(nil)
 
 // 发送GET方法
