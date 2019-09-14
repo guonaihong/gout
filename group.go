@@ -124,6 +124,11 @@ func (g *routerGroup) SetProxy(proxyURL string) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) SetCookies(c ...*http.Cookie) *routerGroup {
+	g.Req.cookies = append(g.Req.cookies, c...)
+	return g
+}
+
 func (g *routerGroup) BindBody(obj interface{}) *routerGroup {
 	g.Req.bodyDecoder = decode.NewBodyDecode(obj)
 	return g

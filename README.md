@@ -19,6 +19,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [form](#form)
         - [callback](#callback)
     - [proxy](#proxy)
+    - [cookie](#cookie)
     
 
 ## 安装
@@ -360,5 +361,28 @@ func main() {
 	}
 
 	fmt.Println(s)
+}
+```
+### cookie
+* SetCookies设置cookie, 可以设置一个或者多个cookie
+
+```go
+package main
+
+import (
+        "fmt"
+        "github.com/guonaihong/gout"
+        "net/http"
+)
+
+func main() {
+
+        // 发送两个cookie
+        err := gout.GET(":1234/cookie").SetCookies(&http.Cookie{Name: "test1", Value: "test1"},
+                &http.Cookie{Name: "test2", Value: "test2"}).Do()
+
+        // 发送一个cookie
+        err = gout.GET(":1234/cookie/one").SetCookies(&http.Cookie{Name: "test3", Value: "test3"}).Do()
+        fmt.Println(err)
 }
 ```
