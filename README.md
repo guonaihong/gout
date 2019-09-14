@@ -281,8 +281,8 @@ err := gout.New(nil).
     POST(":8080/test").
     SetForm(gout.H{"mode": "A",
         "text":   "good",
-        "voice":  gout.FileFile("test.pcm"),
-        "voice2": gout.FileMem("pcm")}).Code(&code).Do()
+        "voice":  gout.FormFile("test.pcm"),
+        "voice2": gout.FormMem("pcm")}).Code(&code).Do()
 
 if err != nil {
     fmt.Printf("%s\n", err)
