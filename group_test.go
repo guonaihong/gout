@@ -876,7 +876,10 @@ func TestProxy(t *testing.T) {
 
 	code := 0
 	var s string
-	err := Def().GET(ts.URL + "/login").SetBody(proxyTs.URL).SetProxy(proxyTs.URL).BindBody(&s).Code(&code).Do()
+
+	c := http.Client{}
+
+	err := New(&c).GET(ts.URL + "/login").SetBody(proxyTs.URL).SetProxy(proxyTs.URL).BindBody(&s).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, code)
