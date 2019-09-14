@@ -876,9 +876,62 @@ func TestProxy(t *testing.T) {
 
 	code := 0
 	var s string
-	err := Def().GET(ts.URL + "/login").SetBody(proxyTs.URL).SetProxy(proxyTs.URL).BindBody(&s).Code(&code).Do()
+
+	c := http.Client{}
+
+	err := New(&c).GET(ts.URL + "/login").SetBody(proxyTs.URL).SetProxy(proxyTs.URL).BindBody(&s).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, code)
 	assert.Equal(t, s, proxyTs.URL)
+}
+
+func setupCookie(t *testing.T, total *int32) *gin.Engine {
+
+	router := gin.Default()
+
+	router.GET("/cookie", func(c *gin.Context) {
+
+		cookie1, err := c.Request.Cookie("test1")
+
+		assert.NoError(t, err)
+		assert.Equal(t, cookie1.Name, "test1")
+		assert.Equal(t, cookie1.Value, "test1")
+
+		cookie2, err := c.Request.Cookie("test2")
+		assert.NoError(t, err)
+		assert.Equal(t, cookie2.Name, "test2")
+		assert.Equal(t, cookie2.Value, "test2")
+
+		atomic.AddInt32(total, 1)
+
+	})
+
+	router.GET("/cookie/one", func(c *gin.Context) {
+
+		cookie3, err := c.Request.Cookie("test3")
+
+		assert.NoError(t, err)
+		assert.Equal(t, cookie3.Name, "test3")
+		assert.Equal(t, cookie3.Value, "test3")
+		atomic.AddInt32(total, 1)
+
+	})
+
+	return router
+}
+
+func TestCookie(t *testing.T) {
+	var total int32
+	router := setupCookie(t, &total)
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	err := GET(ts.URL+"/cookie").SetCookies(&http.Cookie{Name: "test1", Value: "test1"},
+		&http.Cookie{Name: "test2", Value: "test2"}).Do()
+
+	assert.NoError(t, err)
+	err = GET(ts.URL + "/cookie/one").SetCookies(&http.Cookie{Name: "test3", Value: "test3"}).Do()
+
+	assert.Equal(t, total, int32(2))
 }

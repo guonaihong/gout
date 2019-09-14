@@ -32,6 +32,9 @@ type Req struct {
 
 	callback func(*Context) error
 
+	//cookie
+	cookies []*http.Cookie
+
 	err error
 }
 
@@ -42,6 +45,7 @@ type Req struct {
 
 func (r *Req) Reset() {
 	r.err = nil
+	r.cookies = nil
 	r.formEncode = nil
 	r.bodyEncoder = nil
 	r.bodyDecoder = nil
@@ -117,6 +121,10 @@ func (r *Req) Do() (err error) {
 	req, err := http.NewRequest(r.method, r.url, b)
 	if err != nil {
 		return err
+	}
+
+	for _, c := range r.cookies {
+		req.AddCookie(c)
 	}
 
 	if r.formEncode != nil {
