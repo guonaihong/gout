@@ -5,6 +5,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 ## 内容
 - [安装](#安装)
 - [技能树](#技能树)
+- [迁移](#迁移)
 - [API示例](#api-示例)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [group](#group)
@@ -26,6 +27,9 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 ```
 ## 技能树
 ![gout.png](https://github.com/guonaihong/images/blob/master/gout/gout.png)
+
+## 迁移
+* [httplib](./form-xxx-to-gout-doc/beego-httplib.md)
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
 // 创建一个实例
@@ -281,8 +285,8 @@ err := gout.New(nil).
     POST(":8080/test").
     SetForm(gout.H{"mode": "A",
         "text":   "good",
-        "voice":  gout.FileFile("test.pcm"),
-        "voice2": gout.FileMem("pcm")}).Code(&code).Do()
+        "voice":  gout.FormFile("test.pcm"),
+        "voice2": gout.FormMem("pcm")}).Code(&code).Do()
 
 if err != nil {
     fmt.Printf("%s\n", err)

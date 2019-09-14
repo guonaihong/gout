@@ -13,8 +13,8 @@ const (
 
 type H map[string]interface{}
 
-type FileFile = core.FormFile
-type FileMem = core.FormMem
+type FormFile = core.FormFile
+type FormMem = core.FormMem
 
 func lastChar(str string) uint8 {
 	if str == "" {
