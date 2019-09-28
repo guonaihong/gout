@@ -1,5 +1,16 @@
 language: go
-go:
-- 1.12.x
+
+matrix:
+  fast_finish: true
+  include:
+  - go: 1.12.x
+    env: GO111MODULE=on
+  - go: 1.13.x
+  - go: master
+
 script:
 - go test -v ./...
+- make test
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)
