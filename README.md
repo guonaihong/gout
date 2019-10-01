@@ -22,6 +22,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [callback](#callback)
     - [proxy](#proxy)
     - [cookie](#cookie)
+    - [context](#context)
     
 
 ## 安装
@@ -386,5 +387,30 @@ func main() {
         // 发送一个cookie
         err = gout.GET(":1234/cookie/one").SetCookies(&http.Cookie{Name: "test3", Value: "test3"}).Do()
         fmt.Println(err)
+}
+```
+
+### context
+* WithContext设置context，可以取消http请求
+#### 超时
+```go
+func main() {
+	// 给http请求 设置超时
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
+
+	err := gout.GET("127.0.0.1:8080/timeout").WithContext(ctx).Do()
+
+}
+```
+#### 取消
+```go
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(time.Second)
+		cancel() //调用cancel可取消http请求
+	}()
+
+	err := gout.GET("127.0.0.1:8080/cancel").WithContext(ctx).Do()
 }
 ```

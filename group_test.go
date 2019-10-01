@@ -2,6 +2,7 @@ package gout
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout/core"
@@ -934,4 +935,60 @@ func TestCookie(t *testing.T) {
 	err = GET(ts.URL + "/cookie/one").SetCookies(&http.Cookie{Name: "test3", Value: "test3"}).Do()
 
 	assert.Equal(t, total, int32(2))
+}
+
+// Server side testing context function
+func setupContext(t *testing.T) *gin.Engine {
+	router := gin.Default()
+
+	router.GET("/cancel", func(c *gin.Context) {
+		ctx := c.Request.Context()
+		select {
+		case <-ctx.Done():
+			fmt.Printf("cancel done\n")
+		case <-time.After(2 * time.Second):
+			assert.Fail(t, "test cancel fail")
+		}
+	})
+
+	router.GET("/timeout", func(c *gin.Context) {
+		ctx := c.Request.Context()
+		select {
+		case <-ctx.Done():
+			fmt.Printf("timeout done\n")
+		case <-time.After(2 * time.Second):
+			assert.Fail(t, "test timeout fail")
+		}
+	})
+
+	return router
+}
+
+// test timeout
+func testWithContextTimeout(t *testing.T, ts *httptest.Server) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
+
+	err := GET(ts.URL + "/timeout").WithContext(ctx).Do()
+	assert.Error(t, err)
+}
+
+// test cancel
+func testWithContextCancel(t *testing.T, ts *httptest.Server) {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(time.Second)
+		cancel()
+	}()
+
+	err := GET(ts.URL + "/cancel").WithContext(ctx).Do()
+	assert.Error(t, err)
+}
+
+//
+func TestWithContext(t *testing.T) {
+	router := setupContext(t)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	testWithContextTimeout(t, ts)
+	testWithContextCancel(t, ts)
 }

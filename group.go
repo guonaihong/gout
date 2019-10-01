@@ -1,6 +1,7 @@
 package gout
 
 import (
+	"context"
 	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
@@ -161,6 +162,11 @@ func (g *routerGroup) Code(httpCode *int) *routerGroup {
 
 func (g *routerGroup) Callback(cb func(*Context) error) *routerGroup {
 	g.Req.callback = cb
+	return g
+}
+
+func (g *routerGroup) WithContext(c context.Context) *routerGroup {
+	g.Req.c = c
 	return g
 }
 
