@@ -2,6 +2,7 @@ package gout
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
@@ -35,6 +36,7 @@ type Req struct {
 	//cookie
 	cookies []*http.Cookie
 
+	c   context.Context
 	err error
 }
 
@@ -53,6 +55,7 @@ func (r *Req) Reset() {
 	r.headerDecode = nil
 	r.headerEncode = nil
 	r.queryEncode = nil
+	r.c = nil
 }
 
 func isString(x interface{}) (string, bool) {
@@ -121,6 +124,10 @@ func (r *Req) Do() (err error) {
 	req, err := http.NewRequest(r.method, r.url, b)
 	if err != nil {
 		return err
+	}
+
+	if r.c != nil {
+		req = req.WithContext(r.c)
 	}
 
 	for _, c := range r.cookies {
