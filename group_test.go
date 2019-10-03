@@ -992,3 +992,46 @@ func TestWithContext(t *testing.T) {
 	testWithContextTimeout(t, ts)
 	testWithContextCancel(t, ts)
 }
+
+/*
+func setupRunUnix(t *testing.T, path string, ctx context.Context) *http.Server {
+	router := gin.Default()
+	type testHeader struct {
+		H1 string `header:"h1"`
+		H2 string `header:"h2"`
+	}
+
+	router.POST("/test/unix", func(c *gin.Context) {
+
+		tHeader := testHeader{}
+		err := c.ShouldBindHeader(&tHeader)
+
+		assert.NoError(t, err)
+
+		c.String(200, "ok")
+	})
+
+	listener, err := net.Listen("unix", path)
+	assert.NoError(t, err)
+
+	srv := http.Server{Handler: router}
+	go func() {
+		srv.Serve(listener)
+	}()
+
+	return router
+}
+
+func TestUnixSocket(t *testing.T) {
+	path := "./test/unix.sock"
+	defer os.Remove(path)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	srv := setupRunUnix(t, path)
+	srv.Shutdown(ctx)
+	defer cancel()
+
+	c := http.Client{}
+	gout.New(&c).UnixSocket().GET("http://test/unix.sock/")
+}
+*/

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	"net"
 	"net/http"
 	"net/url"
 )
@@ -103,6 +104,26 @@ func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
 	return g
 }
 
+// 会修改Transport
+func (g *routerGroup) UnixSocket(path string) *routerGroup {
+	if g.out.Client.Transport == nil {
+		g.out.Client.Transport = &http.Transport{}
+	}
+
+	transport, ok := g.out.Client.Transport.(*http.Transport)
+	if !ok {
+		g.Req.err = fmt.Errorf("UnixSocket:not found http.transport:%T", g.out.Client.Transport)
+		return g
+	}
+
+	transport.Dial = func(proto, addr string) (conn net.Conn, err error) {
+		return net.Dial("unix", path)
+	}
+
+	return g
+}
+
+// 会修改Transport
 func (g *routerGroup) SetProxy(proxyURL string) *routerGroup {
 	proxy, err := url.Parse(modifyURL(proxyURL))
 	if err != nil {
@@ -116,7 +137,7 @@ func (g *routerGroup) SetProxy(proxyURL string) *routerGroup {
 
 	transport, ok := g.out.Client.Transport.(*http.Transport)
 	if !ok {
-		g.Req.err = fmt.Errorf("not found http.transport:%T", g.out.Client.Transport)
+		g.Req.err = fmt.Errorf("SetProxy:not found http.transport:%T", g.out.Client.Transport)
 		return g
 	}
 
