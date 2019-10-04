@@ -104,7 +104,7 @@ func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
 	return g
 }
 
-// 会修改Transport
+// 此函数会修改Transport
 func (g *routerGroup) UnixSocket(path string) *routerGroup {
 	if g.out.Client.Transport == nil {
 		g.out.Client.Transport = &http.Transport{}
@@ -123,7 +123,7 @@ func (g *routerGroup) UnixSocket(path string) *routerGroup {
 	return g
 }
 
-// 会修改Transport
+// 此函数会修改Transport
 func (g *routerGroup) SetProxy(proxyURL string) *routerGroup {
 	proxy, err := url.Parse(modifyURL(proxyURL))
 	if err != nil {

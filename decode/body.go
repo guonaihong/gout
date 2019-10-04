@@ -57,7 +57,7 @@ func DecodeBody(r io.Reader, obj interface{}) error {
 		return nil
 	}
 
-	fn, ok := convertFunc[value.Kind()]
+	fn, ok := convertBodyFunc[value.Kind()]
 	if ok {
 		return fn.cb(core.BytesToString(all), fn.bitSize, emptyField, value)
 	}

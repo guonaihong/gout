@@ -23,6 +23,9 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [proxy](#proxy)
     - [cookie](#cookie)
     - [context](#context)
+        - [timeout](#timeout)
+        - [cancel](#cancel)
+    - [unix socket](#unix-socket)
     
 
 ## 安装
@@ -344,7 +347,7 @@ g.GET(url).Callback(func(c *gout.Context) error {
 })
 ```
 
-### proxy
+## proxy
 * SetProxy 设置代理服务地址
 ```go
 package main
@@ -366,7 +369,7 @@ func main() {
 	fmt.Println(s)
 }
 ```
-### cookie
+## cookie
 * SetCookies设置cookie, 可以设置一个或者多个cookie
 
 ```go
@@ -390,9 +393,9 @@ func main() {
 }
 ```
 
-### context
+## context
 * WithContext设置context，可以取消http请求
-#### 超时
+### timeout
 ```go
 func main() {
 	// 给http请求 设置超时
@@ -402,7 +405,7 @@ func main() {
 
 }
 ```
-#### 取消
+### cancel
 ```go
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -412,5 +415,25 @@ func main() {
 	}()
 
 	err := gout.GET("127.0.0.1:8080/cancel").WithContext(ctx).Do()
+}
+```
+
+## unix socket
+* UnixSocket可以改变把http底层通信链路由tcp修改为unix domain socket  
+下面的例子，会通过domain socket发送http 包
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"net/http"
+)
+
+func main() {
+	c := http.Client{}
+	g := gout.New(&c).UnixSocket("/tmp/test.socket")
+	err := g.GET("http://a/test").SetBody("hello world").Do()
+	fmt.Println(err)
 }
 ```
