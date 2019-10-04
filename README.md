@@ -419,8 +419,8 @@ func main() {
 ```
 
 ## unix socket
-* UnixSocket可以改变把http底层通信链路由tcp修改为unix domain socket  
-下面的例子，会通过domain socket发送http 包
+* UnixSocket可以把http底层通信链路由tcp修改为unix domain socket  
+下面的例子，会通过domain socket发送http GET请求，http body的内容是hello world
 ```go
 package main
 
