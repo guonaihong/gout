@@ -10,8 +10,10 @@ import (
 	"io"
 	"io/ioutil"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -991,4 +993,52 @@ func TestWithContext(t *testing.T) {
 
 	testWithContextTimeout(t, ts)
 	testWithContextCancel(t, ts)
+}
+
+func setupUnixSocket(t *testing.T, path string) *http.Server {
+	router := gin.Default()
+	type testHeader struct {
+		H1 string `header:"h1"`
+		H2 string `header:"h2"`
+	}
+
+	router.POST("/test/unix", func(c *gin.Context) {
+
+		tHeader := testHeader{}
+		err := c.ShouldBindHeader(&tHeader)
+
+		assert.Equal(t, tHeader.H1, "v1")
+		assert.Equal(t, tHeader.H2, "v2")
+		assert.NoError(t, err)
+
+		c.String(200, "ok")
+	})
+
+	listener, err := net.Listen("unix", path)
+	assert.NoError(t, err)
+
+	srv := http.Server{Handler: router}
+	go func() {
+		srv.Serve(listener)
+	}()
+
+	return &srv
+}
+
+func TestUnixSocket(t *testing.T) {
+	path := "./unix.sock"
+	defer os.Remove(path)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	srv := setupUnixSocket(t, path)
+	defer func() {
+		srv.Shutdown(ctx)
+		cancel()
+	}()
+
+	c := http.Client{}
+	s := ""
+	err := New(&c).UnixSocket(path).POST("http://xxx/test/unix/").SetHeader(H{"h1": "v1", "h2": "v2"}).BindBody(&s).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, s, "ok")
 }
