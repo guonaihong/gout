@@ -26,3 +26,9 @@ func LoopElem(v reflect.Value) reflect.Value {
 func BytesToString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
+
+func NewPtrVal(defValue interface{}) interface{} {
+	p := reflect.New(reflect.TypeOf(defValue))
+	p.Elem().Set(reflect.ValueOf(defValue))
+	return p.Interface()
+}
