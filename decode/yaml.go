@@ -5,18 +5,18 @@ import (
 	"io"
 )
 
-type YamlDecode struct {
+type YAMLDecode struct {
 	obj interface{}
 }
 
-func NewYamlDecode(obj interface{}) *YamlDecode {
+func NewYAMLDecode(obj interface{}) *YAMLDecode {
 	if obj == nil {
 		return nil
 	}
-	return &YamlDecode{obj: obj}
+	return &YAMLDecode{obj: obj}
 }
 
-func (x *YamlDecode) Decode(r io.Reader) error {
+func (x *YAMLDecode) Decode(r io.Reader) error {
 	decode := yaml.NewDecoder(r)
 	return decode.Decode(x.obj)
 }

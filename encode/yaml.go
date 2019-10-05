@@ -5,19 +5,19 @@ import (
 	"io"
 )
 
-type YamlEncode struct {
+type YAMLEncode struct {
 	obj interface{}
 }
 
-func NewYamlEncode(obj interface{}) *YamlEncode {
+func NewYAMLEncode(obj interface{}) *YAMLEncode {
 	if obj == nil {
 		return nil
 	}
 
-	return &YamlEncode{obj: obj}
+	return &YAMLEncode{obj: obj}
 }
 
-func (y *YamlEncode) Encode(w io.Writer) error {
+func (y *YAMLEncode) Encode(w io.Writer) error {
 	encode := yaml.NewEncoder(w)
 	return encode.Encode(y.obj)
 }

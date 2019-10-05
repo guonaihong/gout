@@ -5,19 +5,19 @@ import (
 	"io"
 )
 
-type XmlEncode struct {
+type XMLEncode struct {
 	obj interface{}
 }
 
-func NewXmlEncode(obj interface{}) *XmlEncode {
+func NewXMLEncode(obj interface{}) *XMLEncode {
 	if obj == nil {
 		return nil
 	}
 
-	return &XmlEncode{obj: obj}
+	return &XMLEncode{obj: obj}
 }
 
-func (x *XmlEncode) Encode(w io.Writer) error {
+func (x *XMLEncode) Encode(w io.Writer) error {
 	encode := xml.NewEncoder(w)
 	return encode.Encode(x.obj)
 }

@@ -5,19 +5,19 @@ import (
 	"io"
 )
 
-type JsonEncode struct {
+type JSONEncode struct {
 	obj interface{}
 }
 
-func NewJsonEncode(obj interface{}) *JsonEncode {
+func NewJSONEncode(obj interface{}) *JSONEncode {
 	if obj == nil {
 		return nil
 	}
 
-	return &JsonEncode{obj: obj}
+	return &JSONEncode{obj: obj}
 }
 
-func (j *JsonEncode) Encode(w io.Writer) error {
+func (j *JSONEncode) Encode(w io.Writer) error {
 	encode := json.NewEncoder(w)
 	return encode.Encode(j.obj)
 }

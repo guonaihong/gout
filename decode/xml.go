@@ -5,18 +5,18 @@ import (
 	"io"
 )
 
-type XmlDecode struct {
+type XMLDecode struct {
 	obj interface{}
 }
 
-func NewXmlDecode(obj interface{}) *XmlDecode {
+func NewXMLDecode(obj interface{}) *XMLDecode {
 	if obj == nil {
 		return nil
 	}
-	return &XmlDecode{obj: obj}
+	return &XMLDecode{obj: obj}
 }
 
-func (x *XmlDecode) Decode(r io.Reader) error {
+func (x *XMLDecode) Decode(r io.Reader) error {
 	decode := xml.NewDecoder(r)
 	return decode.Decode(x.obj)
 }
