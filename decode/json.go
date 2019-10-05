@@ -5,18 +5,18 @@ import (
 	"io"
 )
 
-type JsonDecode struct {
+type JSONDecode struct {
 	obj interface{}
 }
 
-func NewJsonDecode(obj interface{}) *JsonDecode {
+func NewJSONDecode(obj interface{}) *JSONDecode {
 	if obj == nil {
 		return nil
 	}
-	return &JsonDecode{obj: obj}
+	return &JSONDecode{obj: obj}
 }
 
-func (j *JsonDecode) Decode(r io.Reader) error {
+func (j *JSONDecode) Decode(r io.Reader) error {
 	decode := json.NewDecoder(r)
 	return decode.Decode(j.obj)
 }

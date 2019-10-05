@@ -162,17 +162,17 @@ func (g *routerGroup) BindHeader(obj interface{}) *routerGroup {
 }
 
 func (g *routerGroup) BindJSON(obj interface{}) *routerGroup {
-	g.Req.bodyDecoder = decode.NewJsonDecode(obj)
+	g.Req.bodyDecoder = decode.NewJSONDecode(obj)
 	return g
 }
 
 func (g *routerGroup) BindXML(obj interface{}) *routerGroup {
-	g.Req.bodyDecoder = decode.NewXmlDecode(obj)
+	g.Req.bodyDecoder = decode.NewXMLDecode(obj)
 	return g
 }
 
 func (g *routerGroup) BindYAML(obj interface{}) *routerGroup {
-	g.Req.bodyDecoder = decode.NewYamlDecode(obj)
+	g.Req.bodyDecoder = decode.NewYAMLDecode(obj)
 	return g
 }
 
