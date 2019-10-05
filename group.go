@@ -90,17 +90,17 @@ func (g *routerGroup) SetHeader(obj interface{}) *routerGroup {
 }
 
 func (g *routerGroup) SetJSON(obj interface{}) *routerGroup {
-	g.Req.bodyEncoder = encode.NewJsonEncode(obj)
+	g.Req.bodyEncoder = encode.NewJSONEncode(obj)
 	return g
 }
 
 func (g *routerGroup) SetXML(obj interface{}) *routerGroup {
-	g.Req.bodyEncoder = encode.NewXmlEncode(obj)
+	g.Req.bodyEncoder = encode.NewXMLEncode(obj)
 	return g
 }
 
 func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
-	g.Req.bodyEncoder = encode.NewYamlEncode(obj)
+	g.Req.bodyEncoder = encode.NewYAMLEncode(obj)
 	return g
 }
 
