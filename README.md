@@ -192,7 +192,7 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 // 设置string变量至请求的http body
 err := gout.New(nil).POST(url).SetBody("hello world"/*更多支持类型请看下面*/).Do()
 
-// 设置实现io.Reader接口的变量 请求的http body
+// 设置实现io.Reader接口的变量至 请求的http body
 err = gout.POST(url).SetBody(bytes.NewBufferString("hello world")).Code(&code).Do()
 ```
 #### bindBody
@@ -203,7 +203,8 @@ var s string
 err := gout.New(nil).GET(url).BindBody(&s/*更多支持指针类型变量请看下面*/).Do()
 
 // 解析http body至实现io.Writer接口的变量里面
-err = New(nil).GET(ts.URL + v.url).BindBody(v.got).Code(&code).Do()
+var b bytes.Buffer{}
+err = gout.GET(url).BindBody(&b).Code(&code).Do()
 ```
 #### 支持的类型有
 * io.Reader(SetBody 支持)
