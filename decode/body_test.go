@@ -65,6 +65,9 @@ func testDecodeBody(t *testing.T, funcName string) {
 
 		{r: bytes.NewBufferString("test string"), need: core.NewPtrVal("test string"), got: new(string)},
 		{r: bytes.NewBuffer([]byte("test bytes")), need: core.NewPtrVal([]byte("test bytes")), got: new([]byte)},
+
+		// test io.Writer
+		{r: bytes.NewBuffer([]byte("test buffer")), need: bytes.NewBufferString("test buffer"), got: bytes.NewBufferString("")},
 	}
 
 	for _, v := range tests {

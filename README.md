@@ -15,6 +15,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [http header](#http-header)
     - [http body](#http-body)
         - [body](#body)
+            - [SetBody](#setbody)
+            - [BindBody](#bindbody)
         - [json](#json)
         - [yaml](#yaml)
         - [xml](#xml)
@@ -184,24 +186,36 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 
 ## http body
 ### body
+#### SetBody
 * SetBody 设置string, []byte等类型数据到http body里面
+```go
+// 设置string变量至请求的http body
+err := gout.New(nil).POST(url).SetBody("hello world"/*更多支持类型请看下面*/).Do()
+
+// 设置实现io.Reader接口的变量至 请求的http body
+err = gout.POST(url).SetBody(bytes.NewBufferString("hello world")).Code(&code).Do()
+```
+#### bindBody
 * BindBody bind body到string, []byte等类型变量里面
 ```go
-
-err := gout.New(nil).POST(url).SetBody(/*支持的类型如下*/).Do()
-
+// 解析http body到string类型变量里面
 var s string
-err := gout.New(nil).GET(url).BindBody(&s/*支持的指针类型变量如下*/).Do()
+err := gout.New(nil).GET(url).BindBody(&s/*更多支持指针类型变量请看下面*/).Do()
 
+// 解析http body至实现io.Writer接口的变量里面
+var b bytes.Buffer{}
+err = gout.GET(url).BindBody(&b).Code(&code).Do()
 ```
-## 支持的类型有
+#### 支持的类型有
+* io.Reader(SetBody 支持)
+* io.Writer(BindBody 支持)
 * int, int8, int16, int32, int64
 * uint, uint8, uint16, uint32, uint64
 * string
 * []byte
 * float32, float64
 
-## 明确不支持的类型有
+#### 明确不支持的类型有
 * struct
 * array, slice
 

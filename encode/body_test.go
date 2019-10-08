@@ -1,10 +1,12 @@
 package encode
 
 import (
+	"bytes"
 	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestNewBodyEncode(t *testing.T) {
@@ -16,6 +18,12 @@ type bodyTest struct {
 	w    *strings.Builder
 	set  interface{}
 	need string
+}
+
+func Test_body_EncodeFail(t *testing.T) {
+	b := NewBodyEncode(&time.Time{})
+	err := b.Encode(bytes.NewBufferString("hello world"))
+	assert.Error(t, err)
 }
 
 func Test_body_Encode(t *testing.T) {
@@ -35,8 +43,10 @@ func Test_body_Encode(t *testing.T) {
 		{w: &strings.Builder{}, set: []byte("test bytes"), need: "test bytes"},
 		{w: &strings.Builder{}, set: "test string", need: "test string"},
 		{w: &strings.Builder{}, set: int(1), need: "1"},
-
 		{w: &strings.Builder{}, set: core.NewPtrVal(1010), need: "1010"},
+
+		// test io.Reader
+		{w: &strings.Builder{}, set: bytes.NewBufferString("set body:hello world"), need: "set body:hello world"},
 	}
 
 	for _, v := range tests {
