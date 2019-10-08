@@ -40,6 +40,11 @@ func (b *BodyDecode) Decode(r io.Reader) error {
 }
 
 func DecodeBody(r io.Reader, obj interface{}) error {
+	if w, ok := obj.(io.Writer); ok {
+		_, err := io.Copy(w, r)
+		return err
+	}
+
 	all, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err

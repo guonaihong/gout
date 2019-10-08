@@ -616,10 +616,17 @@ type testBodyNeed struct {
 	Int64   bool `form:"int64"`
 	String  bool `form:"string"`
 	Bytes   bool `form:"bytes"`
+	Reader  bool `form:"reader"`
 }
 
 type testBodyBind struct {
 	Type string `uri:"type"`
+}
+
+type testBodyReq struct {
+	url  string
+	got  interface{}
+	need interface{}
 }
 
 func TestBindBody(t *testing.T) {
@@ -660,6 +667,8 @@ func TestBindBody(t *testing.T) {
 				c.String(200, "string")
 			case "bytes":
 				c.String(200, "bytes")
+			case "io.writer":
+				c.String(200, "io.writer")
 			default:
 				c.String(500, "unknown")
 			}
@@ -669,77 +678,34 @@ func TestBindBody(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-	code := 0
 
-	var u uint
-	err := New(nil).GET(ts.URL + "/uint").BindBody(&u).Code(&code).Do()
-	assert.Equal(t, u, uint(1))
-	assert.NoError(t, err)
+	tests := []testBodyReq{
+		{url: "/uint", got: new(uint), need: core.NewPtrVal(uint(1))},
+		{url: "/uint8", got: new(uint8), need: core.NewPtrVal(uint8(2))},
+		{url: "/uint16", got: new(uint16), need: core.NewPtrVal(uint16(3))},
+		{url: "/uint32", got: new(uint32), need: core.NewPtrVal(uint32(4))},
+		{url: "/uint64", got: new(uint64), need: core.NewPtrVal(uint64(5))},
+		{url: "/int", got: new(int), need: core.NewPtrVal(int(6))},
+		{url: "/int8", got: new(int8), need: core.NewPtrVal(int8(7))},
+		{url: "/int16", got: new(int16), need: core.NewPtrVal(int16(8))},
+		{url: "/int32", got: new(int32), need: core.NewPtrVal(int32(9))},
+		{url: "/int64", got: new(int64), need: core.NewPtrVal(int64(10))},
+		{url: "/float32", got: new(float32), need: core.NewPtrVal(float32(11))},
+		{url: "/float64", got: new(float64), need: core.NewPtrVal(float64(12))},
+		{url: "/string", got: new(string), need: core.NewPtrVal("string")},
+		{url: "/bytes", got: new([]byte), need: core.NewPtrVal([]byte("bytes"))},
+		{url: "/io.writer", got: bytes.NewBufferString(""), need: bytes.NewBufferString("io.writer")},
+	}
 
-	var u8 uint8
-	err = New(nil).GET(ts.URL + "/uint8").BindBody(&u8).Code(&code).Do()
-	assert.Equal(t, u8, uint8(2))
-	assert.NoError(t, err)
+	for _, v := range tests {
 
-	var u16 uint16
-	err = New(nil).GET(ts.URL + "/uint16").BindBody(&u16).Code(&code).Do()
-	assert.Equal(t, u16, uint16(3))
-	assert.NoError(t, err)
+		code := 0
+		err := New(nil).GET(ts.URL + v.url).BindBody(v.got).Code(&code).Do()
+		assert.Equal(t, code, 200)
+		assert.NoError(t, err)
+		assert.Equal(t, v.got, v.need)
+	}
 
-	var u32 uint32
-	err = New(nil).GET(ts.URL + "/uint32").BindBody(&u32).Code(&code).Do()
-	assert.Equal(t, u32, uint32(4))
-	assert.NoError(t, err)
-
-	var u64 uint64
-	err = New(nil).GET(ts.URL + "/uint64").BindBody(&u64).Code(&code).Do()
-	assert.Equal(t, u64, uint64(5))
-	assert.NoError(t, err)
-
-	var i int
-	err = New(nil).GET(ts.URL + "/int").BindBody(&i).Code(&code).Do()
-	assert.Equal(t, i, int(6))
-	assert.NoError(t, err)
-
-	var i8 int8
-	err = New(nil).GET(ts.URL + "/int8").BindBody(&i8).Code(&code).Do()
-	assert.Equal(t, i8, int8(7))
-	assert.NoError(t, err)
-
-	var i16 int16
-	err = New(nil).GET(ts.URL + "/int16").BindBody(&i16).Code(&code).Do()
-	assert.Equal(t, i16, int16(8))
-	assert.NoError(t, err)
-
-	var i32 int32
-	err = New(nil).GET(ts.URL + "/int32").BindBody(&i32).Code(&code).Do()
-	assert.Equal(t, i32, int32(9))
-	assert.NoError(t, err)
-
-	var i64 int64
-	err = New(nil).GET(ts.URL + "/int64").BindBody(&i64).Code(&code).Do()
-	assert.Equal(t, i64, int64(10))
-	assert.NoError(t, err)
-
-	var f32 float32
-	err = New(nil).GET(ts.URL + "/float32").BindBody(&f32).Code(&code).Do()
-	assert.Equal(t, f32, float32(11))
-	assert.NoError(t, err)
-
-	var f64 float64
-	err = New(nil).GET(ts.URL + "/float64").BindBody(&f64).Code(&code).Do()
-	assert.Equal(t, f64, float64(12))
-	assert.NoError(t, err)
-
-	var s string
-	err = New(nil).GET(ts.URL + "/string").BindBody(&s).Code(&code).Do()
-	assert.Equal(t, s, "string")
-	assert.NoError(t, err)
-
-	var b []byte
-	err = New(nil).GET(ts.URL + "/bytes").BindBody(&b).Code(&code).Do()
-	assert.Equal(t, b, []byte("bytes"))
-	assert.NoError(t, err)
 }
 
 func TestSetBody(t *testing.T) {
@@ -787,6 +753,8 @@ func TestSetBody(t *testing.T) {
 				assert.Equal(t, s, "11")
 			case testBody.Float64:
 				assert.Equal(t, s, "12")
+			case testBody.Reader:
+				assert.Equal(t, s, "test io.Reader")
 			default:
 				c.JSON(500, "unknown type")
 			}
@@ -853,6 +821,11 @@ func TestSetBody(t *testing.T) {
 
 	// test bytes string
 	err = New(nil).POST(ts.URL).SetQuery(H{"bytes": true}).SetBody([]byte("test bytes")).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	// test io.Reader
+	err = New(nil).POST(ts.URL).SetQuery(H{"reader": true}).SetBody(bytes.NewBufferString("test io.Reader")).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 }
