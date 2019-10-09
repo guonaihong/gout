@@ -28,6 +28,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [timeout](#timeout)
         - [cancel](#cancel)
     - [unix socket](#unix-socket)
+    - [http2 doc](#http2-doc)
     
 
 ## 安装
@@ -373,8 +374,9 @@ import (
 )
 
 func main() {
-	var s string
-	err := gout.Def().GET("www.qq.com").SetProxy("http://127.0.0.1:7000").BindBody(&s).Do()
+	c := &http.Client{}
+	s := ""
+	err := gout.New(c).GET("www.qq.com").SetProxy("http://127.0.0.1:7000").BindBody(&s).Do()
 	if err != nil {
 		log.Println(err)
 		return
@@ -449,5 +451,25 @@ func main() {
 	g := gout.New(&c).UnixSocket("/tmp/test.socket")
 	err := g.GET("http://a/test").SetBody("hello world").Do()
 	fmt.Println(err)
+}
+```
+## http2 doc
+go 使用https访问http2的服务会自动启用http2协议，这里不需要任何特殊处理
+* https://http2.golang.org/ (bradfitz建的http2测试网址,里面大约有十来个测试地址，下面的例子选了一个) 
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	s := ""
+	err := gout.GET("https://http2.golang.org/reqinfo").SetBody("hello, ###########").BindBody(&s).Do()
+	fmt.Printf("err = %s\n", err)
+
+	fmt.Printf("body length:%d\n", len(s))
+	fmt.Printf("%s\n", s)
 }
 ```
