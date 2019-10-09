@@ -352,7 +352,7 @@ g.GET(url).Callback(func(c *gout.Context) error {
 
     switch c.Code {
         case 200:
-            c.BindJSON(&Result)
+            c.BindJSON(&r)
         case 500:
             c.BindBody(&errCode)
     }
