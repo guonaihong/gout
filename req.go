@@ -152,6 +152,13 @@ func (r *Req) Do() (err error) {
 	}
 
 	defer resp.Body.Close()
+
+	if r.g.debug {
+		if err := resetBodyAndPrint(req, resp); err != nil {
+			return err
+		}
+	}
+
 	if r.headerDecode != nil {
 		err = decode.Header.Decode(resp, r.headerDecode)
 		if err != nil {
