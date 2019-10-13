@@ -43,18 +43,21 @@ func debugPrint(req *http.Request, rsp *http.Response) error {
 	fmt.Fprint(w, "\n")
 
 	// write body
-	if b, err := req.GetBody(); err != nil {
-		return err
-	} else {
-		io.Copy(os.Stdout, b)
+	if req.GetBody != nil {
+		b, err := req.GetBody()
+		if err != nil {
+			return err
+		}
+
+		if _, err := io.Copy(os.Stdout, b); err != nil {
+			return err
+		}
 		fmt.Fprintf(w, "\r\n\r\n")
 	}
 
 	fmt.Fprintf(w, "< %s %s\r\n", rsp.Proto, rsp.Status)
 	for k, v := range rsp.Header {
 		fmt.Fprintf(w, "< %s: %s\r\n", k, strings.Join(v, ","))
-		fmt.Fprintf(w, "< %s: %s\r\n", k,
-			strings.Join(v, ","))
 	}
 
 	_, err := io.Copy(w, rsp.Body)
