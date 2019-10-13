@@ -29,6 +29,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [cancel](#cancel)
     - [unix socket](#unix-socket)
     - [http2 doc](#http2-doc)
+    - [debug mode](#debug-mode)
     
 
 ## 安装
@@ -472,4 +473,25 @@ func main() {
 	fmt.Printf("body length:%d\n", len(s))
 	fmt.Printf("%s\n", s)
 }
+```
+## debug mode
+该模式主要方便调试用的
+* Debug(true)
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+)
+
+func main() {
+    err := gout.GET("127.0.0.1:1234").Debug(true).SetJSON(gout.H{"key": "val", "key2": "val2"}).Do()
+
+    if err != nil {
+        fmt.Printf("err = %v\n", err)
+    }   
+}
+
 ```

@@ -191,6 +191,11 @@ func (g *routerGroup) WithContext(c context.Context) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) Debug(debug bool) *routerGroup {
+	g.Req.g.debug = true
+	return g
+}
+
 func (g *routerGroup) Do() (err error) {
 	defer func() {
 		g.Req = nil
