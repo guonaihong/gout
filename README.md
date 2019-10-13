@@ -7,7 +7,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 ## 内容
 - [安装](#安装)
 - [技能树](#技能树)
-- [迁移](#迁移)
+- [迁移文档](#迁移文档)
 - [API示例](#api-示例)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [group](#group)
@@ -39,8 +39,11 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 ## 技能树
 ![gout.png](https://github.com/guonaihong/images/blob/master/gout/gout.png)
 
-## 迁移
-* [httplib](./form-xxx-to-gout-doc/beego-httplib.md)
+## 迁移文档
+主要方便下面的用户迁移到gout
+* [httplib](./from-xxx-to-gout-doc/beego-httplib.md)
+* [resty](./from-xxx-to-gout-doc/resty-doc.md)
+
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
 // 创建一个实例
