@@ -191,8 +191,17 @@ func (g *routerGroup) WithContext(c context.Context) *routerGroup {
 	return g
 }
 
-func (g *routerGroup) Debug(debug bool) *routerGroup {
-	g.Req.g.debug = true
+func (g *routerGroup) Debug(d ...interface{}) *routerGroup {
+	fmt.Printf("group option = %p\n", &g.Req.g.opt)
+	for _, v := range d {
+		switch opt := v.(type) {
+		case bool:
+			g.Req.g.opt.Debug = true
+		case DebugOpt:
+			opt.Apply(&g.Req.g.opt)
+		}
+	}
+
 	return g
 }
 

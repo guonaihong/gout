@@ -1015,3 +1015,72 @@ func TestUnixSocket(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, s, "ok")
 }
+
+func setupDebug(t *testing.T) *gin.Engine {
+	r := gin.New()
+
+	r.GET("/", func(c *gin.Context) {
+		all, err := ioutil.ReadAll(c.Request.Body)
+
+		assert.NoError(t, err)
+		c.String(200, string(all))
+	})
+
+	return r
+}
+
+/*
+func TestDebug(t *testing.T) {
+	buf := &bytes.Buffer{}
+
+	router := setupDebug(t)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	test := []func() DebugOpt{
+		// 测试打开日志输出
+		func() DebugOpt {
+			return DebugFunc(func(o *DebugOption) {
+				t.Logf("--->1.DebugOption address = %p\n", o)
+				o.Debug = true
+			})
+		},
+
+		// 测试修改输出源
+		func() DebugOpt {
+			return DebugFunc(func(o *DebugOption) {
+				t.Logf("--->2.DebugOption address = %p\n", o)
+				buf.Reset()
+				o.Write = buf
+			})
+		},
+
+		// 测试环境变量
+		func() DebugOpt {
+			return DebugFunc(func(o *DebugOption) {
+				buf.Reset()
+				if len(os.Getenv("IOS_DEBUG")) > 0 {
+					o.Debug = true
+				}
+				o.Write = buf
+			})
+		},
+	}
+
+	s := ""
+	for k, v := range test[:2] {
+		s = ""
+		err := GET(ts.URL).Debug(v()).SetBody(fmt.Sprintf("%d test debug", k)).BindBody(&s).Do()
+		assert.NoError(t, err)
+
+		if k != 0 {
+			assert.NotEqual(t, buf.Len(), 0)
+		}
+		assert.Equal(t, fmt.Sprintf("%d test debug", k), s)
+	}
+
+	err := GET(ts.URL).Debug(true).SetBody("true test debug").BindBody(&s).Do()
+
+	assert.NoError(t, err)
+	assert.Equal(t, s, "true test debug")
+}
+*/

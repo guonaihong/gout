@@ -49,14 +49,16 @@ func TestResetBodyAndPrintFail(t *testing.T) {
 		},
 	}
 
+	do := DebugOption{}
 	for i, c := range test {
 		req, rsp := c()
-		err := resetBodyAndPrint(req, rsp)
+		err := do.resetBodyAndPrint(req, rsp)
 		assert.Error(t, err, fmt.Sprintf("test index = %d", i))
 	}
 }
 
 func TestResetBodyAndPrint(t *testing.T) {
+
 	test := []func() (*http.Request, *http.Response){
 		func() (*http.Request, *http.Response) {
 			req, _ := http.NewRequest("GET", "/", nil)
@@ -72,9 +74,11 @@ func TestResetBodyAndPrint(t *testing.T) {
 			return req, &rsp
 		},
 	}
+
+	do := DebugOption{}
 	for i, c := range test {
 		req, rsp := c()
-		err := resetBodyAndPrint(req, rsp)
+		err := do.resetBodyAndPrint(req, rsp)
 		assert.NoError(t, err, fmt.Sprintf("test index = %d", i))
 	}
 }
