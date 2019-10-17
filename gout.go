@@ -7,7 +7,8 @@ import (
 type Gout struct {
 	*http.Client
 	routerGroup
-	debug bool
+
+	opt DebugOption
 }
 
 var DefaultClient = http.Client{}

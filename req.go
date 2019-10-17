@@ -153,8 +153,8 @@ func (r *Req) Do() (err error) {
 
 	defer resp.Body.Close()
 
-	if r.g.debug {
-		if err := resetBodyAndPrint(req, resp); err != nil {
+	if r.g.opt.Debug {
+		if err := r.g.opt.resetBodyAndPrint(req, resp); err != nil {
 			return err
 		}
 	}

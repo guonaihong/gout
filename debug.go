@@ -10,20 +10,48 @@ import (
 	"strings"
 )
 
-func resetBodyAndPrint(req *http.Request, resp *http.Response) error {
+type DebugOption struct {
+	Write io.Writer
+	Debug bool
+	Color bool
+}
+
+type DebugOpt interface {
+	Apply(*DebugOption)
+}
+
+type DebugFunc func(*DebugOption)
+
+func (f DebugFunc) Apply(o *DebugOption) {
+	f(o)
+}
+
+// 暂时不启用
+func DebugColor() DebugOpt {
+	return DebugFunc(func(o *DebugOption) {
+		o.Color = true
+		o.Write = os.Stdout
+	})
+}
+
+func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response) error {
 	all, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
 	resp.Body = ioutil.NopCloser(bytes.NewReader(all))
-	err = debugPrint(req, resp)
+	err = do.debugPrint(req, resp)
 	resp.Body = ioutil.NopCloser(bytes.NewReader(all))
 	return err
 }
 
-func debugPrint(req *http.Request, rsp *http.Response) error {
-	var w io.Writer = os.Stdout
+func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
+	if do.Write == nil {
+		do.Write = os.Stdout
+	}
+
+	var w io.Writer = do.Write
 
 	path := "/"
 	if len(req.URL.Path) > 0 {
@@ -49,7 +77,7 @@ func debugPrint(req *http.Request, rsp *http.Response) error {
 			return err
 		}
 
-		if _, err := io.Copy(os.Stdout, b); err != nil {
+		if _, err := io.Copy(w, b); err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "\r\n\r\n")
@@ -60,6 +88,10 @@ func debugPrint(req *http.Request, rsp *http.Response) error {
 		fmt.Fprintf(w, "< %s: %s\r\n", k, strings.Join(v, ","))
 	}
 
+	fmt.Fprintf(w, "\r\n\r\n")
 	_, err := io.Copy(w, rsp.Body)
+
+	fmt.Fprintf(w, "\r\n\r\n")
+
 	return err
 }
