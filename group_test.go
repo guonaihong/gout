@@ -1029,7 +1029,6 @@ func setupDebug(t *testing.T) *gin.Engine {
 	return r
 }
 
-/*
 func TestDebug(t *testing.T) {
 	buf := &bytes.Buffer{}
 
@@ -1050,6 +1049,7 @@ func TestDebug(t *testing.T) {
 			return DebugFunc(func(o *DebugOption) {
 				t.Logf("--->2.DebugOption address = %p\n", o)
 				buf.Reset()
+				o.Debug = true
 				o.Write = buf
 			})
 		},
@@ -1067,15 +1067,16 @@ func TestDebug(t *testing.T) {
 	}
 
 	s := ""
-	for k, v := range test[:2] {
+	os.Setenv("IOS_DEBUG", "true")
+	for k, v := range test {
 		s = ""
-		err := GET(ts.URL).Debug(v()).SetBody(fmt.Sprintf("%d test debug", k)).BindBody(&s).Do()
+		err := GET(ts.URL).Debug(v()).SetBody(fmt.Sprintf("%d test debug.", k)).BindBody(&s).Do()
 		assert.NoError(t, err)
 
 		if k != 0 {
 			assert.NotEqual(t, buf.Len(), 0)
 		}
-		assert.Equal(t, fmt.Sprintf("%d test debug", k), s)
+		assert.Equal(t, fmt.Sprintf("%d test debug.", k), s)
 	}
 
 	err := GET(ts.URL).Debug(true).SetBody("true test debug").BindBody(&s).Do()
@@ -1083,4 +1084,3 @@ func TestDebug(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, s, "true test debug")
 }
-*/

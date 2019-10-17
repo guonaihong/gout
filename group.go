@@ -192,7 +192,6 @@ func (g *routerGroup) WithContext(c context.Context) *routerGroup {
 }
 
 func (g *routerGroup) Debug(d ...interface{}) *routerGroup {
-	fmt.Printf("group option = %p\n", &g.Req.g.opt)
 	for _, v := range d {
 		switch opt := v.(type) {
 		case bool:

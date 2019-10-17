@@ -77,7 +77,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 			return err
 		}
 
-		if _, err := io.Copy(os.Stdout, b); err != nil {
+		if _, err := io.Copy(w, b); err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "\r\n\r\n")
@@ -88,8 +88,10 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 		fmt.Fprintf(w, "< %s: %s\r\n", k, strings.Join(v, ","))
 	}
 
+	fmt.Fprintf(w, "\r\n\r\n")
 	_, err := io.Copy(w, rsp.Body)
 
 	fmt.Fprintf(w, "\r\n\r\n")
+
 	return err
 }

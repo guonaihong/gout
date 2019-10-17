@@ -30,6 +30,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [unix socket](#unix-socket)
     - [http2 doc](#http2-doc)
     - [debug mode](#debug-mode)
+        - [general](#debug-general)
+        - [advanced](#debug-advanced)
     
 
 ## 安装
@@ -478,6 +480,7 @@ func main() {
 }
 ```
 ## debug mode
+### debug general
 该模式主要方便调试用的
 * Debug(true)
 
@@ -495,6 +498,33 @@ func main() {
     if err != nil {
         fmt.Printf("err = %v\n", err)
     }   
+}
+
+```
+### debug advanced
+debug高级模式，可传递函数。下面的例子是如果传递IOS_DEBUG环境变量才输出日志
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+    "os"
+)
+
+func IOSDebug() gout.DebugOpt {
+    return gout.DebugFunc(func(o *gout.DebugOption) {
+        if len(os.Getenv("IOS_DEBUG")) > 0 { 
+            o.Debug = true
+        }   
+    })  
+}
+
+func main() {
+
+    s := ""
+    err := gout.GET("127.0.0.1:1234").Debug(IOSDebug()).SetBody("test hello").BindBody(&s).Do()
+    fmt.Printf("err = %v\n", err)
 }
 
 ```

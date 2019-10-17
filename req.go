@@ -153,7 +153,6 @@ func (r *Req) Do() (err error) {
 
 	defer resp.Body.Close()
 
-	fmt.Printf("r.g.opt = %p\n", &r.g.opt)
 	if r.g.opt.Debug {
 		if err := r.g.opt.resetBodyAndPrint(req, resp); err != nil {
 			return err
