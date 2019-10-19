@@ -1,6 +1,7 @@
 package encode
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -8,6 +9,8 @@ import (
 	"time"
 	"unsafe"
 )
+
+var ErrUnsupported = errors.New("Encode:Unsupported type")
 
 var emptyField = reflect.StructField{}
 
@@ -23,7 +26,7 @@ type Adder interface {
 func Encode(in interface{}, a Adder) error {
 	v := reflect.ValueOf(in)
 
-	if v.Kind() == reflect.Ptr {
+	for v.Kind() == reflect.Ptr {
 		if v.IsNil() {
 			return nil
 		}
@@ -39,11 +42,13 @@ func Encode(in interface{}, a Adder) error {
 				return err
 			}
 		}
+		return nil
 
 	case reflect.Struct:
 		if err := encode(v, emptyField, a); err != nil {
 			return err
 		}
+		return nil
 
 	case reflect.Slice, reflect.Array:
 		if !(v.Len() > 0 && v.Len()%2 == 0) {
@@ -56,9 +61,10 @@ func Encode(in interface{}, a Adder) error {
 				return err
 			}
 		}
+		return nil
 	}
 
-	return nil
+	return ErrUnsupported
 }
 
 func parseTag(tag string) (string, tagOptions) {
@@ -137,7 +143,7 @@ func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
 			return nil
 		}
 
-		val = val.Elem()
+		return encode(val.Elem(), sf, a)
 	}
 
 	if vKind != reflect.Struct || !sf.Anonymous {

@@ -22,9 +22,12 @@ func (r *ReadCloseFail) Close() error {
 	return nil
 }
 
-type H map[string]interface{}
+type H = core.H
+
+type A = core.A
 
 type FormFile = core.FormFile
+
 type FormMem = core.FormMem
 
 func lastChar(str string) uint8 {

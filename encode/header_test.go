@@ -49,8 +49,9 @@ func TestHeaderMap(t *testing.T) {
 }
 
 type testHeader1 struct {
-	H4 int64 `header:"h4"`
-	H5 int32 `header:"h5"`
+	H4 int64  `header:"h4"`
+	H5 int32  `header:"h5"`
+	H6 string `header:"-"`
 }
 
 type testHeader struct {
@@ -77,7 +78,7 @@ func TestHeaderStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	needVal := []string{"test-header-1", "2", "3.3", "4", "5"}
+	needVal := []string{"test-header-1", "2", "3.3", "4", "5", ""}
 
 	for k, v := range needVal {
 		s := fmt.Sprintf("h%d", k+1)

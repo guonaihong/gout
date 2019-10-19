@@ -10,6 +10,10 @@ type FormFile string
 
 type FormMem []byte
 
+type H map[string]interface{}
+
+type A []interface{}
+
 var ErrUnknownType = errors.New("unknown type")
 
 func LoopElem(v reflect.Value) reflect.Value {
