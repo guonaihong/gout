@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
-	"unsafe"
 )
 
 var _ Adder = (*FormEncode)(nil)
@@ -22,15 +21,9 @@ func NewFormEncode(b *bytes.Buffer) *FormEncode {
 	return &FormEncode{Writer: multipart.NewWriter(b)}
 }
 
-func stringToBytes(s string) []byte {
-	sp := *(*[2]uintptr)(unsafe.Pointer(&s))
-	bp := [3]uintptr{sp[0], sp[1], sp[1]}
-	return *(*[]byte)(unsafe.Pointer(&bp))
-}
-
 func toBytes(v reflect.Value) (all []byte, err error) {
 	if s, ok := v.Interface().(string); ok {
-		all = stringToBytes(s)
+		all = core.StringToBytes(s)
 	} else if b, ok := v.Interface().([]byte); ok {
 		all = b
 	} else {
