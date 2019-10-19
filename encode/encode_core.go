@@ -203,6 +203,8 @@ func valueIsEmpty(v reflect.Value) bool {
 		return v.Float() == 0
 	case reflect.Interface, reflect.Ptr:
 		return v.IsNil()
+	case reflect.Invalid:
+		return true
 	}
 
 	if v.Type() == timeType {
