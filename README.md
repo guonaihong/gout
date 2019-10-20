@@ -32,7 +32,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [debug mode](#debug-mode)
         - [general](#debug-general)
         - [advanced](#debug-advanced)
-    
+ - [特色功能示例](#特色功能示例)
+    - [forward gin data](#forward-gin-data)
 
 ## 安装
 ```
@@ -100,10 +101,9 @@ if err != nil {
 * SetQuery() 设置http 查询字符串
 
 ```go
-g := gout.New(nil)
 code := 0
 
-if err := g.GET(":8080/testquery").SetQuery(/*看下面支持的情况*/).Code(&code).Do(); err != nil {
+if err := gout.GET(":8080/testquery").SetQuery(/*看下面支持的情况*/).Code(&code).Do(); err != nil {
 }
 
 /*
@@ -149,10 +149,9 @@ type testHeader struct {
 
 t := testheader{}
 
-g := gout.New(nil)
 code := 0
 
-if err := g.GET(":8080/testquery").Code(&code).SetHeader(/*看下面支持的类型*/).BindHeader(&t).Do(); err != nil {
+if err := gout.GET(":8080/testquery").Code(&code).SetHeader(/*看下面支持的类型*/).BindHeader(&t).Do(); err != nil {
 }
 ```
 * BindHeader支持的类型有
@@ -197,7 +196,7 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 * SetBody 设置string, []byte等类型数据到http body里面
 ```go
 // 设置string变量至请求的http body
-err := gout.New(nil).POST(url).SetBody("hello world"/*更多支持类型请看下面*/).Do()
+err := gout.POST(url).SetBody("hello world"/*更多支持类型请看下面*/).Do()
 
 // 设置实现io.Reader接口的变量至 请求的http body
 err = gout.POST(url).SetBody(bytes.NewBufferString("hello world")).Code(&code).Do()
@@ -207,7 +206,7 @@ err = gout.POST(url).SetBody(bytes.NewBufferString("hello world")).Code(&code).D
 ```go
 // 解析http body到string类型变量里面
 var s string
-err := gout.New(nil).GET(url).BindBody(&s/*更多支持指针类型变量请看下面*/).Do()
+err := gout.GET(url).BindBody(&s/*更多支持指针类型变量请看下面*/).Do()
 
 // 解析http body至实现io.Writer接口的变量里面
 var b bytes.Buffer{}
@@ -242,9 +241,7 @@ type data struct {
 var d1, d2 data
 var httpCode int
 
-g := gout.New(nil)
-
-err := g.POST(":8080/test.json").SetJSON(&d1).BindJSON(&d2).Code(&httpCode).Do()
+err := gout.POST(":8080/test.json").SetJSON(&d1).BindJSON(&d2).Code(&httpCode).Do()
 if err != nil || httpCode != 200{
     fmt.Printf("send fail:%s\n", err)
 }
@@ -265,9 +262,8 @@ type data struct {
 var d1, d2 data
 var httpCode int 
 
-g := gout.New(nil)
 
-err := g.POST(":8080/test.yaml").SetYAML(&d1).BindYAML(&d2).Code(&httpCode).Do()
+err := gout.POST(":8080/test.yaml").SetYAML(&d1).BindYAML(&d2).Code(&httpCode).Do()
 if err != nil || httpCode != 200{
     fmt.Printf("send fail:%s\n", err)
 }
@@ -289,9 +285,8 @@ type data struct {
 var d1, d2 data
 var httpCode int 
 
-g := gout.New(nil)
 
-err := g.POST(":8080/test.xml").SetXML(&d1).BindXML(&d2).Code(&httpCode).Do()
+err := gout.POST(":8080/test.xml").SetXML(&d1).BindXML(&d2).Code(&httpCode).Do()
 if err != nil || httpCode != 200{
     fmt.Printf("send fail:%s\n", err)
 }
@@ -309,7 +304,7 @@ curl -F mode=A -F text="good" -F voice=@./test.pcm -f voice2=@./test2.pcm url
 * 使用gout.H
 ```go
 code := 0
-err := gout.New(nil).
+err := gout.
     POST(":8080/test").
     SetForm(gout.H{"mode": "A",
         "text":   "good",
@@ -342,7 +337,7 @@ t := testForm{}
 r := rsp{}
 code := 0
 
-err := gout.New(nil).POST(url).SetForm(&t).ShoudBindJSON(&r).Code(&code).Do()
+err := gout.POST(url).SetForm(&t).ShoudBindJSON(&r).Code(&code).Do()
 if err != nil {
 
 }
@@ -351,11 +346,10 @@ if err != nil {
 ### callback
 callback主要用在，服务端会返回多种格式body的场景
 ```go
-g := gout.New(nil)
 
 r , errCode := Result{}, 0
 
-g.GET(url).Callback(func(c *gout.Context) error {
+gout.GET(url).Callback(func(c *gout.Context) error {
 
     switch c.Code {
         case 200:
@@ -527,4 +521,61 @@ func main() {
     fmt.Printf("err = %v\n", err)
 }
 
+```
+# 特色功能示例
+## forward gin data
+gout 设计之初就考虑到要和gin协同工作的可能性，下面展示如何方便地使用gout转发gin绑定的数据。
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout"
+)
+
+type testQuery struct {
+	Size int    `query:"size" form:"size"`
+	Page int    `query:"page" form:"page"`
+	Ak   string `query:"ak" form:"ak"`
+}
+
+//下一个服务节点
+func nextSever() {
+	r := gin.Default()
+
+	r.GET("/query", func(c *gin.Context) {
+		q := testQuery{}
+		err := c.ShouldBindQuery(&q)
+		if err != nil {
+			return
+		}
+		c.JSON(200, q)
+	})
+	r.Run(":1234")
+}
+
+func main() {
+	go nextSever()
+	r := gin.Default()
+
+	// 当前服务
+	r.GET("/query", func(c *gin.Context) {
+		q := testQuery{}
+		err := c.ShouldBindQuery(&q)
+		if err != nil {
+			return
+		}
+		// Send to the next service
+		code := 0 // http code
+		err := gout.GET("127.0.0.1:1234/query").SetQuery(q).Code(&code).Do()
+		if err != nil || code != 200 { /* todo Need to handle errors here */
+		}
+		c.JSON(200, q)
+	})
+
+	r.Run()
+}
+
+// http client
+// curl '127.0.0.1:8080/query?size=10&page=20&ak=test'
 ```
