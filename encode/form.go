@@ -22,13 +22,15 @@ func NewFormEncode(b *bytes.Buffer) *FormEncode {
 }
 
 func toBytes(v reflect.Value) (all []byte, err error) {
-	if s, ok := v.Interface().(string); ok {
-		all = core.StringToBytes(s)
-	} else if b, ok := v.Interface().([]byte); ok {
-		all = b
-	} else {
+	switch v := v.Interface().(type) {
+	case string:
+		all = core.StringToBytes(v)
+	case []byte:
+		all = v
+	default:
 		return nil, fmt.Errorf("unknown type toBytes:%T", v)
 	}
+
 	return all, nil
 }
 
@@ -36,11 +38,12 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 	var all []byte
 	if openFile {
 		var fileName string
-		if s, ok := v.Interface().(string); ok {
-			fileName = s
-		} else if b, ok := v.Interface().([]byte); ok {
-			fileName = core.BytesToString(b)
-		} else {
+		switch v := v.Interface().(type) {
+		case string:
+			fileName = v
+		case []byte:
+			fileName = core.BytesToString(v)
+		default:
 			return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
 		}
 
@@ -65,15 +68,15 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 func (f *FormEncode) mapFormFile(key string, v reflect.Value, sf reflect.StructField) (next bool, err error) {
 	var all []byte
 
-	switch v.Interface().(type) {
+	switch val := v.Interface().(type) {
 	case core.FormFile:
-		all, err = ioutil.ReadFile(string(v.Interface().(core.FormFile)))
+		all, err = ioutil.ReadFile(string(val))
 		if err != nil {
 			return false, err
 		}
 
 	case core.FormMem:
-		all = []byte(v.Interface().(core.FormMem))
+		all = []byte(val)
 	default:
 		return true, nil
 	}

@@ -54,15 +54,24 @@ type testHeader1 struct {
 	H6 string `header:"-"`
 }
 
+type testHeader2 struct {
+	H7 string `header:"h7"`
+}
+
 type testHeader struct {
 	H1 string  `header:"h1"`
 	H2 int     `header:"h2"`
 	H3 float64 `header:"h3"`
 	testHeader1
+
+	H  **testHeader2 // 测试多重指针
+	H8 *testHeader2  //测试结构体空指针
 }
 
 func TestHeaderStruct(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
+
+	p := &testHeader2{H7: "h7"}
 
 	err := Encode(testHeader{
 		H1: "test-header-1",
@@ -72,13 +81,14 @@ func TestHeaderStruct(t *testing.T) {
 			H4: int64(4),
 			H5: int32(5),
 		},
+		H: &p,
 	},
 		NewHeaderEncode(req),
 	)
 
 	assert.NoError(t, err)
 
-	needVal := []string{"test-header-1", "2", "3.3", "4", "5", ""}
+	needVal := []string{"test-header-1", "2", "3.3", "4", "5", "", "h7"}
 
 	for k, v := range needVal {
 		s := fmt.Sprintf("h%d", k+1)
