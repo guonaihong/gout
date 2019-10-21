@@ -16,6 +16,11 @@ type testHeader struct {
 	HeaderKey string `header:"headerKey"`
 }
 
+type testContextJson struct {
+	ErrMsg  string `json:"errmsg"`
+	ErrCode int    `json:"errcode"`
+}
+
 func testServrBodyJSON(t *testing.T) *gin.Engine {
 	r := gin.Default()
 	r.GET("/:code", func(c *gin.Context) {
@@ -38,7 +43,7 @@ func testServrBodyJSON(t *testing.T) *gin.Engine {
 	return r
 }
 
-func TestContextBindBodyJSON(t *testing.T) {
+func TestContext_BindBodyJSON(t *testing.T) {
 	s := testServrBodyJSON(t)
 
 	ts := httptest.NewServer(http.HandlerFunc(s.ServeHTTP))
@@ -105,7 +110,7 @@ func testServrBodyYAML(t *testing.T) *gin.Engine {
 	return r
 }
 
-func TestContextBindBodyYAML(t *testing.T) {
+func TestContext_BindBodyYAML(t *testing.T) {
 	s := testServrBodyYAML(t)
 
 	ts := httptest.NewServer(http.HandlerFunc(s.ServeHTTP))
@@ -167,7 +172,7 @@ func testServrBodyXML(t *testing.T) *gin.Engine {
 	return r
 }
 
-func TestContextBindBodyXML(t *testing.T) {
+func TestContext_BindBodyXML(t *testing.T) {
 	s := testServrBodyXML(t)
 
 	ts := httptest.NewServer(http.HandlerFunc(s.ServeHTTP))
@@ -211,4 +216,18 @@ func TestContextBindBodyXML(t *testing.T) {
 
 	}
 	assert.Equal(t, count, 2)
+}
+
+func TestContext_fail(t *testing.T) {
+	s := testServrBodyJSON(t)
+	ts := httptest.NewServer(http.HandlerFunc(s.ServeHTTP))
+
+	var j, j2 testContextJson
+
+	// BindJSON和Callback只能选一个
+	err := GET(ts.URL + "/200").BindJSON(&j).Callback(func(c *Context) error {
+		return c.BindJSON(&j2)
+	}).Do()
+
+	assert.Error(t, err)
 }

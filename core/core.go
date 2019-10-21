@@ -10,6 +10,10 @@ type FormFile string
 
 type FormMem []byte
 
+type H map[string]interface{}
+
+type A []interface{}
+
 var ErrUnknownType = errors.New("unknown type")
 
 func LoopElem(v reflect.Value) reflect.Value {
@@ -25,6 +29,12 @@ func LoopElem(v reflect.Value) reflect.Value {
 
 func BytesToString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+func StringToBytes(s string) []byte {
+	sp := *(*[2]uintptr)(unsafe.Pointer(&s))
+	bp := [3]uintptr{sp[0], sp[1], sp[1]}
+	return *(*[]byte)(unsafe.Pointer(&bp))
 }
 
 func NewPtrVal(defValue interface{}) interface{} {

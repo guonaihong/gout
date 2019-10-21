@@ -27,12 +27,14 @@ func (f DebugFunc) Apply(o *DebugOption) {
 }
 
 // 暂时不启用
+/*
 func DebugColor() DebugOpt {
 	return DebugFunc(func(o *DebugOption) {
 		o.Color = true
 		o.Write = os.Stdout
 	})
 }
+*/
 
 func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response) error {
 	all, err := ioutil.ReadAll(resp.Body)
