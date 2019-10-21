@@ -3,6 +3,7 @@ package gout
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout/core"
@@ -860,6 +861,16 @@ func TestProxy(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 200, code)
 	assert.Equal(t, s, proxyTs.URL)
+
+	// test fail
+	err = New(&c).GET(ts.URL + "/login").SetProxy("\x7f" /*url.Parse源代码写了遇到\x7f会报错*/).Do()
+	assert.Error(t, err)
+
+	// 错误情况1
+	c.Transport = &TransportFail{}
+	err = New(&c).GET(ts.URL + "/login").SetProxy(proxyTs.URL).Do()
+	assert.Error(t, err)
+
 }
 
 func setupCookie(t *testing.T, total *int32) *gin.Engine {
@@ -998,6 +1009,12 @@ func setupUnixSocket(t *testing.T, path string) *http.Server {
 	return &srv
 }
 
+type TransportFail struct{}
+
+func (t *TransportFail) RoundTrip(r *http.Request) (*http.Response, error) {
+	return nil, errors.New("fail")
+}
+
 func TestUnixSocket(t *testing.T) {
 	path := "./unix.sock"
 	defer os.Remove(path)
@@ -1014,6 +1031,11 @@ func TestUnixSocket(t *testing.T) {
 	err := New(&c).UnixSocket(path).POST("http://xxx/test/unix/").SetHeader(H{"h1": "v1", "h2": "v2"}).BindBody(&s).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, s, "ok")
+
+	// 错误情况1
+	c.Transport = &TransportFail{}
+	err = New(&c).UnixSocket(path).POST("http://xxx/test/unix/").SetHeader(H{"h0": "v1", "h2": "v2"}).BindBody(&s).Do()
+	assert.Error(t, err)
 }
 
 func setupDebug(t *testing.T) *gin.Engine {

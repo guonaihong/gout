@@ -22,7 +22,7 @@ const (
 
 type routerGroup struct {
 	basePath string
-	*Req
+	Req
 	reqs []*Req
 	out  *Gout
 }
@@ -35,37 +35,37 @@ func (g *routerGroup) Group(relativePath string) *routerGroup {
 }
 
 func (g *routerGroup) GET(url string) *routerGroup {
-	g.Req = NewReq(Get, joinPaths(g.basePath, url), g.out)
+	g.Req = reqDef(Get, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) POST(url string) *routerGroup {
-	g.Req = NewReq(Post, joinPaths(g.basePath, url), g.out)
+	g.Req = reqDef(Post, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) PUT(url string) *routerGroup {
-	g.Req = NewReq(Put, joinPaths(g.basePath, url), g.out)
+	g.Req = reqDef(Put, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) DELETE(url string) *routerGroup {
-	g.Req = NewReq(Delete, joinPaths(g.basePath, url), g.out)
+	g.Req = reqDef(Delete, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) PATCH(url string) *routerGroup {
-	g.Req = NewReq(Patch, joinPaths(g.basePath, url), g.out)
+	g.Req = reqDef(Patch, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) HEAD(url string) *routerGroup {
-	g.Req = NewReq(Head, joinPaths(g.basePath, url), g.out)
+	g.Req = reqDef(Head, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
 func (g *routerGroup) OPTIONS(url string) *routerGroup {
-	g.Req = NewReq(Options, joinPaths(g.basePath, url), g.out)
+	g.Req = reqDef(Options, joinPaths(g.basePath, url), g.out)
 	return g
 }
 
@@ -206,15 +206,9 @@ func (g *routerGroup) Debug(d ...interface{}) *routerGroup {
 
 func (g *routerGroup) Do() (err error) {
 	defer func() {
-		g.Req = nil
+		g.Req.Reset()
 		g.reqs = g.reqs[0:0]
 	}()
-
-	if g.Req != nil {
-		if err = g.Req.Do(); err != nil {
-			return err
-		}
-	}
 
 	for _, r := range g.reqs {
 		if err = r.Do(); err != nil {
@@ -222,11 +216,17 @@ func (g *routerGroup) Do() (err error) {
 		}
 	}
 
+	if err = g.Req.Do(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (g *routerGroup) Next() *routerGroup {
-	g.reqs = append(g.reqs, g.Req)
-	g.Req = nil
+	r := g.Req.clone()
+	g.Req.Reset()
+	g.Req.url = ""
+	g.reqs = append(g.reqs, &r)
 	return g
 }

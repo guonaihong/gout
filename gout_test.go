@@ -1,6 +1,7 @@
 package gout
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -28,6 +29,27 @@ func setupMethod(total *int32) *gin.Engine {
 	return router
 }
 
+func TestMethodFail(t *testing.T) {
+	var total int32
+
+	router := setupMethod(&total)
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	out := New(nil)
+	err := out.GET(ts.URL + "/someGet").Next().
+		POST(ts.URL + "/somePost").Next().
+		PUT(ts.URL + "/somePut").Next().
+		DELETE(ts.URL + "/someDelete").Next().
+		PATCH(ts.URL + "/somePatch").Next().
+		HEAD("192.168.5.217" /*不存在*/ + "/someHead").Next().
+		OPTIONS(ts.URL + "/someOptions").Do()
+
+	assert.Error(t, err, fmt.Sprintf("total = %d", total))
+
+}
+
 func TestMethod(t *testing.T) {
 
 	var total int32
@@ -44,7 +66,7 @@ func TestMethod(t *testing.T) {
 		DELETE(ts.URL + "/someDelete").Next().
 		PATCH(ts.URL + "/somePatch").Next().
 		HEAD(ts.URL + "/someHead").Next().
-		OPTIONS(ts.URL + "/someOptions").Next().Do()
+		OPTIONS(ts.URL + "/someOptions").Do()
 
 	assert.NoError(t, err)
 

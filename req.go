@@ -45,6 +45,23 @@ type Req struct {
 // headerDecode只有一个可能，就定义为具体类型。这里他们的decode实现也不一样
 // 有没有必要，归一化成一种???
 
+func (r *Req) clone() Req {
+	return Req{
+		method:      r.method,
+		url:         r.url,
+		formEncode:  r.formEncode,
+		bodyEncoder: r.bodyEncoder,
+		bodyDecoder: r.bodyDecoder,
+		queryEncode: r.queryEncode,
+		httpCode:    r.httpCode,
+		g:           r.g,
+		callback:    r.callback,
+		cookies:     r.cookies,
+		c:           r.c,
+		err:         r.err,
+	}
+}
+
 func (r *Req) Reset() {
 	r.err = nil
 	r.cookies = nil
@@ -202,6 +219,6 @@ func modifyURL(url string) string {
 	return fmt.Sprintf("http://%s", url)
 }
 
-func NewReq(method string, url string, g *Gout) *Req {
-	return &Req{method: method, url: modifyURL(url), g: g}
+func reqDef(method string, url string, g *Gout) Req {
+	return Req{method: method, url: modifyURL(url), g: g}
 }
