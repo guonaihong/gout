@@ -349,6 +349,7 @@ callback主要用在，服务端会返回多种格式body的场景, 比如404返
 ```go
 
 func main() {
+	
 	r, str404 := Result{}, ""
 	code := 0
 
@@ -356,9 +357,9 @@ func main() {
 
 		switch c.Code {
 		case 200:
-			c.BindJSON(&r)
+			err = c.BindJSON(&r)
 		case 404:
-			c.BindBody(&str404)
+			err = c.BindBody(&str404)
 		}
 		return
 
@@ -371,6 +372,7 @@ func main() {
 
 	fmt.Printf("http code = %d, str404(%s), result(%v)\n", code, str404, r)
 }
+
 ```
 
 ## proxy
