@@ -344,22 +344,33 @@ if err != nil {
 ```
 
 ### callback
-callback主要用在，服务端会返回多种格式body的场景
+callback主要用在，服务端会返回多种格式body的场景, 比如404返回的是html, 200返回json。
+这时候要用Callback挂载多种处理函数
 ```go
 
-r , errCode := Result{}, 0
+func main() {
+	r, str404 := Result{}, ""
+	code := 0
 
-gout.GET(url).Callback(func(c *gout.Context) error {
+	err := gout.GET(":8080").Code(&code).Callback(func(c *gout.Context) (err error) {
 
-    switch c.Code {
-        case 200:
-            c.BindJSON(&r)
-        case 500:
-            c.BindBody(&errCode)
-    }
+		switch c.Code {
+		case 200:
+			c.BindJSON(&r)
+		case 404:
+			c.BindBody(&str404)
+		}
+		return
 
-    return nil
-})
+	}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %s\n", err)
+		return
+	}
+
+	fmt.Printf("http code = %d, str404(%s), result(%v)\n", code, str404, r)
+}
 ```
 
 ## proxy
