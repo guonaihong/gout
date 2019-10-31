@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/color"
 	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -1057,6 +1058,7 @@ func TestDebug(t *testing.T) {
 	router := setupDebug(t)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
+	color.NoColor = false
 	test := []func() DebugOpt{
 		// 测试打开日志输出
 		func() DebugOpt {
@@ -1086,6 +1088,8 @@ func TestDebug(t *testing.T) {
 				o.Write = buf
 			})
 		},
+
+		DebugColor,
 	}
 
 	s := ""

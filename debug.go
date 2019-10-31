@@ -3,6 +3,7 @@ package gout
 import (
 	"bytes"
 	"fmt"
+	"github.com/guonaihong/gout/color"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -26,15 +27,13 @@ func (f DebugFunc) Apply(o *DebugOption) {
 	f(o)
 }
 
-// 暂时不启用
-/*
 func DebugColor() DebugOpt {
 	return DebugFunc(func(o *DebugOption) {
 		o.Color = true
+		o.Debug = true
 		o.Write = os.Stdout
 	})
 }
-*/
 
 func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response) error {
 	all, err := ioutil.ReadAll(resp.Body)
@@ -55,6 +54,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	var w io.Writer = do.Write
 
+	cl := color.New(do.Color)
 	path := "/"
 	if len(req.URL.Path) > 0 {
 		path = req.URL.RequestURI()
@@ -64,9 +64,8 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	// write request header
 	for k, v := range req.Header {
-		fmt.Fprintf(w, "> %s: %s\r\n", k, strings.Join(v, ","))
-		fmt.Fprintf(w, "> %s: %s\r\n", k,
-			strings.Join(v, ","))
+		fmt.Fprintf(w, "> %s: %s\r\n", cl.Sgrayf(k),
+			cl.Sbluef(strings.Join(v, ",")))
 	}
 
 	fmt.Fprint(w, ">\r\n")
@@ -87,7 +86,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	fmt.Fprintf(w, "< %s %s\r\n", rsp.Proto, rsp.Status)
 	for k, v := range rsp.Header {
-		fmt.Fprintf(w, "< %s: %s\r\n", k, strings.Join(v, ","))
+		fmt.Fprintf(w, "< %s: %s\r\n", cl.Sgrayf(k), cl.Sbluef(strings.Join(v, ",")))
 	}
 
 	fmt.Fprintf(w, "\r\n\r\n")
