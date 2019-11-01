@@ -13,6 +13,19 @@ var (
 		(!isatty.IsTerminal(os.Stdout.Fd()) && !isatty.IsCygwinTerminal(os.Stdout.Fd()))
 )
 
+type attr int
+
+const (
+	FgBlack attr = iota + 30
+	FgRed
+	FgGreen
+	FgYellow
+	FgBlue
+	FgMagenta
+	FgCyan
+	FgWhite
+)
+
 const (
 	Gray = 30
 	Blue = 34
@@ -20,9 +33,10 @@ const (
 
 type Color struct {
 	openColor bool
+	a         attr
 }
 
-func New(openColor bool) *Color {
+func New(openColor bool, c attr) *Color {
 	return &Color{openColor: openColor}
 }
 
