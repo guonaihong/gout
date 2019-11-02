@@ -33,14 +33,14 @@ const (
 
 type Color struct {
 	openColor bool
-	a         attr
+	attr      attr
 }
 
 func New(openColor bool, c attr) *Color {
 	return &Color{openColor: openColor}
 }
 
-func (c *Color) set(buf *strings.Builder, attr int) {
+func (c *Color) set(buf *strings.Builder, attr attr) {
 	if NoColor || !c.openColor {
 		return
 	}
@@ -56,10 +56,10 @@ func (c *Color) unset(buf *strings.Builder) {
 	fmt.Fprintf(buf, "\x1b[0m")
 }
 
-func (c *Color) colorf(attr int, format string, a ...interface{}) string {
+func (c *Color) colorf(format string, a ...interface{}) string {
 	var buf strings.Builder
 
-	c.set(&buf, attr)
+	c.set(&buf, c.attr)
 
 	fmt.Fprintf(&buf, format, a...)
 	c.unset(&buf)
@@ -68,9 +68,11 @@ func (c *Color) colorf(attr int, format string, a ...interface{}) string {
 }
 
 func (c *Color) Sgrayf(format string, a ...interface{}) string {
-	return c.colorf(Gray, format, a...)
+	c.attr = Gray
+	return c.colorf(format, a...)
 }
 
 func (c *Color) Sbluef(format string, a ...interface{}) string {
-	return c.colorf(Blue, format, a...)
+	c.attr = Blue
+	return c.colorf(format, a...)
 }

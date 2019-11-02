@@ -40,11 +40,11 @@ type Formatter struct {
 
 func NewFormatter() *Formatter {
 	return &Formatter{
-		KeyColor:        color.New(true, FgWhite),
-		StringColor:     color.New(true, FgGreen),
-		BoolColor:       color.New(true, FgYellow),
-		NumberColor:     color.New(true, FgCyan),
-		NullColor:       color.New(true, FgMagenta),
+		KeyColor:        New(true, FgWhite),
+		StringColor:     New(true, FgGreen),
+		BoolColor:       New(true, FgYellow),
+		NumberColor:     New(true, FgCyan),
+		NullColor:       New(true, FgMagenta),
 		StringMaxLength: 0,
 		DisabledColor:   false,
 		Indent:          0,
@@ -56,14 +56,14 @@ func (f *Formatter) sprintfColor(c *Color, format string, args ...interface{}) s
 	if f.DisabledColor || c == nil {
 		return fmt.Sprintf(format, args...)
 	}
-	return c.SprintfFunc()(format, args...)
+	return c.colorf(format, args...)
 }
 
-func (f *Formatter) sprintColor(c *color.Color, s string) string {
+func (f *Formatter) sprintColor(c *Color, s string) string {
 	if f.DisabledColor || c == nil {
 		return fmt.Sprint(s)
 	}
-	return c.SprintFunc()(s)
+	return c.colorf(s, "")
 }
 
 func (f *Formatter) writeIndent(buf *bytes.Buffer, depth int) {
@@ -104,7 +104,7 @@ func (f *Formatter) marshalMap(m map[string]interface{}, buf *bytes.Buffer, dept
 
 	for _, key := range keys {
 		f.writeIndent(buf, depth+1)
-		buf.WriteString(f.KeyColor.Sprintf("\"%s\": ", key))
+		buf.WriteString(f.KeyColor.colorf(`"%s": `, key))
 		f.marshalValue(m[key], buf, depth+1)
 		remaining--
 		if remaining != 0 {
