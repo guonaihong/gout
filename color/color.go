@@ -36,8 +36,12 @@ type Color struct {
 	attr      attr
 }
 
-func New(openColor bool, c attr) *Color {
-	return &Color{openColor: openColor}
+func New(openColor bool, c ...attr) *Color {
+	attr := attr(30)
+	if len(c) > 0 {
+		attr = c[0]
+	}
+	return &Color{openColor: openColor, attr: attr}
 }
 
 func (c *Color) set(buf *strings.Builder, attr attr) {
