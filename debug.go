@@ -54,7 +54,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	var w io.Writer = do.Write
 
-	cl := color.New(do.Color, color.FgGreen)
+	cl := color.New(do.Color)
 	path := "/"
 	if len(req.URL.Path) > 0 {
 		path = req.URL.RequestURI()
@@ -71,7 +71,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 	fmt.Fprint(w, ">\r\n")
 	fmt.Fprint(w, "\n")
 
-	// write body
+	// write req body
 	if req.GetBody != nil {
 		b, err := req.GetBody()
 		if err != nil {
@@ -90,6 +90,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 	}
 
 	fmt.Fprintf(w, "\r\n\r\n")
+	// write rsp body
 	_, err := io.Copy(w, rsp.Body)
 
 	fmt.Fprintf(w, "\r\n\r\n")

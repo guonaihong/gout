@@ -60,6 +60,17 @@ func (c *Color) unset(buf *strings.Builder) {
 	fmt.Fprintf(buf, "\x1b[0m")
 }
 
+func (c *Color) color(a ...interface{}) string {
+	var buf strings.Builder
+
+	c.set(&buf, c.attr)
+
+	fmt.Fprint(&buf, a...)
+	c.unset(&buf)
+
+	return buf.String()
+}
+
 func (c *Color) colorf(format string, a ...interface{}) string {
 	var buf strings.Builder
 

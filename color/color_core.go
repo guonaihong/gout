@@ -63,7 +63,7 @@ func (f *Formatter) sprintColor(c *Color, s string) string {
 	if f.DisabledColor || c == nil {
 		return fmt.Sprint(s)
 	}
-	return c.colorf(s, "")
+	return c.color(s)
 }
 
 func (f *Formatter) writeIndent(buf *bytes.Buffer, depth int) {

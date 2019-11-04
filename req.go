@@ -97,13 +97,13 @@ func (r *Req) Do() (err error) {
 		return r.err
 	}
 
-	b := &bytes.Buffer{}
+	body := &bytes.Buffer{}
 
 	defer r.Reset()
 
 	// set http body
 	if r.bodyEncoder != nil {
-		if err := r.bodyEncoder.Encode(b); err != nil {
+		if err := r.bodyEncoder.Encode(body); err != nil {
 			return err
 		}
 	}
@@ -129,8 +129,11 @@ func (r *Req) Do() (err error) {
 
 	var f *encode.FormEncode
 
+	// TODO
+	// 可以考虑和 bodyEncoder合并,
+	// 头疼的是f.FormDataContentType如何合并，每个encoder都实现这个方法???
 	if r.formEncode != nil {
-		f = encode.NewFormEncode(b)
+		f = encode.NewFormEncode(body)
 		if err := encode.Encode(r.formEncode, f); err != nil {
 			return err
 		}
@@ -138,7 +141,7 @@ func (r *Req) Do() (err error) {
 		f.End()
 	}
 
-	req, err := http.NewRequest(r.method, r.url, b)
+	req, err := http.NewRequest(r.method, r.url, body)
 	if err != nil {
 		return err
 	}
