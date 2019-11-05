@@ -11,10 +11,25 @@ import (
 	"strings"
 )
 
+func ToBodyType(s string) color.BodyType {
+	switch strings.ToLower(s) {
+	case "json":
+		return color.JsonType
+	case "xml":
+		return color.XmlType
+	case "yaml":
+		return color.YamlType
+	}
+
+	return color.TxtType
+}
+
 type DebugOption struct {
-	Write io.Writer
-	Debug bool
-	Color bool
+	Write       io.Writer
+	Debug       bool
+	Color       bool
+	ReqBodyType string
+	RspBodyType string
 }
 
 type DebugOpt interface {
@@ -48,6 +63,11 @@ func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response)
 }
 
 func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
+	if t := rsp.Header.Get("Content-Type"); len(t) != 0 &&
+		strings.Index(t, "application/json") != -1 {
+		do.RspBodyType = "json"
+	}
+
 	if do.Write == nil {
 		do.Write = os.Stdout
 	}
@@ -78,7 +98,13 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 			return err
 		}
 
-		if _, err := io.Copy(w, b); err != nil {
+		var r = io.Reader(b)
+		format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.ReqBodyType))
+		if format != nil {
+			r = format
+		}
+
+		if _, err := io.Copy(w, r); err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "\r\n\r\n")
@@ -91,7 +117,12 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	fmt.Fprintf(w, "\r\n\r\n")
 	// write rsp body
-	_, err := io.Copy(w, rsp.Body)
+	var r = io.Reader(rsp.Body)
+	format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.RspBodyType))
+	if format != nil {
+		r = format
+	}
+	_, err := io.Copy(w, r)
 
 	fmt.Fprintf(w, "\r\n\r\n")
 

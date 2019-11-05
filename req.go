@@ -173,12 +173,6 @@ func (r *Req) Do() (err error) {
 
 	defer resp.Body.Close()
 
-	if r.g.opt.Debug {
-		if err := r.g.opt.resetBodyAndPrint(req, resp); err != nil {
-			return err
-		}
-	}
-
 	if r.headerDecode != nil {
 		err = decode.Header.Decode(resp, r.headerDecode)
 		if err != nil {
@@ -188,6 +182,17 @@ func (r *Req) Do() (err error) {
 
 	if r.bodyDecoder != nil {
 		if err := r.bodyDecoder.Decode(resp.Body); err != nil {
+			return err
+		}
+	}
+
+	if r.g.opt.Debug {
+		if t := resp.Header.Get("Content-Type"); len(t) != 0 &&
+			strings.Index(t, "application/json") != -1 {
+			r.g.opt.RspBodyType = "json"
+		}
+
+		if err := r.g.opt.resetBodyAndPrint(req, resp); err != nil {
 			return err
 		}
 	}

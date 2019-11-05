@@ -4,9 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"sort"
 	"strconv"
 	"strings"
+)
+
+type BodyType int
+
+const (
+	JsonType BodyType = iota + 1
+	XmlType
+	YamlType
+	TxtType
 )
 
 // 本文件来自github.com/TylerBrock/colorjson, 感谢TylerBrock
@@ -36,10 +47,35 @@ type Formatter struct {
 	Indent          int
 	DisabledColor   bool
 	RawStrings      bool
+
+	r io.Reader
 }
 
-func NewFormatter() *Formatter {
-	return &Formatter{
+func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter {
+	// 如果颜色没打开，或者bodyType为txt
+	if openColor == false || bodyType == TxtType {
+		return nil
+	}
+
+	all, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil
+	}
+
+	var obj map[string]interface{}
+
+	switch bodyType {
+	case JsonType:
+		err = json.Unmarshal(all, &obj)
+		//todo xmlType and yamlType
+	case XmlType:
+	case YamlType:
+	}
+	if err != nil {
+		return nil
+	}
+
+	f := &Formatter{
 		KeyColor:        New(true, FgWhite),
 		StringColor:     New(true, FgGreen),
 		BoolColor:       New(true, FgYellow),
@@ -47,9 +83,15 @@ func NewFormatter() *Formatter {
 		NullColor:       New(true, FgMagenta),
 		StringMaxLength: 0,
 		DisabledColor:   false,
-		Indent:          0,
+		Indent:          4,
 		RawStrings:      false,
+		r:               r,
 	}
+
+	all, _ = f.Marshal(obj)
+
+	f.r = bytes.NewReader(all)
+	return f
 }
 
 func (f *Formatter) sprintfColor(c *Color, format string, args ...interface{}) string {
@@ -167,7 +209,6 @@ func (f *Formatter) marshalString(str string, buf *bytes.Buffer) {
 	buf.WriteString(f.sprintColor(f.StringColor, str))
 }
 
-// Marshal JSON data with default options
-func Marshal(jsonObj interface{}) ([]byte, error) {
-	return NewFormatter().Marshal(jsonObj)
+func (f *Formatter) Read(p []byte) (n int, err error) {
+	return f.r.Read(p)
 }

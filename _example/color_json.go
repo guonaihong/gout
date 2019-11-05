@@ -22,10 +22,13 @@ func main() {
 
 	err := gout.POST(":8080/colorjson").
 		Debug(gout.DebugColor()).
-		SetJSON(gout.H{
-			"str":     "str val",
-			"int":     3,
-			"float64": 3.14}).Do()
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
 
 	if err != nil {
 		fmt.Printf("err = %v\n", err)
