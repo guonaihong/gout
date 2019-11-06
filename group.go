@@ -90,16 +90,19 @@ func (g *routerGroup) SetHeader(obj interface{}) *routerGroup {
 }
 
 func (g *routerGroup) SetJSON(obj interface{}) *routerGroup {
+	g.out.opt.ReqBodyType = "json"
 	g.Req.bodyEncoder = encode.NewJSONEncode(obj)
 	return g
 }
 
 func (g *routerGroup) SetXML(obj interface{}) *routerGroup {
+	g.out.opt.ReqBodyType = "xml"
 	g.Req.bodyEncoder = encode.NewXMLEncode(obj)
 	return g
 }
 
 func (g *routerGroup) SetYAML(obj interface{}) *routerGroup {
+	g.out.opt.ReqBodyType = "yaml"
 	g.Req.bodyEncoder = encode.NewYAMLEncode(obj)
 	return g
 }
@@ -162,16 +165,19 @@ func (g *routerGroup) BindHeader(obj interface{}) *routerGroup {
 }
 
 func (g *routerGroup) BindJSON(obj interface{}) *routerGroup {
+	g.out.opt.RspBodyType = "json"
 	g.Req.bodyDecoder = decode.NewJSONDecode(obj)
 	return g
 }
 
 func (g *routerGroup) BindXML(obj interface{}) *routerGroup {
+	g.out.opt.RspBodyType = "xml"
 	g.Req.bodyDecoder = decode.NewXMLDecode(obj)
 	return g
 }
 
 func (g *routerGroup) BindYAML(obj interface{}) *routerGroup {
+	g.out.opt.RspBodyType = "yaml"
 	g.Req.bodyDecoder = decode.NewYAMLDecode(obj)
 	return g
 }
@@ -195,9 +201,9 @@ func (g *routerGroup) Debug(d ...interface{}) *routerGroup {
 	for _, v := range d {
 		switch opt := v.(type) {
 		case bool:
-			g.Req.g.opt.Debug = true
+			g.out.opt.Debug = true
 		case DebugOpt:
-			opt.Apply(&g.Req.g.opt)
+			opt.Apply(&g.out.opt)
 		}
 	}
 

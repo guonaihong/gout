@@ -43,7 +43,7 @@ func TestMethodFail(t *testing.T) {
 		PUT(ts.URL + "/somePut").Next().
 		DELETE(ts.URL + "/someDelete").Next().
 		PATCH(ts.URL + "/somePatch").Next().
-		HEAD("192.168.5.217" /*不存在*/ + "/someHead").Next().
+		HEAD("127.0.0.1" /*不存在*/ + "/someHead").Next().
 		OPTIONS(ts.URL + "/someOptions").Do()
 
 	assert.Error(t, err, fmt.Sprintf("total = %d", total))

@@ -3,6 +3,7 @@ package gout
 import (
 	"bytes"
 	"fmt"
+	"github.com/guonaihong/gout/color"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,10 +11,25 @@ import (
 	"strings"
 )
 
+func ToBodyType(s string) color.BodyType {
+	switch strings.ToLower(s) {
+	case "json":
+		return color.JsonType
+	case "xml":
+		return color.XmlType
+	case "yaml":
+		return color.YamlType
+	}
+
+	return color.TxtType
+}
+
 type DebugOption struct {
-	Write io.Writer
-	Debug bool
-	Color bool
+	Write       io.Writer
+	Debug       bool
+	Color       bool
+	ReqBodyType string
+	RspBodyType string
 }
 
 type DebugOpt interface {
@@ -26,15 +42,13 @@ func (f DebugFunc) Apply(o *DebugOption) {
 	f(o)
 }
 
-// 暂时不启用
-/*
 func DebugColor() DebugOpt {
 	return DebugFunc(func(o *DebugOption) {
 		o.Color = true
+		o.Debug = true
 		o.Write = os.Stdout
 	})
 }
-*/
 
 func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response) error {
 	all, err := ioutil.ReadAll(resp.Body)
@@ -49,12 +63,18 @@ func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response)
 }
 
 func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
+	if t := rsp.Header.Get("Content-Type"); len(t) != 0 &&
+		strings.Index(t, "application/json") != -1 {
+		do.RspBodyType = "json"
+	}
+
 	if do.Write == nil {
 		do.Write = os.Stdout
 	}
 
 	var w io.Writer = do.Write
 
+	cl := color.New(do.Color)
 	path := "/"
 	if len(req.URL.Path) > 0 {
 		path = req.URL.RequestURI()
@@ -64,22 +84,27 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	// write request header
 	for k, v := range req.Header {
-		fmt.Fprintf(w, "> %s: %s\r\n", k, strings.Join(v, ","))
-		fmt.Fprintf(w, "> %s: %s\r\n", k,
-			strings.Join(v, ","))
+		fmt.Fprintf(w, "> %s: %s\r\n", cl.Sgrayf(k),
+			cl.Sbluef(strings.Join(v, ",")))
 	}
 
 	fmt.Fprint(w, ">\r\n")
 	fmt.Fprint(w, "\n")
 
-	// write body
+	// write req body
 	if req.GetBody != nil {
 		b, err := req.GetBody()
 		if err != nil {
 			return err
 		}
 
-		if _, err := io.Copy(w, b); err != nil {
+		var r = io.Reader(b)
+		format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.ReqBodyType))
+		if format != nil {
+			r = format
+		}
+
+		if _, err := io.Copy(w, r); err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "\r\n\r\n")
@@ -87,11 +112,17 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	fmt.Fprintf(w, "< %s %s\r\n", rsp.Proto, rsp.Status)
 	for k, v := range rsp.Header {
-		fmt.Fprintf(w, "< %s: %s\r\n", k, strings.Join(v, ","))
+		fmt.Fprintf(w, "< %s: %s\r\n", cl.Sgrayf(k), cl.Sbluef(strings.Join(v, ",")))
 	}
 
 	fmt.Fprintf(w, "\r\n\r\n")
-	_, err := io.Copy(w, rsp.Body)
+	// write rsp body
+	var r = io.Reader(rsp.Body)
+	format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.RspBodyType))
+	if format != nil {
+		r = format
+	}
+	_, err := io.Copy(w, r)
 
 	fmt.Fprintf(w, "\r\n\r\n")
 

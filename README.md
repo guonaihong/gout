@@ -44,8 +44,8 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 
 ## 迁移文档
 主要方便下面的用户迁移到gout
-* [httplib](./from-xxx-to-gout-doc/beego-httplib.md)
-* [resty](./from-xxx-to-gout-doc/resty-doc.md)
+* [httplib](./to-gout-doc/beego-httplib.md)
+* [resty](./to-gout-doc/resty-doc.md)
 
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
