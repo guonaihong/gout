@@ -5,16 +5,6 @@ import (
 	"testing"
 )
 
-func TestUtil_Close(t *testing.T) {
-	assert.NoError(t, (&ReadCloseFail{}).Close())
-}
-
-func TestUtil_lastChar(t *testing.T) {
-	assert.Panics(t, func() {
-		lastChar("")
-	})
-}
-
 func TestUtil_Join(t *testing.T) {
 	urls := []string{
 		"http://127.0.0.1:43471/v1",

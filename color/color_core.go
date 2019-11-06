@@ -94,13 +94,6 @@ func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter
 	return f
 }
 
-func (f *Formatter) sprintfColor(c *Color, format string, args ...interface{}) string {
-	if f.DisabledColor || c == nil {
-		return fmt.Sprintf(format, args...)
-	}
-	return c.colorf(format, args...)
-}
-
 func (f *Formatter) sprintColor(c *Color, s string) string {
 	if f.DisabledColor || c == nil {
 		return fmt.Sprint(s)
