@@ -79,6 +79,11 @@ func (g *routerGroup) SetForm(obj interface{}) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) SetWWWForm(obj interface{}) *routerGroup {
+	g.Req.bodyEncoder = encode.NewWWWFormEncode(obj)
+	return g
+}
+
 func (g *routerGroup) SetQuery(obj interface{}) *routerGroup {
 	g.Req.queryEncode = obj
 	return g
