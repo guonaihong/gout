@@ -19,6 +19,10 @@ func TestNewJSONEncode(t *testing.T) {
 
 }
 
+func TestJSONEncode_Name(t *testing.T) {
+	assert.Equal(t, NewJSONEncode("").Name(), "json")
+}
+
 func TestJSONEncode_Encode(t *testing.T) {
 	need := testJson{
 		I: 100,

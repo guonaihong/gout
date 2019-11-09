@@ -55,3 +55,7 @@ func Test_body_Encode(t *testing.T) {
 		assert.Equal(t, v.w.String(), v.need)
 	}
 }
+
+func Test_body_Name(t *testing.T) {
+	assert.Equal(t, NewBodyEncode("").Name(), "body")
+}

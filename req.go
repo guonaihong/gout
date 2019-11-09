@@ -92,6 +92,35 @@ func isString(x interface{}) (string, bool) {
 	return "", false
 }
 
+func (r *Req) addDefDebug() {
+	if r.bodyEncoder != nil {
+		switch bodyType := r.bodyEncoder.(Encoder); bodyType.Name() {
+		case "json":
+			r.g.opt.ReqBodyType = "json"
+		case "xml":
+			r.g.opt.ReqBodyType = "xml"
+		case "yaml":
+			r.g.opt.ReqBodyType = "yaml"
+		}
+	}
+
+}
+
+func (r *Req) addContextType(req *http.Request) {
+	if r.bodyEncoder != nil {
+		switch bodyType := r.bodyEncoder.(Encoder); bodyType.Name() {
+		case "json":
+			req.Header.Add("Content-Type", "application/json")
+		case "xml":
+			req.Header.Add("Content-Type", "application/xml")
+		case "yaml":
+		case "www-form":
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		}
+	}
+
+}
+
 func (r *Req) Do() (err error) {
 	if r.err != nil {
 		return r.err
@@ -166,6 +195,8 @@ func (r *Req) Do() (err error) {
 		}
 	}
 
+	r.addDefDebug()
+	r.addContextType(req)
 	resp, err := r.g.Client.Do(req)
 	if err != nil {
 		return err

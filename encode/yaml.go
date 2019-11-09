@@ -21,3 +21,7 @@ func (y *YAMLEncode) Encode(w io.Writer) error {
 	encode := yaml.NewEncoder(w)
 	return encode.Encode(y.obj)
 }
+
+func (y *YAMLEncode) Name() string {
+	return "yaml"
+}

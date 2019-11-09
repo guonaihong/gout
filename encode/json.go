@@ -21,3 +21,7 @@ func (j *JSONEncode) Encode(w io.Writer) error {
 	encode := json.NewEncoder(w)
 	return encode.Encode(j.obj)
 }
+
+func (j *JSONEncode) Name() string {
+	return "json"
+}

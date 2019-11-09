@@ -20,7 +20,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [json](#json)
         - [yaml](#yaml)
         - [xml](#xml)
-        - [form](#form)
+        - [form-data](#form-data)
+        - [x-www-form-urlencoded](#x-www-form-urlencoded)
         - [callback](#callback)
     - [proxy](#proxy)
     - [cookie](#cookie)
@@ -32,6 +33,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [debug mode](#debug-mode)
         - [general](#debug-general)
         - [advanced](#debug-advanced)
+        - [color](#color)
  - [特色功能示例](#特色功能示例)
     - [forward gin data](#forward-gin-data)
 
@@ -40,7 +42,11 @@ gout 是go写的http 客户端，为提高工作效率而开发
 env GOPATH=`pwd` go get github.com/guonaihong/gout
 ```
 ## 技能树
+<details>
+
 ![gout.png](https://github.com/guonaihong/images/blob/master/gout/gout.png)
+
+</details>
 
 ## 迁移文档
 主要方便下面的用户迁移到gout
@@ -293,7 +299,7 @@ if err != nil || httpCode != 200{
 
 ```
 
-### form
+### form-data
 * SetForm() 设置http body 为multipart/form-data格式数据
 
 客户端发送multipart/form-data到服务端,curl用法等同go代码
@@ -341,6 +347,34 @@ err := gout.POST(url).SetForm(&t).ShoudBindJSON(&r).Code(&code).Do()
 if err != nil {
 
 }
+```
+### x-www-form-urlencoded
+* 使用WWWForm函数实现发送x-www-form-urlencoded类型数据
+```go
+func main() {
+    err := gout.POST(":8080/post").
+		Debug(true).
+		SetWWWForm(gout.H{
+			"int":     3,
+			"float64": 3.14,
+			"string":  "test-www-Form",
+		}).
+		Do()
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+
+}
+/*
+output:
+> POST /post HTTP/1.1
+> Content-Type: application/x-www-form-urlencoded
+>
+
+float64=3.14&int=3&string=test-www-Form
+
+*/
 ```
 
 ### callback
@@ -532,6 +566,27 @@ func main() {
     s := ""
     err := gout.GET("127.0.0.1:1234").Debug(IOSDebug()).SetBody("test hello").BindBody(&s).Do()
     fmt.Printf("err = %v\n", err)
+}
+
+```
+### color
+color开关对debug模式进行增强，输出颜色高亮的debug信息，Debug函数传递gout.DebugColor()函数即可
+```go
+func main() {
+	
+	err := gout.POST(":8080/colorjson").
+		Debug(gout.DebugColor()).
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
 }
 
 ```

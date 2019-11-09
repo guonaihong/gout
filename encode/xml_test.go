@@ -18,6 +18,10 @@ func TestNewXMLEncode(t *testing.T) {
 	assert.Nil(t, x)
 }
 
+func TestXMLEncode_Name(t *testing.T) {
+	assert.Equal(t, NewXMLEncode("").Name(), "xml")
+}
+
 func TestXMLEncode_Encode(t *testing.T) {
 	need := testXml{
 		I: 100,
