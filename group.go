@@ -206,7 +206,7 @@ func (g *routerGroup) Debug(d ...interface{}) *routerGroup {
 	for _, v := range d {
 		switch opt := v.(type) {
 		case bool:
-			g.out.opt.Debug = true
+			defaultDebug(&g.out.opt)
 		case DebugOpt:
 			opt.Apply(&g.out.opt)
 		}

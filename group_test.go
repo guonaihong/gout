@@ -108,7 +108,7 @@ func TestGroupNew(t *testing.T) {
 
 type data struct {
 	Id   int    `json:"id" xml:"id"`
-	Data string `json:"data xml:"data""`
+	Data string `json:"data" xml:"data"`
 }
 
 type BindTest struct {
@@ -1089,7 +1089,7 @@ func TestDebug(t *testing.T) {
 			})
 		},
 
-		DebugColor,
+		NoColor,
 	}
 
 	s := ""

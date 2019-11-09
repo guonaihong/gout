@@ -52,8 +52,23 @@ func main() {
 		return
 	}
 
-	fmt.Printf("====2.=================www-form=====use struct==\n\n")
-	// 2.第一种方式，使用结构体
+	fmt.Printf("====2.===============www-form=====use gout.A==\n\n")
+	// 2.第一种方式，使用gout.A
+	err = gout.POST(":8080/post").
+		Debug(true).
+		SetWWWForm(gout.A{
+			"int", 3,
+			"float64", 3.14,
+			"string", "test-www-Form",
+		}).
+		Do()
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+
+	fmt.Printf("====3.=================www-form=====use struct==\n\n")
+	// 3.第一种方式，使用结构体
 	need := testWWWForm{
 		Int:     3,
 		Float64: 3.14,
