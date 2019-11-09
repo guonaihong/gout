@@ -349,7 +349,7 @@ if err != nil {
 }
 ```
 ### x-www-form-urlencoded
-* 使用WWWForm函数实现发送x-www-form-urlencoded类型数据
+* 使用SetWWWForm函数实现发送x-www-form-urlencoded类型数据
 ```go
 func main() {
     err := gout.POST(":8080/post").
