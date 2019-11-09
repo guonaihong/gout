@@ -16,7 +16,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -1124,23 +1123,9 @@ func setupWWWForm(t *testing.T, need testWWWForm) *gin.Engine {
 	r.POST("/", func(c *gin.Context) {
 		wf := testWWWForm{}
 
-		i := c.PostForm("int")
-		if i2, err := strconv.Atoi(i); err == nil {
-			wf.Int = i2
-		} else {
-			assert.NoError(t, err)
-		}
+		err := c.ShouldBind(&wf)
 
-		f64 := c.PostForm("float64")
-		if f, err := strconv.ParseFloat(f64, 0); err == nil {
-			wf.Float64 = f
-		} else {
-			assert.NoError(t, err)
-		}
-
-		s := c.PostForm("string")
-		wf.String = s
-
+		assert.NoError(t, err)
 		//err := c.ShouldBind(&wf)
 		assert.Equal(t, need, wf)
 	})
@@ -1158,6 +1143,6 @@ func TestWWWForm(t *testing.T) {
 	router := setupWWWForm(t, need)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
-	err := POST(ts.URL).Debug(true).SetHeader(A{"Content-Type", "application/x-www-form-urlencoded"}).SetWWWForm(need).Do()
+	err := POST(ts.URL).Debug(true).SetWWWForm(need).Do()
 	assert.NoError(t, err)
 }

@@ -18,6 +18,10 @@ func TestNewYAMLEncode(t *testing.T) {
 	assert.Nil(t, y)
 }
 
+func TestYAMLEncode_Name(t *testing.T) {
+	assert.Equal(t, NewYAMLEncode("").Name(), "yaml")
+}
+
 func TestYAMLEncode_Encode(t *testing.T) {
 	need := testYaml{
 		I: 100,

@@ -43,3 +43,7 @@ func (b *BodyEncode) Encode(w io.Writer) error {
 	_, err := io.WriteString(w, v)
 	return err
 }
+
+func (b *BodyEncode) Name() string {
+	return "body"
+}

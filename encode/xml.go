@@ -21,3 +21,7 @@ func (x *XMLEncode) Encode(w io.Writer) error {
 	encode := xml.NewEncoder(w)
 	return encode.Encode(x.obj)
 }
+
+func (x *XMLEncode) Name() string {
+	return "xml"
+}

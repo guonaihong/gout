@@ -24,6 +24,9 @@ func Test_Color_Sbluef(t *testing.T) {
 	assert.Equal(t, New(false).Sbluef("hello"), "hello")
 }
 
+func Test_Color_color(t *testing.T) {
+}
+
 func Test_Color_New(t *testing.T) {
 	n := New(true)
 	assert.NotNil(t, n)

@@ -23,7 +23,9 @@ func NewWWWFormEncode(obj interface{}) *WWWFormEncode {
 }
 
 func (we *WWWFormEncode) Encode(w io.Writer) (err error) {
-	Encode(we.obj, we)
+	if err = Encode(we.obj, we); err != nil {
+		return err
+	}
 	_, err = w.Write(core.StringToBytes(we.values.Encode()))
 	return
 }
