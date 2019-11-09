@@ -42,9 +42,15 @@ func (f DebugFunc) Apply(o *DebugOption) {
 	f(o)
 }
 
-func DebugColor() DebugOpt {
+func defaultDebug(o *DebugOption) {
+	o.Color = true
+	o.Debug = true
+	o.Write = os.Stdout
+}
+
+func NoColor() DebugOpt {
 	return DebugFunc(func(o *DebugOption) {
-		o.Color = true
+		o.Color = false
 		o.Debug = true
 		o.Write = os.Stdout
 	})

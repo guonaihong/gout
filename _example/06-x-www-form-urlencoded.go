@@ -40,7 +40,7 @@ func main() {
 	fmt.Printf("====1.===============www-form=====use gout.H==\n\n")
 	// 1.第一种方式，使用gout.H
 	err := gout.POST(":8080/post").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetWWWForm(gout.H{
 			"int":     3,
 			"float64": 3.14,
@@ -55,7 +55,7 @@ func main() {
 	fmt.Printf("====2.===============www-form=====use gout.A==\n\n")
 	// 2.第一种方式，使用gout.A
 	err = gout.POST(":8080/post").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetWWWForm(gout.A{
 			"int", 3,
 			"float64", 3.14,
@@ -76,7 +76,7 @@ func main() {
 	}
 
 	err = gout.POST(":8080/post").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetWWWForm(need).Do()
 
 	if err != nil {

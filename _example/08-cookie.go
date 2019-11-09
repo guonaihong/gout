@@ -49,7 +49,7 @@ func main() {
 	// 发送两个cookie
 	fmt.Printf("\n\n===1. Send two cookies=========\n")
 	err := gout.GET(":8080/cookie").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetCookies(&http.Cookie{Name: "test1", Value: "test1"},
 			&http.Cookie{Name: "test2", Value: "test2"}).
 		Do()
@@ -61,7 +61,7 @@ func main() {
 	// 发送一个cookie
 	fmt.Printf("\n\n===1. Send a cookies=========\n")
 	err = gout.GET(":8080/cookie/one").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetCookies(&http.Cookie{Name: "test3", Value: "test3"}).
 		Do()
 	fmt.Println(err)

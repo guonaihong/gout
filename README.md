@@ -31,9 +31,9 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [unix socket](#unix-socket)
     - [http2 doc](#http2-doc)
     - [debug mode](#debug-mode)
-        - [general](#debug-general)
-        - [advanced](#debug-advanced)
         - [color](#color)
+        - [customize](#customize)
+        - [no-color](#no-color)
  - [特色功能示例](#特色功能示例)
     - [forward gin data](#forward-gin-data)
 
@@ -521,29 +521,30 @@ func main() {
 }
 ```
 ## debug mode
-### debug general
-该模式主要方便调试用的
+### color
+该模式主要方便调试用的，默认开启颜色高亮
 * Debug(true)
 
 ```go
-package main
-
-import (
-    "fmt"
-    "github.com/guonaihong/gout"
-)
-
 func main() {
-    err := gout.GET("127.0.0.1:1234").Debug(true).SetJSON(gout.H{"key": "val", "key2": "val2"}).Do()
+	
+	err := gout.POST(":8080/colorjson").
+		Debug(true).
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
 
-    if err != nil {
-        fmt.Printf("err = %v\n", err)
-    }   
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
 }
-
 ```
-### debug advanced
-debug高级模式，可传递函数。下面的例子是如果传递IOS_DEBUG环境变量才输出日志
+### customize
+debug 自定义模式，可传递函数。下面的只有传递IOS_DEBUG环境变量才输出日志
 ```go
 package main
 
@@ -569,13 +570,13 @@ func main() {
 }
 
 ```
-### color
-color开关对debug模式进行增强，输出颜色高亮的debug信息，Debug函数传递gout.DebugColor()函数即可
+### no-color
+no-color 使用gout.NoColor()关闭颜色高亮
 ```go
 func main() {
 	
 	err := gout.POST(":8080/colorjson").
-		Debug(gout.DebugColor()).
+		Debug(gout.NoColor()).
 		SetJSON(gout.H{"str": "foo",
 			"num":   100,
 			"bool":  false,

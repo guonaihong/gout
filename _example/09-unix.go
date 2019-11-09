@@ -56,7 +56,7 @@ func main() {
 	c := http.Client{}
 	s := ""
 	err := gout.New(&c).
-		Debug(gout.DebugColor()).
+		Debug(true).
 		UnixSocket(path).
 		POST("http://xxx/test/unix/").
 		SetHeader(gout.H{"h1": "v1", "h2": "v2"}).

@@ -22,7 +22,7 @@ func main() {
 
 	fmt.Printf("\n\n=============color json===========\n\n")
 	err := gout.POST(":8080/colorjson").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetJSON(gout.H{"str": "foo",
 			"num":   100,
 			"bool":  false,

@@ -38,7 +38,7 @@ func main() {
 	// 1.使用gout.H
 	fmt.Printf("======1. SetHeader======use gout.H=====\n")
 	err := gout.GET(":8080/test.header").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetHeader(gout.H{"h1": "v1",
 			"h2": 2,
 			"h3": float32(3.14),
@@ -55,7 +55,7 @@ func main() {
 	// 2.使用数组变量
 	fmt.Printf("======2. SetHeader======use array=====\n")
 	err = gout.GET(":8080/test.header").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetHeader(gout.A{"h1", "v1",
 			"h2", 2,
 			"h3", float32(3.14),
@@ -73,7 +73,7 @@ func main() {
 	// 使用结构体需要设置"header" tag
 	fmt.Printf("======3. SetHeader======use struct=====\n")
 	err = gout.GET(":8080/test.header").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetHeader(testHeader{H1: "v1",
 			H2: 2,
 			H3: float32(3.14),

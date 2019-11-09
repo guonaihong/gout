@@ -41,7 +41,7 @@ func main() {
 	// 1.使用gout.H
 	fmt.Printf("======1. SetQuery======use gout.H=====\n")
 	err := gout.GET(":8080/test.query").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetQuery(gout.H{"q1": "v1",
 			"q2": 2,
 			"q3": float32(3.14),
@@ -58,7 +58,7 @@ func main() {
 	// 2.使用数组变量
 	fmt.Printf("======2. SetQuery======use array=====\n")
 	err = gout.GET(":8080/test.query").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetQuery(gout.A{"q1", "v1",
 			"q2", 2,
 			"q3", float32(3.14),
@@ -76,7 +76,7 @@ func main() {
 	// 使用结构体需要设置query tag
 	fmt.Printf("======3. SetQuery======use struct=====\n")
 	err = gout.GET(":8080/test.query").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetQuery(testQuery{Q1: "v1",
 			Q2: 2,
 			Q3: float32(3.14),
@@ -93,7 +93,7 @@ func main() {
 	// 4.使用string
 	fmt.Printf("======4. SetQuery======use string=====\n")
 	err = gout.GET(":8080/test.query").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetQuery("q1=v1&q2=2&q3=3.14&q4=3.1415&q5=1564295760&q6=1564295760000001000&q7=2019-07-28").
 		Do()
 	if err != nil {

@@ -25,7 +25,7 @@ func main() {
 	// 1.发送string
 	fmt.Printf("\n\n=====1.=====send string========\n")
 	err := gout.POST(":8080/req/body").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetBody("send string"). // string
 		Do()
 
@@ -37,7 +37,7 @@ func main() {
 	// 2.发送[]byte
 	fmt.Printf("=====2.=====send string========\n")
 	err = gout.POST(":8080/req/body").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetBody([]byte("send bytes")). // []byte
 		Do()
 
@@ -49,7 +49,7 @@ func main() {
 	// 3.发送实现io.Reader接口的变量
 	fmt.Printf("=====3.=====io.Reader========\n")
 	err = gout.POST(":8080/req/body").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetBody(strings.NewReader("io.Reader")). // io.Reader
 		Do()
 
@@ -61,7 +61,7 @@ func main() {
 	// 4.发基础类型的变量
 	fmt.Printf("=====4.=====base type========\n")
 	err = gout.POST(":8080/req/body").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		SetBody(3.14). //float64
 		Do()
 

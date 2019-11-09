@@ -33,7 +33,7 @@ func main() {
 	fmt.Printf("\n\n=========1. bind string=====\n")
 	s := ""
 	err := gout.GET(":8080/rsp/body/string").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		BindBody(&s).
 		Do()
 
@@ -47,7 +47,7 @@ func main() {
 	fmt.Printf("\n\n=========2. bind string=====\n")
 	var b []byte
 	err = gout.GET(":8080/rsp/body/bytes").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		BindBody(&b).
 		Do()
 
@@ -61,7 +61,7 @@ func main() {
 	fmt.Printf("\n\n=========3. bind int=====\n")
 	i := 0
 	err = gout.GET(":8080/rsp/body/int").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		BindBody(&i).
 		Do()
 

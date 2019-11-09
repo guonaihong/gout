@@ -1089,7 +1089,7 @@ func TestDebug(t *testing.T) {
 			})
 		},
 
-		DebugColor,
+		NoColor,
 	}
 
 	s := ""

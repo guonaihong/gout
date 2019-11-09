@@ -31,7 +31,7 @@ func main() {
 
 	rsp := rspHeader{}
 	err := gout.GET(":8080/test.header").
-		Debug(gout.DebugColor()).
+		Debug(true).
 		BindHeader(&rsp). //解析请求header
 		Do()
 	if err != nil {
