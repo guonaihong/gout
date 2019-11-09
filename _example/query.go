@@ -23,7 +23,7 @@ func server() {
 	router := gin.New()
 	router.GET("/test.query", func(c *gin.Context) {
 		q2 := testQuery{}
-		err := c.BindQuery(&q2)
+		err := c.ShouldBindQuery(&q2)
 		if err != nil {
 			c.String(500, "fail")
 			return
@@ -74,7 +74,7 @@ func main() {
 
 	// 3.使用结构体
 	// 使用结构体需要设置query tag
-	fmt.Printf("======2. SetQuery======use struct=====\n")
+	fmt.Printf("======3. SetQuery======use struct=====\n")
 	err = gout.GET(":8080/test.query").
 		Debug(gout.DebugColor()).
 		SetQuery(testQuery{Q1: "v1",
@@ -91,7 +91,7 @@ func main() {
 	}
 
 	// 4.使用string
-	fmt.Printf("======2. SetQuery======use string=====\n")
+	fmt.Printf("======4. SetQuery======use string=====\n")
 	err = gout.GET(":8080/test.query").
 		Debug(gout.DebugColor()).
 		SetQuery("q1=v1&q2=2&q3=3.14&q4=3.1415&q5=1564295760&q6=1564295760000001000&q7=2019-07-28").
