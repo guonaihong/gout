@@ -26,7 +26,7 @@ func main() {
 	fmt.Printf("\n\n=====1.=====send string========\n")
 	err := gout.POST(":8080/req/body").
 		Debug(gout.DebugColor()).
-		SetBody("send string").
+		SetBody("send string"). // string
 		Do()
 
 	if err != nil {
@@ -38,7 +38,7 @@ func main() {
 	fmt.Printf("=====2.=====send string========\n")
 	err = gout.POST(":8080/req/body").
 		Debug(gout.DebugColor()).
-		SetBody([]byte("send bytes")).
+		SetBody([]byte("send bytes")). // []byte
 		Do()
 
 	if err != nil {
@@ -50,7 +50,7 @@ func main() {
 	fmt.Printf("=====3.=====io.Reader========\n")
 	err = gout.POST(":8080/req/body").
 		Debug(gout.DebugColor()).
-		SetBody(strings.NewReader("io.Reader")).
+		SetBody(strings.NewReader("io.Reader")). // io.Reader
 		Do()
 
 	if err != nil {
@@ -62,7 +62,7 @@ func main() {
 	fmt.Printf("=====4.=====base type========\n")
 	err = gout.POST(":8080/req/body").
 		Debug(gout.DebugColor()).
-		SetBody(3.14).
+		SetBody(3.14). //float64
 		Do()
 
 	if err != nil {
