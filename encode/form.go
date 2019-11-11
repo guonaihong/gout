@@ -21,14 +21,29 @@ func NewFormEncode(b *bytes.Buffer) *FormEncode {
 	return &FormEncode{Writer: multipart.NewWriter(b)}
 }
 
-func toBytes(v reflect.Value) (all []byte, err error) {
-	switch v := v.Interface().(type) {
+func toBytes(val reflect.Value) (all []byte, err error) {
+	switch v := val.Interface().(type) {
 	case string:
 		all = core.StringToBytes(v)
 	case []byte:
 		all = v
 	default:
-		return nil, fmt.Errorf("unknown type toBytes:%T", v)
+
+		if val.Kind() == reflect.Interface {
+			val = reflect.ValueOf(val.Interface())
+		}
+
+		switch t := val.Kind(); t {
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		case reflect.Float32, reflect.Float64:
+		case reflect.String:
+		default:
+			return nil, fmt.Errorf("unknown type toBytes:%T, kind:%v", v, val.Kind())
+		}
+
+		s := valToStr(val, emptyField)
+		all = core.StringToBytes(s)
 	}
 
 	return all, nil
