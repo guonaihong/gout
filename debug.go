@@ -16,9 +16,9 @@ func ToBodyType(s string) color.BodyType {
 	case "json":
 		return color.JsonType
 	case "xml":
-		return color.XmlType
+		//return color.XmlType //TODO open
 	case "yaml":
-		return color.YamlType
+		//return color.YamlType //TODO open
 	}
 
 	return color.TxtType
@@ -113,6 +113,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 		if _, err := io.Copy(w, r); err != nil {
 			return err
 		}
+
 		fmt.Fprintf(w, "\r\n\r\n")
 	}
 

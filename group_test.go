@@ -253,8 +253,20 @@ func TestBindHeader(t *testing.T) {
 }
 
 type testForm struct {
-	Mode string `form:"mode"`
-	Text string `form:"text"`
+	Mode    string  `form:"mode"`
+	Text    string  `form:"text"`
+	Int     int     `form:"int"`
+	Int8    int8    `form:"int8"`
+	Int16   int16   `form:"int16"`
+	Int32   int32   `form:"int32"`
+	Int64   int64   `form:"int64"`
+	Uint    uint    `form:"uint"`
+	Uint8   uint8   `form:"uint8"`
+	Uint16  uint16  `form:"uint16"`
+	Uint32  uint32  `form:"uint32"`
+	Uint64  uint64  `form:"uint64"`
+	Float32 float32 `form:"float32"`
+	Float64 float64 `form:"float64"`
 	//Voice []byte `form:"voice" form-mem:"true"` //todo open
 }
 
@@ -265,16 +277,23 @@ func setupForm(t *testing.T, reqTestForm testForm) *gin.Engine {
 		t2 := testForm{}
 		err := c.Bind(&t2)
 		assert.NoError(t, err)
-		//assert.Equal(t, reqTestForm, t2)
-		assert.Equal(t, reqTestForm.Mode, t2.Mode)
-		assert.Equal(t, reqTestForm.Text, t2.Text)
+		assert.Equal(t, reqTestForm, t2)
+		/*
+			assert.Equal(t, reqTestForm.Mode, t2.Mode)
+			assert.Equal(t, reqTestForm.Text, t2.Text)
+		*/
 	})
 	return router
 }
 
 type testForm2 struct {
-	Mode      string                `form:"mode"`
-	Text      string                `form:"text"`
+	Mode    string  `form:"mode"`
+	Text    string  `form:"text"`
+	Int     int     `form:"int"`
+	Uint    uint    `form:"uint"`
+	Float32 float32 `form:"float32"`
+	Float64 float64 `form:"float64"`
+
 	Voice     *multipart.FileHeader `form:"voice"`
 	Voice2    *multipart.FileHeader `form:"voice2"`
 	ReqVoice  []byte
@@ -291,6 +310,10 @@ func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
 		//assert.Equal(t, reqTestForm, t2)
 		assert.Equal(t, reqTestForm.Mode, t2.Mode)
 		assert.Equal(t, reqTestForm.Text, t2.Text)
+		assert.Equal(t, reqTestForm.Int, t2.Int)
+		assert.Equal(t, reqTestForm.Uint, t2.Uint)
+		assert.Equal(t, reqTestForm.Float32, t2.Float32)
+		//assert.Equal(t, reqTestForm.Float64, t2.Float64)
 
 		assert.NotNil(t, t2.Voice)
 		fd, err := t2.Voice.Open()
@@ -321,6 +344,10 @@ func TestSetFormMap(t *testing.T) {
 		Mode:      "A",
 		Text:      "good morning",
 		ReqVoice2: []byte("pcm pcm"),
+		Int:       1,
+		Uint:      2,
+		Float32:   1.12,
+		Float64:   3.14,
 	}
 
 	var err error
@@ -334,16 +361,38 @@ func TestSetFormMap(t *testing.T) {
 
 	g := New(nil)
 	code := 0
-	err = g.POST(ts.URL + "/test.form").SetForm(H{"mode": "A", "text": "good morning",
-		"voice": core.FormFile("testdata/voice.pcm"), "voice2": core.FormMem("pcm pcm")}).Code(&code).Do()
+	err = g.POST(ts.URL + "/test.form").
+		SetForm(H{"mode": "A",
+			"text":    "good morning",
+			"voice":   core.FormFile("testdata/voice.pcm"),
+			"voice2":  core.FormMem("pcm pcm"),
+			"int":     1,
+			"uint":    2,
+			"float32": 1.12,
+			"float64": 3.14,
+		}).
+		Code(&code).
+		Do()
 
 	assert.NoError(t, err)
 }
 
 func TestSetFormStruct(t *testing.T) {
 	reqTestForm := testForm{
-		Mode: "A",
-		Text: "good morning",
+		Mode:    "A",
+		Text:    "good morning",
+		Int:     1,
+		Int8:    2,
+		Int16:   3,
+		Int32:   4,
+		Int64:   5,
+		Uint:    6,
+		Uint8:   7,
+		Uint16:  8,
+		Uint32:  9,
+		Uint64:  10,
+		Float32: 1.23,
+		Float64: 3.14,
 		//Voice: []byte("pcm data"),
 	}
 
@@ -354,7 +403,11 @@ func TestSetFormStruct(t *testing.T) {
 
 	g := New(nil)
 	code := 0
-	err := g.POST(ts.URL + "/test.form").SetForm(&reqTestForm).Code(&code).Do()
+	err := g.POST(ts.URL + "/test.form").
+		//Debug(true).
+		SetForm(&reqTestForm).
+		Code(&code).
+		Do()
 
 	assert.NoError(t, err)
 }
