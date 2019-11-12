@@ -42,3 +42,32 @@ func Test_Core_BytesToString(t *testing.T) {
 		assert.Equal(t, BytesToString(test.set), test.need)
 	}
 }
+
+type testCore struct {
+	need interface{}
+	set  interface{}
+}
+
+func Test_Core_StringToBytes(t *testing.T) {
+	tests := []testCore{
+		{StringToBytes("hello"), []byte("hello")},
+		{StringToBytes("world"), []byte("world")},
+	}
+
+	for _, v := range tests {
+		assert.Equal(t, v.need, v.set)
+	}
+}
+
+func Test_Core_NewPtrVal(t *testing.T) {
+	tests := []testCore{
+		{NewPtrVal(1), 1},
+		{NewPtrVal(11.11), 11.11},
+	}
+
+	for _, v := range tests {
+		val := reflect.ValueOf(v.need)
+		val = val.Elem()
+		assert.Equal(t, val.Interface(), v.set)
+	}
+}
