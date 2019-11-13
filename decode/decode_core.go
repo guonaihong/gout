@@ -173,6 +173,7 @@ func setIntField(val string, bitSize int, sf reflect.StructField, field reflect.
 	if val == "" {
 		val = "0"
 	}
+
 	intVal, err := strconv.ParseInt(val, 10, bitSize)
 	if err == nil {
 		field.SetInt(intVal)
@@ -219,6 +220,11 @@ func setTimeField(val string, bitSize int, structField reflect.StructField, valu
 		timeFormat = time.RFC3339
 	}
 
+	if val == "" {
+		value.Set(reflect.ValueOf(time.Time{}))
+		return nil
+	}
+
 	switch tf := strings.ToLower(timeFormat); tf {
 	case "unix", "unixnano":
 		tv, err := strconv.ParseInt(val, 10, 0)
@@ -235,11 +241,6 @@ func setTimeField(val string, bitSize int, structField reflect.StructField, valu
 		value.Set(reflect.ValueOf(t))
 		return nil
 
-	}
-
-	if val == "" {
-		value.Set(reflect.ValueOf(time.Time{}))
-		return nil
 	}
 
 	l := time.Local
@@ -297,6 +298,10 @@ func setMapField(val string, bitSize int, sf reflect.StructField, value reflect.
 }
 
 func setTimeDuration(val string, bitSize int, sf reflect.StructField, value reflect.Value) error {
+	if val == "" {
+		val = "0"
+	}
+
 	d, err := time.ParseDuration(val)
 	if err != nil {
 		return err
