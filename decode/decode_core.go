@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/guonaihong/gout/core"
 	"reflect"
 	"strconv"
 	"strings"
@@ -321,6 +322,5 @@ func setBase(val string, sf reflect.StructField, value reflect.Value) error {
 		return fn.cb(val, fn.bitSize, sf, value)
 	}
 
-	//todo
-	return nil
+	return fmt.Errorf("type (%T) %s", value, core.ErrUnknownType)
 }

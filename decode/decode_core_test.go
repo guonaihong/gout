@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -32,6 +33,7 @@ func TestHeaderDecode(t *testing.T) {
 		UnixTimeZero   time.Time     `header:"unixTimeZero" time_format:"unix"`
 		DurationZero   time.Duration `header:"durationZero"`
 		BoolZero       bool          `header:"boolZero"`
+		UintZero       uint          `header:"uintZero"`
 
 		Tstruct Tstruct  `header:"struct"`
 		Tslice  []string `header:"tslice"`
@@ -55,13 +57,14 @@ func TestHeaderDecode(t *testing.T) {
 		w.Header().Add("tslice", "4")
 
 		// 测试0值
-		//w.Header().Add("limitZero", "")
+		w.Header().Add("limitZero", "")
 		w.Header().Add("f64Zero", "")
 		w.Header().Add("f32Zero", "")
 		w.Header().Add("createTimeZero", "")
 		w.Header().Add("unixTimeZero", "")
 		w.Header().Add("durationZero", "")
 		w.Header().Add("boolZero", "")
+		w.Header().Add("uintZero", "")
 
 		w.Header().Add("tstruct", `{"x":3, "y":4}`)
 	}
@@ -86,6 +89,7 @@ func TestHeaderDecode(t *testing.T) {
 
 	assert.Equal(t, Tstruct{X: 3, Y: 4}, theader.Tstruct)
 
+	// 测试0值
 	assert.Equal(t, 0, theader.LimitZero)
 	assert.Equal(t, 0.0, theader.F64Zero)
 	assert.Equal(t, float32(0.0), theader.F32Zero)
@@ -93,6 +97,7 @@ func TestHeaderDecode(t *testing.T) {
 	assert.Equal(t, time.Time{}.Unix(), theader.UnixTimeZero.Unix())
 	assert.Equal(t, 0, int(theader.DurationZero))
 	assert.Equal(t, false, theader.BoolZero)
+	assert.Equal(t, uint(0), theader.UintZero)
 
 	failFunc := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("fail", `{fail:fail}`)
@@ -109,4 +114,49 @@ func TestHeaderDecode(t *testing.T) {
 
 	err := h.Decode(resp, &failStruct{})
 	assert.Error(t, err)
+}
+
+func Test_Core_setBase_fail(t *testing.T) {
+	//测试出错
+	err := setBase("x", emptyField, reflect.ValueOf(make(chan struct{})))
+	assert.Error(t, err)
+}
+
+func Test_Core_setTimeDuration_fail(t *testing.T) {
+	//测试出错
+	err := setTimeDuration("xx", 0, emptyField, reflect.Value{})
+	assert.Error(t, err)
+}
+
+func Test_Core_setSlice_fail(t *testing.T) {
+	//测试出错
+	err := setSlice([]string{"1", "2"}, emptyField, reflect.ValueOf([]chan struct{}{make(chan struct{})}))
+	assert.Error(t, err)
+}
+
+//TODO
+func Test_Core_setTimeField(t *testing.T) {
+	//测试
+}
+
+type emptySet struct{}
+
+func (e *emptySet) Set(value reflect.Value, sf reflect.StructField, tagValue string) error {
+	return nil
+}
+
+//测试空返回错误
+func Test_Core_decode_empty(t *testing.T) {
+	var p *int
+	err := []error{
+		decode(&emptySet{}, nil, "test empty"),
+		decode(&emptySet{}, p, "test empty"),
+	}
+
+	for _, e := range err {
+		assert.Error(t, e)
+	}
+}
+
+func Test_Core_setForm_fail(t *testing.T) {
 }
