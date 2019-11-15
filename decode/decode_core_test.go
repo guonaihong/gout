@@ -134,9 +134,38 @@ func Test_Core_setSlice_fail(t *testing.T) {
 	assert.Error(t, err)
 }
 
-//TODO
+type time1 struct {
+	Time time.Time `test:"time"`
+}
+
+type time2 struct {
+	Time time.Time `test:"time"`
+}
+
+type time3 struct {
+	Time time.Time `test:"time" time_format:"unixNano"`
+}
+
+type timeLocationFail struct {
+	Time time.Time `test:"time" time_location:"xxx"`
+}
+
+func Test_Core_setTimeField_Fail(t *testing.T) {
+	//测试时间
+	tests := []reflect.Value{
+
+		reflect.ValueOf(time3{}),
+		reflect.ValueOf(timeLocationFail{}),
+	}
+
+	for _, v := range tests {
+		err := setTimeField("xx", 0, v.Type().Field(0), v.Field(0))
+		assert.Error(t, err)
+	}
+}
+
 func Test_Core_setTimeField(t *testing.T) {
-	//测试
+	//测试时间
 }
 
 type emptySet struct{}
@@ -158,5 +187,27 @@ func Test_Core_decode_empty(t *testing.T) {
 	}
 }
 
-func Test_Core_setForm_fail(t *testing.T) {
+// 测试数组类型
+func Test_Core_setForm_array(t *testing.T) {
+	//测试出错
+	m := map[string][]string{
+		"testarray-fail": []string{"123"},
+	}
+
+	var s [3]string
+	err := setForm(m, reflect.ValueOf(s), emptyField, "testarray-fail")
+	assert.Error(t, err)
+
+	//测试ok
+
+	m = map[string][]string{
+		"testarray-ok": []string{"123", "456"},
+	}
+
+	var ok [2]string
+	v := reflect.ValueOf(&ok)
+	v = v.Elem()
+	err = setForm(m, v, emptyField, "testarray-ok")
+	assert.NoError(t, err)
+	assert.Equal(t, ok, [2]string{"123", "456"})
 }
