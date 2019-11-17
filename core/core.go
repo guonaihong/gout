@@ -31,10 +31,13 @@ func BytesToString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
-func StringToBytes(s string) []byte {
-	sp := *(*[2]uintptr)(unsafe.Pointer(&s))
-	bp := [3]uintptr{sp[0], sp[1], sp[1]}
-	return *(*[]byte)(unsafe.Pointer(&bp))
+func StringToBytes(s string) (b []byte) {
+	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	sh := *(*reflect.StringHeader)(unsafe.Pointer(&s))
+	bh.Data = sh.Data
+	bh.Len = sh.Len
+	bh.Cap = sh.Len
+	return b
 }
 
 func NewPtrVal(defValue interface{}) interface{} {

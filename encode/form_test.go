@@ -3,7 +3,11 @@ package encode
 import (
 	"bytes"
 	"fmt"
+	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
+	"io"
+	"io/ioutil"
+	"mime/multipart"
 	"reflect"
 	"testing"
 	"time"
@@ -16,15 +20,17 @@ type formTest struct {
 	openFile bool
 }
 
-func TestForm_FormEncodeNew(t *testing.T) {
+func Test_Form_FormEncodeNew(t *testing.T) {
 	f := NewFormEncode(nil)
 	assert.NotNil(t, f)
 }
 
-func TestForm_ToBytes(t *testing.T) {
+func Test_Form_toBytes(t *testing.T) {
 	f := []formTest{
 		{set: "test string", need: []byte("test string")},
 		{set: []byte("test bytes"), need: []byte("test bytes")},
+		{set: interface{}(1), need: []byte("1")},
+		{set: 1, need: []byte("1")},
 	}
 
 	fail := []formTest{
@@ -47,7 +53,7 @@ func TestForm_ToBytes(t *testing.T) {
 	}
 }
 
-func TestForm_FormFileWrite(t *testing.T) {
+func Test_Form_FormFileWrite(t *testing.T) {
 
 	f := []formTest{
 		{set: "../testdata/voice.pcm", need: nil, got: nil},
@@ -89,14 +95,133 @@ func TestForm_FormFileWrite(t *testing.T) {
 	}
 }
 
-func TestForm_MapFormFile(t *testing.T) {
+func checkForm(t *testing.T, boundary string, out *bytes.Buffer) {
+	need := map[string]string{
+		"mode":   "A",
+		"text":   "good",
+		"voice":  "pcm1",
+		"voice2": "pcmpcmpcm\n",
+	}
+
+	mr := multipart.NewReader(out, boundary)
+
+	for {
+		p, err := mr.NextPart()
+		if err == io.EOF {
+			break
+		}
+
+		assert.NoError(t, err)
+
+		slurp, err := ioutil.ReadAll(p)
+		assert.NoError(t, err, fmt.Sprintf("formname = %s", p.FormName()))
+		if err != nil {
+			return
+		}
+
+		// key
+		key := p.FormName()
+		// slurp is value
+
+		v := need[key]
+		assert.Equal(t, v, string(slurp))
+	}
 }
 
-func TestForm_Add(t *testing.T) {
+type test_Form struct {
+	f    *FormEncode
+	data interface{}
 }
 
-func TestForm_FormFieldWrite(t *testing.T) {
+//测试错误情况所用结构体
+type test_Form_struct_fail struct {
+	Mode   string `form:"mode"`
+	Text   string `form:"text"`
+	Voice  string `form:"voice" form-mem:"xxx"`
+	Voice2 string `form:"voice2" form-file:"true"`
 }
 
-func TestForm_End(t *testing.T) {
+//测试错误情况所用结构体2
+type test_Form_struct_fail2 struct {
+	Mode   string `form:"mode"`
+	Text   string `form:"text"`
+	Voice  string `form:"voice" form-mem:"true"`
+	Voice2 string `form:"voice2" form-file:"xxx"`
+}
+
+// 测试错误的情况
+func Test_Form_Fail(t *testing.T) {
+	var out bytes.Buffer
+	tests := []test_Form{
+		{NewFormEncode(&out), core.H{
+			"mode":   "A",
+			"text":   "good",
+			"voice":  core.FormMem("pcm1"),
+			"voice2": core.FormFile("Non-existent file"), //不存在的文件
+		}},
+		{NewFormEncode(&out), test_Form_struct_fail2{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  "pcm1",
+			Voice2: "../testdata/voice.pcm",
+		}},
+		{NewFormEncode(&out), test_Form_struct_fail{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  "pcm1",
+			Voice2: "../testdata/voice.pcm",
+		}}}
+
+	for _, v := range tests {
+		err := Encode(v.data, v.f)
+		assert.Error(t, err)
+	}
+}
+
+//测试正确情况所用结构体
+type test_Form_struct struct {
+	Mode   string `form:"mode"`
+	Text   string `form:"text"`
+	Voice  string `form:"voice" form-mem:"true"`
+	Voice2 string `form:"voice2" form-file:"true"`
+}
+
+// 测试正确的情况
+func Test_Form(t *testing.T) {
+	var out bytes.Buffer
+
+	tests := []test_Form{
+		{NewFormEncode(&out), core.H{
+			"mode":   "A",
+			"text":   "good",
+			"voice":  core.FormMem("pcm1"),
+			"voice2": core.FormFile("../testdata/voice.pcm"),
+		}},
+
+		{NewFormEncode(&out), test_Form_struct{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  "pcm1",
+			Voice2: "../testdata/voice.pcm",
+		}},
+	}
+
+	for _, v := range tests {
+		err := Encode(v.data, v.f)
+		assert.NoError(t, err)
+
+		if err != nil {
+			continue
+		}
+		v.f.End()
+
+		boundary := v.f.Writer.Boundary()
+		checkForm(t, boundary, &out)
+		out.Reset()
+	}
+}
+
+func Test_Form_Name(t *testing.T) {
+	f := NewFormEncode(&bytes.Buffer{})
+	assert.Equal(t, f.Name(), "form")
 }

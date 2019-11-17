@@ -25,6 +25,9 @@ func Test_Color_Sbluef(t *testing.T) {
 }
 
 func Test_Color_color(t *testing.T) {
+	NoColor = false
+	assert.Equal(t, New(true, Blue).color("hello"), "\x1b[34;1mhello\x1b[0m")
+	assert.Equal(t, New(false).color("hello"), "hello")
 }
 
 func Test_Color_New(t *testing.T) {
