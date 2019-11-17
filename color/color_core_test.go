@@ -1,9 +1,11 @@
 package color
 
 import (
+	"bytes"
 	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
 	"io"
+	"io/ioutil"
 	"strings"
 	"testing"
 )
@@ -28,4 +30,33 @@ func Test_ColorCore_NewFormat_Nil(t *testing.T) {
 }
 
 func Test_ColorCore_Read(t *testing.T) {
+	j := `{
+    "array": [
+        "foo",
+        "bar",
+        "baz"
+    ],
+    "bool": false,
+    "null": null,
+    "num": 100,
+    "obj": {
+        "a": 1,
+        "b": 2
+    },
+    "str": "foo"
+}`
+
+	NoColor = false
+	f := NewFormatEncoder(strings.NewReader(j), true /*open color*/, JsonType)
+	var out bytes.Buffer
+
+	io.Copy(&out, f)
+
+	all, err := ioutil.ReadFile("./testdata/color.data")
+	if err != nil {
+		return
+	}
+
+	assert.Equal(t, out.Bytes(), all)
+	//ioutil.WriteFile("/tmp/color.data", out.Bytes(), 0644)
 }
