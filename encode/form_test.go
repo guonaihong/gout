@@ -138,6 +138,14 @@ type test_Form_struct_fail struct {
 	Mode   string `form:"mode"`
 	Text   string `form:"text"`
 	Voice  string `form:"voice" form-mem:"xxx"`
+	Voice2 string `form:"voice2" form-file:"true"`
+}
+
+//测试错误情况所用结构体2
+type test_Form_struct_fail2 struct {
+	Mode   string `form:"mode"`
+	Text   string `form:"text"`
+	Voice  string `form:"voice" form-mem:"true"`
 	Voice2 string `form:"voice2" form-file:"xxx"`
 }
 
@@ -145,6 +153,18 @@ type test_Form_struct_fail struct {
 func Test_Form_Fail(t *testing.T) {
 	var out bytes.Buffer
 	tests := []test_Form{
+		{NewFormEncode(&out), core.H{
+			"mode":   "A",
+			"text":   "good",
+			"voice":  core.FormMem("pcm1"),
+			"voice2": core.FormFile("Non-existent file"), //不存在的文件
+		}},
+		{NewFormEncode(&out), test_Form_struct_fail2{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  "pcm1",
+			Voice2: "../testdata/voice.pcm",
+		}},
 		{NewFormEncode(&out), test_Form_struct_fail{
 			Mode:   "A",
 			Text:   "good",
