@@ -267,7 +267,8 @@ type testForm struct {
 	Uint64  uint64  `form:"uint64"`
 	Float32 float32 `form:"float32"`
 	Float64 float64 `form:"float64"`
-	//Voice []byte `form:"voice" form-mem:"true"` //todo open
+	//Voice   []byte  `form-mem:"true"`  //测试从内存中构造
+	//Voice2  []byte  `form-file:"true"` //测试从文件中读取
 }
 
 func setupForm(t *testing.T, reqTestForm testForm) *gin.Engine {
@@ -313,7 +314,7 @@ func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
 		assert.Equal(t, reqTestForm.Int, t2.Int)
 		assert.Equal(t, reqTestForm.Uint, t2.Uint)
 		assert.Equal(t, reqTestForm.Float32, t2.Float32)
-		//assert.Equal(t, reqTestForm.Float64, t2.Float64)
+		assert.Equal(t, reqTestForm.Float64, t2.Float64)
 
 		assert.NotNil(t, t2.Voice)
 		fd, err := t2.Voice.Open()
