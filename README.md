@@ -24,6 +24,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
             - [SetBody](#setbody)
             - [BindBody](#bindbody)
         - [json](#json)
+            - [SetJSON](#setjson)
+            - [BindJSON](#bindjson)
         - [yaml](#yaml)
         - [xml](#xml)
         - [form-data](#form-data)
@@ -59,7 +61,14 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 * [httplib](./to-gout-doc/beego-httplib.md)
 * [resty](./to-gout-doc/resty-doc.md)
 # example
- [examples](./_example) 目录下面的例子，都是可以直接跑的。如果觉得运行例子还是不明白用法，可以把你迷惑的地方写出来，让后提[issue](https://github.com/guonaihong/gout/issues/new)
+ [examples](./_example) 目录下面的例子，都是可以直接跑的。如果觉得运行例子还是不明白用法，可以把你迷惑的地方写出来，然后提[issue](https://github.com/guonaihong/gout/issues/new)
+ ### 运行命令如下
+ ```bash
+ cd _example
+ # GOPROXY 是打开go module代理，可以更快下载模块
+ # 第一次运行需要加GOPROXY下载模块，模块已的直接 go run 01-color-json.go 即可
+ env GOPROXY=https://goproxy.cn go run 01-color-json.go
+ ```
 # API 示例
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
@@ -356,24 +365,77 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 ## http body
 ### body
 #### SetBody
-* SetBody 设置string, []byte等类型数据到http body里面
 ```go
-// 设置string变量至请求的http body
-err := gout.POST(url).SetBody("hello world"/*更多支持类型请看下面*/).Do()
+// SetBody 设置string, []byte等类型数据到http body里面
+// SetBody支持的更多数据类型可看下面
+package main
 
-// 设置实现io.Reader接口的变量至 请求的http body
-err = gout.POST(url).SetBody(bytes.NewBufferString("hello world")).Code(&code).Do()
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	err := gout.
+		// 设置POST方法和url
+		POST(":8080/req/body").
+		//打开debug模式
+		Debug(true).
+		// 设置非结构化数据到http body里面
+		// 设置json需使用SetJSON
+		SetBody("send string").
+		//结束函数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+
+}
+
+/*
+> POST /req/body HTTP/1.1
+>
+
+send string
+
+< HTTP/1.1 200 OK
+< Content-Type: text/plain; charset=utf-8
+< Date: Mon, 18 Nov 2019 14:57:43 GMT
+< Content-Length: 2
+
+*/
+
 ```
 #### bindBody
-* BindBody bind body到string, []byte等类型变量里面
 ```go
-// 解析http body到string类型变量里面
-var s string
-err := gout.GET(url).BindBody(&s/*更多支持指针类型变量请看下面*/).Do()
+// BindBody bind body到string, []byte等类型变量里面
+package main
 
-// 解析http body至实现io.Writer接口的变量里面
-var b bytes.Buffer{}
-err = gout.GET(url).BindBody(&b).Code(&code).Do()
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	s := ""
+	err := gout.
+		// 设置GET 方法及url
+		GET("www.baidu.com").
+		// 绑定返回值
+		BindBody(&s).
+		// 结束函数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+
+	fmt.Printf("html size = %d\n", len(s))
+}
+
 ```
 #### 支持的类型有
 * io.Reader(SetBody 支持)
@@ -389,27 +451,86 @@ err = gout.GET(url).BindBody(&b).Code(&code).Do()
 * array, slice
 
 ### json
-
-* SetJSON()  设置请求http body为json
-* BindJSON()  解析响应http body里面的json到结构体里面
-
-发送json到服务端，然后把服务端返回的json结果解析到结构体里面
+#### setjson
 ```go
-type data struct {
-    Id int `json:"id"`
-    Data string `json:"data"`
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	err := gout.POST(":8080/colorjson").
+		//打开debug模式
+		Debug(true).
+		//设置json到请求body
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
 }
+/*
+> POST /colorjson HTTP/1.1
+> Content-Type: application/json
+>
 
-
-var d1, d2 data
-var httpCode int
-
-err := gout.POST(":8080/test.json").SetJSON(&d1).BindJSON(&d2).Code(&httpCode).Do()
-if err != nil || httpCode != 200{
-    fmt.Printf("send fail:%s\n", err)
+{
+    "array": [
+        "foo",
+        "bar",
+        "baz"
+    ],
+    "bool": false,
+    "null": null,
+    "num": 100,
+    "obj": {
+        "a": 1,
+        "b": 2
+    },
+    "str": "foo"
 }
+*/
+
 ```
+#### bindjson
+```go
+package main
 
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+type rsp struct {
+	ErrMsg  string `json:"errmsg"`
+	ErrCode int    `json:"errcode"`
+}
+
+func main() {
+	rsp := rsp{}
+	err := gout.
+		GET(":8080/colorjson").
+		//打开debug模式
+		Debug(true).
+		//绑定响应json数据到结构体
+        BindJSON(&rsp).
+        //结束函数
+		Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
+
+``` 
 ### yaml
 * SetYAML() 设置请求http body为yaml
 * BindYAML() 解析响应http body里面的yaml到结构体里面
