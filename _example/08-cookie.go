@@ -50,8 +50,13 @@ func main() {
 	fmt.Printf("\n\n===1. Send two cookies=========\n")
 	err := gout.GET(":8080/cookie").
 		Debug(true).
-		SetCookies(&http.Cookie{Name: "test1", Value: "test1"},
-			&http.Cookie{Name: "test2", Value: "test2"}).
+		SetCookies(
+			&http.Cookie{
+				Name:  "test1",
+				Value: "test1"},
+			&http.Cookie{
+				Name:  "test2",
+				Value: "test2"}).
 		Do()
 	if err != nil {
 		fmt.Println(err)
