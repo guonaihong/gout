@@ -6,15 +6,19 @@ gout 是go写的http 客户端，为提高工作效率而开发
 
 ## 演示
 ![gout-example.gif](https://github.com/guonaihong/images/blob/master/gout/gout-example.gif?raw=true)
+
 ## 内容
 - [安装](#安装)
 - [技能树](#技能树)
 - [迁移文档](#迁移文档)
+- [example](#example)
 - [API示例](#api-示例)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [group](#group)
     - [query](#query)
     - [http header](#http-header)
+		- [req header](#req-header)
+		- [rsp header](#rsp-header)
     - [http body](#http-body)
         - [body](#body)
             - [SetBody](#setbody)
@@ -54,7 +58,9 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 主要方便下面的用户迁移到gout
 * [httplib](./to-gout-doc/beego-httplib.md)
 * [resty](./to-gout-doc/resty-doc.md)
-
+# example
+ [examples](./_example) 目录下面的例子，都是可以直接跑的。如果觉得运行例子还是不明白用法，可以把你迷惑的地方写出来，让后提[issue](https://github.com/guonaihong/gout/issues/new)
+# API 示例
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
 // 创建一个实例
@@ -106,12 +112,62 @@ if err != nil {
 }
 ```
 ## query
-* SetQuery() 设置http 查询字符串
 
+### easy example
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+    "time"
+)
+
+func main() {
+    err := gout.
+        //设置GET请求和url，:8080/test.query是127.0.0.1:8080/test.query的简写
+        GET(":8080/test.query").
+        //打开debug模式
+        Debug(true).
+        //设置查询字符串
+        SetQuery(gout.H{
+            "q1": "v1",
+            "q2": 2,
+            "q3": float32(3.14),
+            "q4": 4.56,
+            "q5": time.Now().Unix(),
+            "q6": time.Now().UnixNano(),
+            "q7": time.Now().Format("2006-01-02")}).
+        //结束函数
+        Do()
+    if err != nil {
+        fmt.Printf("%s\n", err)
+        return
+    }
+
+}
+
+/*
+> GET /test.query?q1=v1&q2=2&q3=3.14&q4=4.56&q5=1574081600&q6=1574081600258009213&q7=2019-11-18 HTTP/1.1
+>
+
+< HTTP/1.1 200 OK
+< Content-Length: 0
+*/
+
+
+```
+### SetQuery支持的更多数据类型
 ```go
 code := 0
 
-if err := gout.GET(":8080/testquery").SetQuery(/*看下面支持的情况*/).Code(&code).Do(); err != nil {
+err := gout.
+	GET(":8080/testquery").
+	SetQuery( /*看下面支持的情况*/ ).
+	Code(&code). //解析http code，如不关心服务端返回状态吗，不设置该函数即可
+	Do()
+if err != nil {
+
 }
 
 /*
@@ -145,10 +201,109 @@ SetQuery([]string{"active", "enable", "action", "drop"})`
 ```
 
 ## http header
-* SetHeader() 设置http header
-* BindHeader() 解析响应http header
+#### req header
+```go
+package main
 
-对gout来说，既支持客户端发送http header,也支持解码服务端返回的http header
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+    "time"
+)
+
+func main() {
+    err := gout.
+        //设置GET请求和url，:8080/test.header是127.0.0.1:8080/test.header的简写
+        GET(":8080/test.header").
+        //设置debug模式
+        Debug(true).
+        //设置请求http header
+        SetHeader(gout.H{
+            "h1": "v1",
+            "h2": 2,
+            "h3": float32(3.14),
+            "h4": 4.56,
+            "h5": time.Now().Unix(),
+            "h6": time.Now().UnixNano(),
+            "h7": time.Now().Format("2006-01-02")}).
+        Do()
+    if err != nil {
+        fmt.Printf("%s\n", err)
+        return
+    }
+
+}
+
+/*
+> GET /test.header HTTP/1.1
+> H2: 2
+> H3: 3.14
+> H4: 4.56
+> H5: 1574081686
+> H6: 1574081686471347098
+> H7: 2019-11-18
+> H1: v1
+>
+
+
+< HTTP/1.1 200 OK
+< Date: Mon, 18 Nov 2019 12:54:46 GMT
+< Content-Length: 0
+*/
+```
+#### rsp header
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+    "time"
+)
+
+// 和解析json类似，如要解析http header需设置header tag
+type rspHeader struct {
+    Total int       `header:"total"`
+    Sid   string    `header:"sid"`
+    Time  time.Time `header:"time" time_format:"2006-01-02"`
+}
+
+func main() {
+
+    rsp := rspHeader{}
+    err := gout.
+        // :8080/test.header是 http://127.0.0.1:8080/test.header的简写
+        GET(":8080/test.header").
+        //打开debug模式
+        Debug(true).
+        //解析请求header至结构体中
+        BindHeader(&rsp). 
+        //结束函数
+        Do()
+    if err != nil {
+        fmt.Printf("%s\n", err)
+        return
+    }
+
+    fmt.Printf("rsp header:\n%#v \nTime:%s\n", rsp, rsp.Time)
+}
+
+/*
+> GET /test.header HTTP/1.1
+>
+
+
+
+< HTTP/1.1 200 OK
+< Content-Length: 0
+< Sid: 1234
+< Time: 2019-11-18
+< Total: 2048
+< Date: Mon, 18 Nov 2019 12:59:37 GMT
+*/
+
+```
+### SetHeader和BindHeader支持的更多类型
 ```go
 type testHeader struct {
     CheckIn string `header:checkin`
@@ -438,49 +593,110 @@ func main() {
 * SetCookies设置cookie, 可以设置一个或者多个cookie
 
 ```go
-package main
-
 import (
-        "fmt"
-        "github.com/guonaihong/gout"
-        "net/http"
+    "fmt"
+    "github.com/guonaihong/gout"
+    "net/http"
 )
 
 func main() {
 
-        // 发送两个cookie
-        err := gout.GET(":1234/cookie").SetCookies(&http.Cookie{Name: "test1", Value: "test1"},
-                &http.Cookie{Name: "test2", Value: "test2"}).Do()
+    // === 发送多个cookie ====
 
-        // 发送一个cookie
-        err = gout.GET(":1234/cookie/one").SetCookies(&http.Cookie{Name: "test3", Value: "test3"}).Do()
+    err := gout.
+        // :8080/cookie是http://127.0.0.1:8080/cookie的简写
+        GET(":8080/cookie").
+        //设置debug模式
+        Debug(true).
+        SetCookies(
+            //设置cookie1
+            &http.Cookie{
+                Name:  "test1",
+                Value: "test1"},
+            //设置cookie2
+            &http.Cookie{
+                Name:  "test2",
+                Value: "test2"}).
+        Do()
+
+    if err != nil {
         fmt.Println(err)
+        return
+    }
+
+    // === 发送一个cookie ===
+    err = gout.
+        // :8080/cookie/one是http://127.0.0.1:8080/cookie/one的简写
+        GET(":8080/cookie/one").
+        //设置debug模式
+        Debug(true).
+        SetCookies(
+            //设置cookie1
+            &http.Cookie{
+                Name:  "test3",
+                Value: "test3"}).
+        Do()
+    fmt.Println(err)
+
 }
+
 ```
 
 ## context
 * WithContext设置context，可以取消http请求
 ### timeout
 ```go
+package main
+
+import (
+    "context"
+    "github.com/guonaihong/gout"
+    "time"
+)
+
 func main() {
-	// 给http请求 设置超时
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
+    // 给http请求 设置超时
+    ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
 
-	err := gout.GET("127.0.0.1:8080/timeout").WithContext(ctx).Do()
+    err := gout.
+        GET("127.0.0.1:8080/timeout"). //设置GET请求以及url地址
+        WithContext(ctx).              //设置context,　如果传过来的ctx超时，这个http请求就会被取消
+        Do()                           //结束函数
 
+    if err != nil {
+    }
 }
+
 ```
 ### cancel
 ```go
-func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		time.Sleep(time.Second)
-		cancel() //调用cancel可取消http请求
-	}()
+package main
 
-	err := gout.GET("127.0.0.1:8080/cancel").WithContext(ctx).Do()
+import (
+    "context"
+    "github.com/guonaihong/gout"
+    "time"
+)
+
+func main() {
+    //　声明一个context
+    ctx, cancel := context.WithCancel(context.Background())
+
+    //调用cancel可取消http请求
+    go func() {
+        time.Sleep(time.Second)
+        cancel()
+    }() 
+
+    err := gout.
+        GET("127.0.0.1:8080/cancel"). //设置GET请求以及需要访问的url
+        WithContext(ctx).             //设置context, 外层调用cancel函数就可取消这个http请求
+        Do()
+
+    if err != nil {
+    }   
 }
+
 ```
 
 ## unix socket
@@ -490,16 +706,23 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"github.com/guonaihong/gout"
-	"net/http"
+    "fmt"
+    "github.com/guonaihong/gout"
+    "net/http"
 )
 
 func main() {
-	c := http.Client{}
-	g := gout.New(&c).UnixSocket("/tmp/test.socket")
-	err := g.GET("http://a/test").SetBody("hello world").Do()
-	fmt.Println(err)
+    c := http.Client{}
+
+    g := gout.
+        New(&c).
+        UnixSocket("/tmp/test.socket") //设置unixsocket文件位置
+
+    err := g.
+        GET("http://a/test").   //设置GET请求
+        SetBody("hello world"). //设置body内容
+        Do()
+    fmt.Println(err)
 }
 ```
 ## http2 doc
@@ -509,18 +732,25 @@ go 使用https访问http2的服务会自动启用http2协议，这里不需要�
 package main
 
 import (
-	"fmt"
-	"github.com/guonaihong/gout"
+    "fmt"
+    "github.com/guonaihong/gout"
 )
 
 func main() {
-	s := ""
-	err := gout.GET("https://http2.golang.org/reqinfo").SetBody("hello, ###########").BindBody(&s).Do()
-	fmt.Printf("err = %s\n", err)
+    s := ""
+    err := gout.
+        GET("https://http2.golang.org/reqinfo"). //设置GET请求和请求url
+        Debug(true).                             //打开debug模式，可以看到请求数据和响应数据
+        SetBody("hello, ###########").           //设置请求body的内容，如果你的请求内容是json格式，需要使用SetJSON函数
+        BindBody(&s).                            //解析响应body内容
+        Do()                                     //结束函数
 
-	fmt.Printf("body length:%d\n", len(s))
-	fmt.Printf("%s\n", s)
+    if err != nil {
+        fmt.Printf("send fail:%s\n", err)
+    }   
+    _ = s 
 }
+
 ```
 ## debug mode
 ### color
@@ -605,7 +835,7 @@ import (
 )
 
 type testQuery struct {
-	Size int    `query:"size" form:"size"`
+	Size int    `query:"size" form:"size"`　// query tag是gout设置查询字符串需要的
 	Page int    `query:"page" form:"page"`
 	Ak   string `query:"ak" form:"ak"`
 }
@@ -636,9 +866,15 @@ func main() {
 		if err != nil {
 			return
 		}
+
 		// Send to the next service
+
 		code := 0 // http code
-		err := gout.GET("127.0.0.1:1234/query").SetQuery(q).Code(&code).Do()
+		err := gout.
+			GET("127.0.0.1:1234/query"). //发起GET请求
+			SetQuery(q).                 //设置查询字符串
+			Code(&code).                 //解析http code，如果不关系服务端的code　可以不设置该函数
+			Do()
 		if err != nil || code != 200 { /* todo Need to handle errors here */
 		}
 		c.JSON(200, q)
