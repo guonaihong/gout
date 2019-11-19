@@ -10,6 +10,19 @@ import (
 	"testing"
 )
 
+func TestNew(t *testing.T) {
+	c := &http.Client{}
+	tests := []*Gout{
+		New(nil),
+		New(),
+		New(c),
+	}
+
+	for _, v := range tests {
+		assert.NotNil(t, v)
+	}
+}
+
 func setupMethod(total *int32) *gin.Engine {
 
 	router := gin.Default()

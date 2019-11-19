@@ -76,7 +76,7 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 // 也可以直接调用包里面的GET, POST方法
 // 比如gout.GET(url)
 
-g := gout.New(nil)
+g := gout.New()
 
 // 发送GET方法
 g.GET(url).Do()
@@ -102,7 +102,7 @@ g.OPTIONS(url).Do()
 ## group
 路由组
 ```go
-g := New(nil)
+g := New()
 
 v1 := g.Group(ts.URL + "/v1")
 err := v1.POST("/login").Next(). // http://127.0.0.1:80/v1/login
@@ -521,8 +521,8 @@ func main() {
 		//打开debug模式
 		Debug(true).
 		//绑定响应json数据到结构体
-        BindJSON(&rsp).
-        //结束函数
+		BindJSON(&rsp).
+		//结束函数
 		Do()
 
 	if err != nil {
