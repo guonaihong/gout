@@ -72,32 +72,36 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
 # API 示例
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
-// 创建一个实例
-// 也可以直接调用包里面的GET, POST方法
-// 比如gout.GET(url)
+package main
 
-g := gout.New()
+import (
+	"github.com/guonaihong/gout"
+)
 
-// 发送GET方法
-g.GET(url).Do()
+func main() {
+	url := "https://github.com"
+	// 发送GET方法
+	gout.GET(url).Do()
 
-// 发送POST方法
-g.POST(url).Do()
+	// 发送POST方法
+	gout.POST(url).Do()
 
-// 发送PUT方法
-g.PUT(url).Do()
+	// 发送PUT方法
+	gout.PUT(url).Do()
 
-// 发送DELETE方法
-g.DELETE(url).Do()
+	// 发送DELETE方法
+	gout.DELETE(url).Do()
 
-// 发送PATH方法
-g.PATCH(url).Do()
+	// 发送PATH方法
+	gout.PATCH(url).Do()
 
-// 发送HEAD方法
-g.HEAD(url).Do()
+	// 发送HEAD方法
+	gout.HEAD(url).Do()
 
-// 发送OPTIONS
-g.OPTIONS(url).Do()
+	// 发送OPTIONS
+	gout.OPTIONS(url).Do()
+}
+
 ```
 ## group
 路由组
@@ -122,7 +126,7 @@ if err != nil {
 ```
 ## query
 
-### easy example
+### SetQuery
 ```go
 package main
 
@@ -168,16 +172,33 @@ func main() {
 ```
 ### SetQuery支持的更多数据类型
 ```go
-code := 0
+package main
 
-err := gout.
-	GET(":8080/testquery").
-	SetQuery( /*看下面支持的情况*/ ).
-	Code(&code). //解析http code，如不关心服务端返回状态吗，不设置该函数即可
-	Do()
-if err != nil {
+import (
+	"github.com/guonaihong/gout"
+)
 
+func main() {
+
+	code := 0
+
+	err := gout.
+
+		//发送GET请求 :8080/testquery是127.0.0.1:8080/testquery简写
+		GET(":8080/testquery").
+
+		// 设置查询字符串
+		SetQuery( /*看下面支持的情况*/ ).
+
+		//解析http code，如不关心服务端返回状态吗，不设置该函数即可
+		Code(&code).
+		Do()
+	if err != nil {
+
+	}
 }
+
+
 
 /*
 SetQuery支持的类型有
@@ -187,16 +208,16 @@ SetQuery支持的类型有
 * array, slice(长度必须是偶数)
 */
 
-// string
+// 1.string
 SetQuery("check_in=2019-06-18&check_out=2018-06-18")
 
-// gout.H 或者 map[string]interface{}
+// 2.gout.H 或者 map[string]interface{}
 SetQuery(gout.H{
     "check_in":"2019-06-18",
     "check_out":"2019-06-18",
 })
 
-// struct
+// 3.struct
 type testQuery struct {
     CheckIn string `query:checkin`
     CheckOut string `query:checkout`
@@ -204,7 +225,7 @@ type testQuery struct {
 
 SetQuery(&testQuery{CheckIn:2019-06-18, CheckOut:2019-06-18})
 
-// array or slice
+// 4.array or slice
 // ?active=enable&action=drop
 SetQuery([]string{"active", "enable", "action", "drop"})`
 ```
@@ -256,7 +277,6 @@ func main() {
 
 
 < HTTP/1.1 200 OK
-< Date: Mon, 18 Nov 2019 12:54:46 GMT
 < Content-Length: 0
 */
 ```
@@ -308,7 +328,6 @@ func main() {
 < Sid: 1234
 < Time: 2019-11-18
 < Total: 2048
-< Date: Mon, 18 Nov 2019 12:59:37 GMT
 */
 
 ```
@@ -402,7 +421,6 @@ send string
 
 < HTTP/1.1 200 OK
 < Content-Type: text/plain; charset=utf-8
-< Date: Mon, 18 Nov 2019 14:57:43 GMT
 < Content-Length: 2
 
 */
@@ -587,20 +605,73 @@ curl -F mode=A -F text="good" -F voice=@./test.pcm -f voice2=@./test2.pcm url
 
 * 使用gout.H
 ```go
-code := 0
-err := gout.
-    POST(":8080/test").
-    SetForm(gout.H{"mode": "A",
-        "text":   "good",
-        "voice":  gout.FormFile("test.pcm"),
-        "voice2": gout.FormMem("pcm")}).Code(&code).Do()
+package main
 
-if err != nil {
-    fmt.Printf("%s\n", err)
-}   
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
 
-if code != 200 {
-}   
+func main() {
+
+	code := 0
+	err := gout.
+		POST(":8080/test").
+		// 打开debug模式
+		Debug(true).
+		SetForm(
+			gout.H{
+				"mode": "A",
+				"text": "good",
+				// 从文件里面打开
+				"voice":  gout.FormFile("test.pcm"),
+				"voice2": gout.FormMem("pcm"),
+			},
+		).
+		//解析http code，如不关心可以不设置
+		Code(&code).
+		Do()
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+
+	if code != 200 {
+	}
+}
+
+/*
+> POST /test HTTP/1.1
+> Content-Type: multipart/form-data; boundary=2b0685e5b98e540f80b247d5e7c1283807aa07e62b827543859a6db765a8
+>
+
+--2b0685e5b98e540f80b247d5e7c1283807aa07e62b827543859a6db765a8
+Content-Disposition: form-data; name="mode"
+
+A
+--2b0685e5b98e540f80b247d5e7c1283807aa07e62b827543859a6db765a8
+Content-Disposition: form-data; name="text"
+
+good
+--2b0685e5b98e540f80b247d5e7c1283807aa07e62b827543859a6db765a8
+Content-Disposition: form-data; name="voice"; filename="voice"
+Content-Type: application/octet-stream
+
+pcm pcm pcm
+
+--2b0685e5b98e540f80b247d5e7c1283807aa07e62b827543859a6db765a8
+Content-Disposition: form-data; name="voice2"; filename="voice2"
+Content-Type: application/octet-stream
+
+pcm
+--2b0685e5b98e540f80b247d5e7c1283807aa07e62b827543859a6db765a8--
+
+
+< HTTP/1.1 200 OK
+< Server: gurl-server
+< Content-Length: 0
+*/
+ 
 ```
 
 * 使用结构体
@@ -629,30 +700,53 @@ if err != nil {
 ### x-www-form-urlencoded
 * 使用SetWWWForm函数实现发送x-www-form-urlencoded类型数据
 ```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
 func main() {
-    err := gout.POST(":8080/post").
+
+	code := 0
+	err := gout.
+		POST(":8080/post").
+		// 打开debug模式
 		Debug(true).
-		SetWWWForm(gout.H{
-			"int":     3,
-			"float64": 3.14,
-			"string":  "test-www-Form",
-		}).
+		// 设置x-www-form-urlencoded数据
+		SetWWWForm(
+			gout.H{
+				"int":     3,
+				"float64": 3.14,
+				"string":  "test-www-Form",
+			},
+		).
+		// 关心http code 返回值设置
+		Code(&code).
 		Do()
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
 
+	if code != 200 {
+	}
 }
+
 /*
-output:
 > POST /post HTTP/1.1
 > Content-Type: application/x-www-form-urlencoded
 >
 
 float64=3.14&int=3&string=test-www-Form
 
+< HTTP/1.1 200 OK
+< Content-Length: 0
+< Server: gurl-server
+
 */
+
 ```
 
 ### callback
@@ -701,7 +795,15 @@ import (
 func main() {
 	c := &http.Client{}
 	s := ""
-	err := gout.New(c).GET("www.qq.com").SetProxy("http://127.0.0.1:7000").BindBody(&s).Do()
+	err := gout.
+		New(c).
+		GET("www.qq.com").
+		// 设置proxy服务地址
+		SetProxy("http://127.0.0.1:7000").
+		// 绑定返回数据到s里面
+		BindBody(&s).
+		Do()
+
 	if err != nil {
 		log.Println(err)
 		return
@@ -709,55 +811,62 @@ func main() {
 
 	fmt.Println(s)
 }
+
 ```
 ## cookie
 * SetCookies设置cookie, 可以设置一个或者多个cookie
 
 ```go
+package main
+
 import (
-    "fmt"
-    "github.com/guonaihong/gout"
-    "net/http"
+	"fmt"
+	"github.com/guonaihong/gout"
+	"net/http"
 )
 
 func main() {
 
-    // === 发送多个cookie ====
+	// === 发送多个cookie ====
+	err := gout.
+		// :8080/cookie是http://127.0.0.1:8080/cookie的简写
+		GET(":8080/cookie").
+		//设置debug模式
+		Debug(true).
+		SetCookies(
+			//设置cookie1
+			&http.Cookie{
+				Name:  "test1",
+				Value: "test1",
+			},
+			//设置cookie2
+			&http.Cookie{
+				Name:  "test2",
+				Value: "test2",
+			},
+		).
+		Do()
 
-    err := gout.
-        // :8080/cookie是http://127.0.0.1:8080/cookie的简写
-        GET(":8080/cookie").
-        //设置debug模式
-        Debug(true).
-        SetCookies(
-            //设置cookie1
-            &http.Cookie{
-                Name:  "test1",
-                Value: "test1"},
-            //设置cookie2
-            &http.Cookie{
-                Name:  "test2",
-                Value: "test2"}).
-        Do()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-
-    // === 发送一个cookie ===
-    err = gout.
-        // :8080/cookie/one是http://127.0.0.1:8080/cookie/one的简写
-        GET(":8080/cookie/one").
-        //设置debug模式
-        Debug(true).
-        SetCookies(
-            //设置cookie1
-            &http.Cookie{
-                Name:  "test3",
-                Value: "test3"}).
-        Do()
-    fmt.Println(err)
+	// === 发送一个cookie ===
+	err = gout.
+		// :8080/cookie/one是http://127.0.0.1:8080/cookie/one的简写
+		GET(":8080/cookie/one").
+		//设置debug模式
+		Debug(true).
+		SetCookies(
+			//设置cookie1
+			&http.Cookie{
+				Name:  "test3",
+				Value: "test3",
+			},
+		).
+		Do()
+	fmt.Println(err)
 
 }
 
@@ -911,17 +1020,27 @@ func IOSDebug() gout.DebugOpt {
     return gout.DebugFunc(func(o *gout.DebugOption) {
         if len(os.Getenv("IOS_DEBUG")) > 0 { 
             o.Debug = true
-        }   
+        }
     })  
 }
 
 func main() {
 
     s := ""
-    err := gout.GET("127.0.0.1:1234").Debug(IOSDebug()).SetBody("test hello").BindBody(&s).Do()
+    err := gout.
+        GET("127.0.0.1:8080").
+        // Debug可以支持自定义方法
+        // 可以实现设置某个环境变量才输出debug信息
+        // 或者debug信息保存到文件里面，可以看下_example/15-debug-save-file.go
+        Debug(IOSDebug()).
+        SetBody("test hello").
+        BindBody(&s).
+        Do()
+
     fmt.Printf("err = %v\n", err)
 }
 
+// env IOS_DEBUG=true go run customize.go
 ```
 ### no-color
 no-color 使用gout.NoColor()关闭颜色高亮
@@ -956,7 +1075,7 @@ import (
 )
 
 type testQuery struct {
-	Size int    `query:"size" form:"size"`　// query tag是gout设置查询字符串需要的
+	Size int    `query:"size" form:"size"` // query tag是gout设置查询字符串需要的
 	Page int    `query:"page" form:"page"`
 	Ak   string `query:"ak" form:"ak"`
 }
@@ -980,21 +1099,24 @@ func main() {
 	go nextSever()
 	r := gin.Default()
 
-	// 当前服务
+	// 演示把gin绑定到的查询字符串转发到nextServer节点
 	r.GET("/query", func(c *gin.Context) {
 		q := testQuery{}
+		// 绑定查询字符串
 		err := c.ShouldBindQuery(&q)
 		if err != nil {
 			return
 		}
 
-		// Send to the next service
-
+		// 开发转发, 复用gin所用结构体变量q
 		code := 0 // http code
 		err := gout.
-			GET("127.0.0.1:1234/query"). //发起GET请求
-			SetQuery(q).                 //设置查询字符串
-			Code(&code).                 //解析http code，如果不关系服务端的code　可以不设置该函数
+			//发起GET请求
+			GET("127.0.0.1:1234/query").
+			//设置查询字符串
+			SetQuery(q).
+			//关心http server返回的状态码 设置该函数
+			Code(&code).
 			Do()
 		if err != nil || code != 200 { /* todo Need to handle errors here */
 		}
