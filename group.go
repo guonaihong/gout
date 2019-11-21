@@ -241,3 +241,7 @@ func (g *routerGroup) Next() *routerGroup {
 	g.reqs = append(g.reqs, &r)
 	return g
 }
+
+func (g *routerGroup) Bench() *Bench {
+	return &Bench{g: g}
+}
