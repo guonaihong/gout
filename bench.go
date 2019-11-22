@@ -8,6 +8,7 @@ type Bench struct {
 	durations  time.Duration
 	number     int
 	concurrent int
+	rate       int
 
 	g *routerGroup
 }
@@ -19,6 +20,11 @@ func (b *Bench) Concurrent(c int) *Bench {
 
 func (b *Bench) Number(n int) *Bench {
 	b.number = n
+	return b
+}
+
+func (b *Bench) Rate(rate int) *Bench {
+	b.rate = rate
 	return b
 }
 

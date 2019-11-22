@@ -1,13 +1,14 @@
 package bench
 
 import (
+	"sync/atomic"
 	"time"
 )
 
 // 数据字段，每个字段都用于显示
 type report struct {
 	Concurrency   int
-	Failed        int
+	Failed        int32
 	Tps           float64
 	Total         time.Duration
 	Kbs           float64
@@ -27,5 +28,5 @@ type Report struct {
 }
 
 func (r *Report) AddFail() {
-	atomic.AddInt32(&r.Failed)
+	atomic.AddInt32(&r.Failed, 1)
 }
