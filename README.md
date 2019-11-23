@@ -12,6 +12,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 - [技能树](#技能树)
 - [迁移文档](#迁移文档)
 - [example](#example)
+- [quick start](#quick-start)
 - [API示例](#api-示例)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [group](#group)
@@ -68,6 +69,73 @@ env GOPATH=`pwd` go get github.com/guonaihong/gout
  # GOPROXY 是打开go module代理，可以更快下载模块
  # 第一次运行需要加GOPROXY下载模块，模块已的直接 go run 01-color-json.go 即可
  env GOPROXY=https://goproxy.cn go run 01-color-json.go
+ ```
+
+ # quick start
+ ```go
+ package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"time"
+)
+
+type Rsp struct {
+	ErrMsg  string `json:"errmsg"`
+	ErrCode int    `json:"errcode"`
+	Data    string `json:"data"`
+}
+
+type RspHeader struct {
+	Sid  string `header:"sid"`
+	Time int    `header:"time"`
+}
+
+func main() {
+	rsp := Rsp{}
+	header := RspHeader{}
+
+	//code := 0
+
+	err := gout.
+		// POST请求
+		POST("127.0.0.1:8080").
+		// 打开debug模式
+		Debug(true).
+		// 设置查询字符串
+		SetQuery(gout.H{"page": 10, "size": 10}).
+		// 设置http header
+		SetHeader(gout.H{"X-IP": "127.0.0.1", "sid": fmt.Sprintf("%x", time.Now().UnixNano())}).
+		// SetJSON设置http body为json
+		// 同类函数有SetBody, SetYAML, SetXML, SetForm, SetWWWForm
+		SetJSON(gout.H{"text": "gout"}).
+		// BindJSON解析返回的body内容
+		// 同类函数有BindBody, BindYAML, BindXML
+		BindJSON(&rsp).
+		// 解析返回的http header
+		BindHeader(&header).
+		// http code
+		// Code(&code).
+		Do()
+
+	if err != nil {
+		fmt.Printf("send fail:%s\n", err)
+	}
+}
+/*
+> POST /?page=10&size=10 HTTP/1.1
+> Sid: 15d9b742ef32c130
+> X-Ip: 127.0.0.1
+> Content-Type: application/json
+>
+
+{
+    "text": "gout"
+}
+
+
+*/
  ```
 # API 示例
 ## GET POST PUT DELETE PATH HEAD OPTIONS
