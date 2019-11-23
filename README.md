@@ -81,23 +81,24 @@ import (
 	"time"
 )
 
-type Rsp struct {
+// 用于解析 服务端 返回的http body
+type RspBody struct {
 	ErrMsg  string `json:"errmsg"`
 	ErrCode int    `json:"errcode"`
 	Data    string `json:"data"`
 }
 
+// 用于解析 服务端 返回的http header
 type RspHeader struct {
 	Sid  string `header:"sid"`
 	Time int    `header:"time"`
 }
 
 func main() {
-	rsp := Rsp{}
+	rsp := RspBody{}
 	header := RspHeader{}
 
 	//code := 0
-
 	err := gout.
 
 		// POST请求
@@ -128,10 +129,12 @@ func main() {
 		// 结束函数
 		Do()
 
+		// 判度错误
 	if err != nil {
 		fmt.Printf("send fail:%s\n", err)
 	}
 }
+
 /*
 > POST /?page=10&size=10 HTTP/1.1
 > Sid: 15d9b742ef32c130
