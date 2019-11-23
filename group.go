@@ -242,6 +242,6 @@ func (g *routerGroup) Next() *routerGroup {
 	return g
 }
 
-func (g *routerGroup) Bench() *Bench {
+func (g *routerGroup) FilterBench() *Bench {
 	return &Bench{g: g}
 }

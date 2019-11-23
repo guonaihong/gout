@@ -1,11 +1,18 @@
 package bench
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
 )
+
+type Tasker interface {
+	Init()
+	SubProcess(chan struct{})
+	WaitAll()
+}
 
 type Task struct {
 	Duration   time.Duration //压测时间
@@ -20,12 +27,12 @@ type Task struct {
 	wg sync.WaitGroup
 }
 
-func (t *Task) Init() {
+func (t *Task) init() {
 	t.work = make(chan struct{})
 	t.ok = true
 }
 
-func (t *Task) Producer() {
+func (t *Task) producer() {
 	if t.ok == false {
 		panic("task must be init")
 	}
@@ -66,7 +73,7 @@ func (t *Task) Producer() {
 
 }
 
-func (t *Task) RunMain() {
+func (t *Task) run(task Tasker) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 
@@ -74,6 +81,7 @@ func (t *Task) RunMain() {
 	work := t.work
 	wg := &t.wg
 
+	ctx, cancel := context.WithCancel(context.Background())
 	if t.Rate > 0 {
 		interval = int(time.Second) / t.Rate
 	}
@@ -109,7 +117,34 @@ func (t *Task) RunMain() {
 
 	}
 
+	wg.Add(t.Concurrent)
 	for i, c := 0, t.Concurrent; i < c; i++ {
-		//wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			task.SubProcess(work)
+		}()
 	}
+
+	go func() {
+		wg.Wait()
+		cancel()
+	}()
+
+	select {
+	case <-sig:
+		task.WaitAll()
+	case <-ctx.Done():
+		task.WaitAll()
+	}
+}
+
+func (t *Task) Run(task Tasker) {
+	t.init()
+
+	task.Init()
+
+	t.producer()
+
+	t.run(task)
 }

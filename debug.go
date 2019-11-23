@@ -82,7 +82,8 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	cl := color.New(do.Color)
 	path := "/"
-	if len(req.URL.Path) > 0 {
+
+	if len(req.URL.RequestURI()) > 0 {
 		path = req.URL.RequestURI()
 	}
 
