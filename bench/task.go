@@ -1,16 +1,16 @@
 package bench
 
 import (
-	"context"
 	"os"
 	"os/signal"
 	"sync"
 	"time"
 )
 
-type Tasker interface {
+type SubTasker interface {
 	Init()
-	SubProcess(chan struct{})
+	Process(chan struct{})
+	Cancel()
 	WaitAll()
 }
 
@@ -73,7 +73,7 @@ func (t *Task) producer() {
 
 }
 
-func (t *Task) run(task Tasker) {
+func (t *Task) run(sub SubTasker) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 
@@ -81,7 +81,7 @@ func (t *Task) run(task Tasker) {
 	work := t.work
 	wg := &t.wg
 
-	ctx, cancel := context.WithCancel(context.Background())
+	allDone := make(chan struct{})
 	if t.Rate > 0 {
 		interval = int(time.Second) / t.Rate
 	}
@@ -121,30 +121,31 @@ func (t *Task) run(task Tasker) {
 	for i, c := 0, t.Concurrent; i < c; i++ {
 		go func() {
 			defer wg.Done()
-
-			task.SubProcess(work)
+			sub.Process(work)
 		}()
 	}
 
 	go func() {
 		wg.Wait()
-		cancel()
+		close(allDone)
 	}()
 
 	select {
 	case <-sig:
-		task.WaitAll()
-	case <-ctx.Done():
-		task.WaitAll()
+		sub.Cancel()
+		sub.WaitAll()
+	case <-allDone:
+		sub.Cancel()
+		sub.WaitAll()
 	}
 }
 
-func (t *Task) Run(task Tasker) {
+func (t *Task) Run(sub SubTasker) {
 	t.init()
 
-	task.Init()
+	sub.Init()
 
 	t.producer()
 
-	t.run(task)
+	t.run(sub)
 }

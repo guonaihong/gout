@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var _ Tasker = (*Report)(nil)
+var _ SubTasker = (*Report)(nil)
 
 type result struct {
 	time       float64
@@ -21,8 +21,8 @@ type report struct {
 	Failed        int32 //出错的连接数
 	Tps           float64
 	Duration      time.Duration // 连接总时间
-	TotalBody     int           // 统计所有body大小
-	TotalRead     int           // 统计所有read的流量
+	TotalBody     int32         // 统计所有body大小
+	TotalRead     int32         // 统计所有read的流量
 	SendNum       int           // 已经发送的http 请求
 	Kbs           float64
 	Mean          float64
@@ -42,9 +42,10 @@ type Report struct {
 	Number    int // 发送总次数
 	step      int // 动态报表输出间隔
 	allResult chan result
-	ctx       context.Context
 	waitQuit  chan struct{} //等待startReport函数结束
 	allTimes  []float64
+	ctx       context.Context
+	cancel    func()
 }
 
 func NewReport(ctx context.Context, c, n int, duration time.Duration, url string) *Report {
@@ -55,6 +56,7 @@ func NewReport(ctx context.Context, c, n int, duration time.Duration, url string
 		}
 	}
 
+	ctx, cancel := context.WithCancel(ctx)
 	return &Report{
 		allResult: make(chan result),
 		report: report{
@@ -62,10 +64,16 @@ func NewReport(ctx context.Context, c, n int, duration time.Duration, url string
 			StatusCodes: make(map[int]int, 2),
 			Duration:    duration,
 		},
-		Number: n,
-		step:   step,
-		ctx:    ctx,
+		waitQuit: make(chan struct{}),
+		Number:   n,
+		step:     step,
+		ctx:      ctx,
+		cancel:   cancel,
 	}
+}
+
+func (r *Report) Cancel() {
+	r.cancel()
 }
 
 // 初始化报表模块
@@ -74,7 +82,7 @@ func (r *Report) Init() {
 }
 
 // 负责构造压测http 链接和统计压测元数据
-func (r *Report) SubProcess(work chan struct{}) {
+func (r *Report) Process(work chan struct{}) {
 }
 
 // 等待结束
@@ -94,26 +102,28 @@ func (r *Report) calBody(resp *http.Response) {
 
 		r.length = bodyN
 
-		hN := len(resp.Status)
-		hN += len(resp.Proto)
-		hN += 1 //space
-		hN += 2 //\r\n
-		for k, v := range resp.Header {
-			hN += len(k)
-
-			for _, hv := range v {
-				hN += len(hv)
-			}
-			hN += 2 //:space
-			hN += 2 //\r\n
-		}
-
-		hN += 2
-
-		atomic.AddInt32(&r.TotalBody, int32(bodyN))
-		atomic.AddInt32(&r.TotalRead, int32(hN))
-		atomic.AddInt32(&r.TotalRead, int32(bodyN))
 	*/
+
+	bodyN := 0 //todo
+	hN := len(resp.Status)
+	hN += len(resp.Proto)
+	hN += 1 //space
+	hN += 2 //\r\n
+	for k, v := range resp.Header {
+		hN += len(k)
+
+		for _, hv := range v {
+			hN += len(hv)
+		}
+		hN += 2 //:space
+		hN += 2 //\r\n
+	}
+
+	hN += 2
+
+	atomic.AddInt32(&r.TotalBody, int32(bodyN))
+	atomic.AddInt32(&r.TotalRead, int32(hN))
+	atomic.AddInt32(&r.TotalRead, int32(bodyN))
 }
 
 func genTimeStr(now time.Time) string {

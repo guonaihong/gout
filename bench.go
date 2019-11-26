@@ -33,11 +33,14 @@ func (b *Bench) Durations(d time.Duration) *Bench {
 }
 
 func (b *Bench) Do() error {
+	// 报表插件
 	r := bench.NewReport(context.Background(),
 		b.Task.Concurrent,
 		b.Task.Number,
 		b.Task.Duration,
 		"" /* todo */)
+
+	// task是并发控制模块
 	b.Run(r)
 	return nil
 }
