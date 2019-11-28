@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const bench_number = 1000
+const bench_number = 100
 
 func setup_bench_number(total *int32) *gin.Engine {
 	router := gin.New()

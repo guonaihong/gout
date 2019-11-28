@@ -121,19 +121,13 @@ func (r *Req) addContextType(req *http.Request) {
 
 }
 
-func (r *Req) Do() (err error) {
-	if r.err != nil {
-		return r.err
-	}
-
+func (r *Req) request() (*http.Request, error) {
 	body := &bytes.Buffer{}
-
-	defer r.Reset()
 
 	// set http body
 	if r.bodyEncoder != nil {
 		if err := r.bodyEncoder.Encode(body); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -144,8 +138,8 @@ func (r *Req) Do() (err error) {
 			query = q
 		} else {
 			q := encode.NewQueryEncode(nil)
-			if err = encode.Encode(r.queryEncode, q); err != nil {
-				return err
+			if err := encode.Encode(r.queryEncode, q); err != nil {
+				return nil, err
 			}
 
 			query = q.End()
@@ -164,7 +158,7 @@ func (r *Req) Do() (err error) {
 	if r.formEncode != nil {
 		f = encode.NewFormEncode(body)
 		if err := encode.Encode(r.formEncode, f); err != nil {
-			return err
+			return nil, err
 		}
 
 		f.End()
@@ -172,7 +166,7 @@ func (r *Req) Do() (err error) {
 
 	req, err := http.NewRequest(r.method, r.url, body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if r.c != nil {
@@ -191,8 +185,24 @@ func (r *Req) Do() (err error) {
 	if r.headerEncode != nil {
 		err = encode.Encode(r.headerEncode, encode.NewHeaderEncode(req))
 		if err != nil {
-			return err
+			return nil, err
 		}
+	}
+
+	return req, nil
+}
+
+func (r *Req) Do() (err error) {
+	if r.err != nil {
+		return r.err
+	}
+
+	// reset  Req
+	defer r.Reset()
+
+	req, err := r.request()
+	if err != nil {
+		return err
 	}
 
 	r.addDefDebug()

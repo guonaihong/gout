@@ -195,8 +195,6 @@ func TestBindJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 	defer ts.Close()
 
-	g := New(nil)
-
 	tests := []BindTest{
 		{InBody: data{Id: 9, Data: "早上测试结构体"}, OutBody: data{}},
 		{InBody: H{"id": 10, "data": "早上测试map"}, OutBody: data{}},
@@ -205,10 +203,15 @@ func TestBindJSON(t *testing.T) {
 	for k, _ := range tests {
 		t.Logf("outbody type:%T:%p\n", tests[k].OutBody, &tests[k].OutBody)
 
-		err := g.POST(ts.URL + "/test.json").SetJSON(&tests[k].InBody).BindJSON(&tests[k].OutBody).Code(&tests[k].httpCode).Do()
+		err := POST(ts.URL + "/test.json").
+			SetJSON(&tests[k].InBody).
+			BindJSON(&tests[k].OutBody).
+			Code(&tests[k].httpCode).
+			Do()
 		if err != nil {
 			t.Errorf("send fail:%s\n", err)
 		}
+		assert.NoError(t, err)
 
 		assert.Equal(t, tests[k].httpCode, 200)
 

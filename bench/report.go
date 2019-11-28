@@ -3,6 +3,8 @@ package bench
 import (
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"sync/atomic"
 	"time"
@@ -46,9 +48,12 @@ type Report struct {
 	allTimes  []float64
 	ctx       context.Context
 	cancel    func()
+	req       *http.Request
+
+	*http.Client
 }
 
-func NewReport(ctx context.Context, c, n int, duration time.Duration, url string) *Report {
+func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.Request, client *http.Client) *Report {
 	step := 0
 	if n > 150 {
 		if step = n / 10; step < 100 {
@@ -69,6 +74,8 @@ func NewReport(ctx context.Context, c, n int, duration time.Duration, url string
 		step:     step,
 		ctx:      ctx,
 		cancel:   cancel,
+		req:      req,
+		Client:   client,
 	}
 }
 
@@ -83,6 +90,31 @@ func (r *Report) Init() {
 
 // 负责构造压测http 链接和统计压测元数据
 func (r *Report) Process(work chan struct{}) {
+	start := time.Now()
+
+	req, err := cloneRequest(r.req)
+	if err != nil {
+		//todo 归类到错误报表里面
+		return
+	}
+
+	resp, err := r.Do(req)
+	if err != nil {
+		//todo 归类到错误报表里面
+		return
+	}
+
+	bodySize := resp.ContentLength
+	if bodySize == -1 { // chunck size, 凭感觉加的, TODO 确认下
+		bodySize, err = io.Copy(ioutil.Discard, resp.Body)
+	}
+
+	resp.Body.Close()
+
+	r.allResult <- result{
+		time:       float64(time.Now().Sub(start)) / float64(time.Millisecond),
+		statusCode: resp.StatusCode,
+	}
 }
 
 // 等待结束
