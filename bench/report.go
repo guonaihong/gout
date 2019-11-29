@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"sync/atomic"
 	"time"
 )
@@ -19,27 +20,30 @@ type result struct {
 
 // 数据字段，每个字段都用于显示
 type report struct {
-	Concurrency   int   //并发数
-	Failed        int32 //出错的连接数
-	Tps           float64
-	Duration      time.Duration // 连接总时间
-	TotalBody     int32         // 统计所有body大小
-	TotalRead     int32         // 统计所有read的流量
-	SendNum       int           // 已经发送的http 请求
-	Kbs           float64
-	Mean          float64
-	AllMean       float64
-	Percentage55  time.Duration
-	Percentage66  time.Duration
-	Percentage75  time.Duration
-	Percentage80  time.Duration
-	Percentage90  time.Duration
-	Percentage99  time.Duration
-	Percentage100 time.Duration
-	StatusCodes   map[int]int
+	Concurrency     int   //并发数
+	Failed          int32 //出错的连接数
+	CompleteRequest int32 //正常的请求数
+	TotalRead       int32 // 统计所有read的流量
+	Tps             float64
+	Duration        time.Duration // 连接总时间
+	Kbs             float64
+	Mean            float64
+	AllMean         float64
+	Percentage55    time.Duration
+	Percentage66    time.Duration
+	Percentage75    time.Duration
+	Percentage80    time.Duration
+	Percentage90    time.Duration
+	Percentage95    time.Duration
+	Percentage98    time.Duration
+	Percentage99    time.Duration
+	Percentage100   time.Duration
+	StatusCodes     map[int]int
 }
 
 type Report struct {
+	SendNum   int   // 已经发送的http 请求
+	TotalBody int32 // 统计所有body大小
 	report
 	Number    int // 发送总次数
 	step      int // 动态报表输出间隔
@@ -50,6 +54,7 @@ type Report struct {
 	cancel    func()
 	req       *http.Request
 
+	startTime time.Time
 	*http.Client
 }
 
@@ -69,13 +74,14 @@ func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.
 			StatusCodes: make(map[int]int, 2),
 			Duration:    duration,
 		},
-		waitQuit: make(chan struct{}),
-		Number:   n,
-		step:     step,
-		ctx:      ctx,
-		cancel:   cancel,
-		req:      req,
-		Client:   client,
+		waitQuit:  make(chan struct{}),
+		Number:    n,
+		step:      step,
+		ctx:       ctx,
+		cancel:    cancel,
+		req:       req,
+		Client:    client,
+		startTime: time.Now(),
 	}
 }
 
@@ -90,30 +96,34 @@ func (r *Report) Init() {
 
 // 负责构造压测http 链接和统计压测元数据
 func (r *Report) Process(work chan struct{}) {
-	start := time.Now()
+	for range work {
+		start := time.Now()
 
-	req, err := cloneRequest(r.req)
-	if err != nil {
-		//todo 归类到错误报表里面
-		return
-	}
+		req, err := cloneRequest(r.req)
+		if err != nil {
+			//todo 归类到错误报表里面
+			fmt.Printf("err = %s\n", err)
+			return
+		}
 
-	resp, err := r.Do(req)
-	if err != nil {
-		//todo 归类到错误报表里面
-		return
-	}
+		resp, err := r.Do(req)
+		if err != nil {
+			//todo 归类到错误报表里面
+			fmt.Printf("err = %s\n", err)
+			return
+		}
 
-	bodySize := resp.ContentLength
-	if bodySize == -1 { // chunck size, 凭感觉加的, TODO 确认下
-		bodySize, err = io.Copy(ioutil.Discard, resp.Body)
-	}
+		bodySize := resp.ContentLength
+		if bodySize == -1 { // chunck size, 凭感觉加的, TODO 确认下
+			bodySize, err = io.Copy(ioutil.Discard, resp.Body)
+		}
 
-	resp.Body.Close()
+		resp.Body.Close()
 
-	r.allResult <- result{
-		time:       float64(time.Now().Sub(start)) / float64(time.Millisecond),
-		statusCode: resp.StatusCode,
+		r.allResult <- result{
+			time:       float64(time.Now().Sub(start)) / float64(time.Millisecond),
+			statusCode: resp.StatusCode,
+		}
 	}
 }
 
@@ -241,4 +251,9 @@ func (r *Report) startReport() {
 }
 
 func (r *Report) outputReport() {
+	r.Duration = time.Now().Sub(r.startTime)
+	r.Tps = float64(r.SendNum) / r.Duration.Seconds()
+
+	tmpl := newTemplate()
+	tmpl.Execute(os.Stdout, r.report)
 }

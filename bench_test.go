@@ -25,10 +25,10 @@ func Test_Bench_Number(t *testing.T) {
 	router := setup_bench_number(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
-	err := GET(ts.URL).
+	err := POST(ts.URL).
 		SetJSON(H{"key": "val"}).
 		FilterBench().
-		Concurrent(20).
+		Concurrent(4).
 		Number(bench_number).
 		Do()
 

@@ -129,6 +129,7 @@ func decodeCore(val reflect.Value, sf reflect.StructField, setter setter, tagNam
 			}
 
 			tag := sf.Tag.Get(tagName)
+
 			if err = decodeCore(val.Field(i), sf, setter, tag); err != nil {
 				return
 			}
