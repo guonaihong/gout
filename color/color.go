@@ -27,8 +27,8 @@ const (
 )
 
 const (
-	Gray = 30
-	Blue = 34
+	Purple = 35
+	Blue   = 34
 )
 
 type Color struct {
@@ -82,12 +82,17 @@ func (c *Color) colorf(format string, a ...interface{}) string {
 	return buf.String()
 }
 
-func (c *Color) Sgrayf(format string, a ...interface{}) string {
-	c.attr = Gray
-	return c.colorf(format, a...)
-}
-
 func (c *Color) Sbluef(format string, a ...interface{}) string {
 	c.attr = Blue
 	return c.colorf(format, a...)
+}
+
+func (c *Color) Spurplef(format string, a ...interface{}) string {
+	c.attr = Purple
+	return c.colorf(format, a...)
+}
+
+func (c *Color) Spurple(a ...interface{}) string {
+	c.attr = Purple
+	return c.color(a...)
 }

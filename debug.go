@@ -90,7 +90,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	// write request header
 	for k, v := range req.Header {
-		fmt.Fprintf(w, "> %s: %s\r\n", cl.Sgrayf(k),
+		fmt.Fprintf(w, "> %s: %s\r\n", cl.Spurplef(k),
 			cl.Sbluef(strings.Join(v, ",")))
 	}
 
@@ -119,7 +119,7 @@ func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	fmt.Fprintf(w, "< %s %s\r\n", rsp.Proto, rsp.Status)
 	for k, v := range rsp.Header {
-		fmt.Fprintf(w, "< %s: %s\r\n", cl.Sgrayf(k), cl.Sbluef(strings.Join(v, ",")))
+		fmt.Fprintf(w, "< %s: %s\r\n", cl.Spurplef(k), cl.Sbluef(strings.Join(v, ",")))
 	}
 
 	fmt.Fprintf(w, "\r\n\r\n")
