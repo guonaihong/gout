@@ -6,15 +6,26 @@ import (
 	"testing"
 )
 
-func Test_Color_Sgrayf(t *testing.T) {
+func Test_Color_Spurple(t *testing.T) {
 	NoColor = false
 
-	need := "\x1b[30;1mhello\x1b[0m"
-	got := New(true).Sgrayf("hello")
+	need := "\x1b[35;1mhello\x1b[0m"
+	got := New(true).Spurple("hello")
 
 	fmt.Printf("got(%s) need(%s)\n", got, need)
 	assert.Equal(t, got, need)
-	assert.Equal(t, New(false).Sgrayf("hello"), "hello")
+	assert.Equal(t, New(false).Spurple("hello"), "hello")
+}
+
+func Test_Color_Spurplef(t *testing.T) {
+	NoColor = false
+
+	need := "\x1b[35;1mhello:world\x1b[0m"
+	got := New(true).Spurplef("hello:%s", "world")
+
+	fmt.Printf("got(%s) need(%s)\n", got, need)
+	assert.Equal(t, got, need)
+	assert.Equal(t, New(false).Spurplef("hello:%s", "world"), "hello:world")
 }
 
 func Test_Color_Sbluef(t *testing.T) {

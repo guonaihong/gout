@@ -35,7 +35,7 @@ func TestHeaderDecode(t *testing.T) {
 		BoolZero       bool          `header:"boolZero"`
 		UintZero       uint          `header:"uintZero"`
 
-		Tstruct Tstruct  `header:"struct"`
+		Tstruct Tstruct  `header:"tstruct"`
 		Tslice  []string `header:"tslice"`
 	}
 
