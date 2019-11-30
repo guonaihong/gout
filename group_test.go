@@ -1114,6 +1114,16 @@ func TestDebug(t *testing.T) {
 
 	color.NoColor = false
 	test := []func() DebugOpt{
+		// 测试颜色
+		func() DebugOpt {
+			return DebugFunc(func(o *DebugOption) {
+				buf.Reset()
+				o.Debug = true
+				o.Color = true
+				o.Write = buf
+			})
+		},
+
 		// 测试打开日志输出
 		func() DebugOpt {
 			return DebugFunc(func(o *DebugOption) {
@@ -1143,6 +1153,7 @@ func TestDebug(t *testing.T) {
 			})
 		},
 
+		// 没有颜色输出
 		NoColor,
 	}
 
@@ -1150,12 +1161,17 @@ func TestDebug(t *testing.T) {
 	os.Setenv("IOS_DEBUG", "true")
 	for k, v := range test {
 		s = ""
-		err := GET(ts.URL).Debug(v()).SetBody(fmt.Sprintf("%d test debug.", k)).BindBody(&s).Do()
+		err := GET(ts.URL).
+			Debug(v()).
+			SetBody(fmt.Sprintf("%d test debug.", k)).
+			BindBody(&s).
+			Do()
 		assert.NoError(t, err)
 
 		if k != 0 {
 			assert.NotEqual(t, buf.Len(), 0)
 		}
+
 		assert.Equal(t, fmt.Sprintf("%d test debug.", k), s)
 	}
 
