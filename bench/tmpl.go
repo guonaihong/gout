@@ -5,12 +5,15 @@ import (
 )
 
 var tmpl = `
-Status Codes:           {{range $code, $num := .StatusCodes}} {{$code}}:{{$num}} {{end}} [code:count]
+{{if gt (len .ErrMsg) 0}}Error message:         {{range $errmsg, $num := .ErrMsg}} {{$errmsg}}:{{$num}} {{end}} [errmsg:count]{{end}}
+Status Codes:           {{range $code, $num := .StatusCodes}} {{$num}}:{{$code}} {{end}} [count:code]
 Concurrency Level:      {{.Concurrency}}
 Time taken for tests:   {{.Duration}}
 Complete requests:      {{.CompleteRequest}}
 Failed requests:        {{.Failed}}
-Total transferred:      {{.TotalRead}} bytes
+Total Read Data:        {{.TotalRead}} bytes
+Total Read body         {{.TotalBody}} bytes
+Total Write Body        {{.TotalWriteBody}} bytes
 Requests per second:    {{.Tps}} [#/sec] (mean)
 Time per request:       {{.Mean}} [ms] (mean)
 Time per request:       {{.AllMean}} [ms] (mean, across all concurrent requests)

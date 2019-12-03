@@ -39,12 +39,17 @@ func (b *Bench) Do() error {
 		return err
 	}
 
+	client := b.g.out.Client
+	if client == &DefaultClient {
+		client = &DefaultBenchClient
+	}
+
 	r := bench.NewReport(context.Background(),
 		b.Task.Concurrent,
 		b.Task.Number,
 		b.Task.Duration,
 		req,
-		b.g.out.Client)
+		client)
 
 	// task是并发控制模块
 	b.Run(r)

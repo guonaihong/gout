@@ -46,11 +46,13 @@ func (t *Task) producer() {
 			for {
 				select {
 				case <-tk.C:
+					return
 				case work <- struct{}{}:
 				}
 			}
 		}()
 
+		return
 	}
 
 	go func() {

@@ -11,7 +11,14 @@ type Gout struct {
 	opt DebugOption
 }
 
-var DefaultClient = http.Client{}
+var (
+	DefaultClient      = http.Client{}
+	DefaultBenchClient = http.Client{
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost: 10000,
+		},
+	}
+)
 
 func New(c ...*http.Client) *Gout {
 	out := &Gout{}
@@ -27,33 +34,33 @@ func New(c ...*http.Client) *Gout {
 
 // default
 func Def() *Gout {
-	return New(nil)
+	return New()
 }
 
 func GET(url string) *routerGroup {
-	return New(nil).GET(url)
+	return New().GET(url)
 }
 
 func POST(url string) *routerGroup {
-	return New(nil).POST(url)
+	return New().POST(url)
 }
 
 func PUT(url string) *routerGroup {
-	return New(nil).PUT(url)
+	return New().PUT(url)
 }
 
 func DELETE(url string) *routerGroup {
-	return New(nil).DELETE(url)
+	return New().DELETE(url)
 }
 
 func PATCH(url string) *routerGroup {
-	return New(nil).PATCH(url)
+	return New().PATCH(url)
 }
 
 func HEAD(url string) *routerGroup {
-	return New(nil).HEAD(url)
+	return New().HEAD(url)
 }
 
 func OPTIONS(url string) *routerGroup {
-	return New(nil).OPTIONS(url)
+	return New().OPTIONS(url)
 }

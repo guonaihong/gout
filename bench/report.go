@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -14,16 +16,18 @@ import (
 var _ SubTasker = (*Report)(nil)
 
 type result struct {
-	time       float64
+	time       time.Duration
 	statusCode int
 }
 
 // 数据字段，每个字段都用于显示
 type report struct {
-	Concurrency     int   //并发数
-	Failed          int32 //出错的连接数
-	CompleteRequest int32 //正常的请求数
-	TotalRead       int32 // 统计所有read的流量
+	Concurrency     int    //并发数
+	Failed          uint64 //出错的连接数
+	CompleteRequest uint64 //正常的请求数
+	TotalRead       uint64 //统计所有read的流量body+(request line)+(http header)
+	TotalBody       uint64 //统计所有body的流量
+	TotalWriteBody  uint64 //统计所有写入的body流量
 	Tps             float64
 	Duration        time.Duration // 连接总时间
 	Kbs             float64
@@ -39,23 +43,26 @@ type report struct {
 	Percentage99    time.Duration
 	Percentage100   time.Duration
 	StatusCodes     map[int]int
+	ErrMsg          map[string]int
 }
 
 type Report struct {
-	SendNum   int   // 已经发送的http 请求
-	TotalBody int32 // 统计所有body大小
+	SendNum int // 已经发送的http 请求
 	report
 	Number    int // 发送总次数
 	step      int // 动态报表输出间隔
 	allResult chan result
 	waitQuit  chan struct{} //等待startReport函数结束
-	allTimes  []float64
+	allTimes  []time.Duration
 	ctx       context.Context
 	cancel    func()
 	req       *http.Request
 
 	startTime time.Time
 	*http.Client
+
+	lerr  sync.Mutex
+	lcode sync.Mutex
 }
 
 func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.Request, client *http.Client) *Report {
@@ -71,8 +78,9 @@ func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.
 		allResult: make(chan result),
 		report: report{
 			Concurrency: c,
-			StatusCodes: make(map[int]int, 2),
+			StatusCodes: make(map[int]int, 1000),
 			Duration:    duration,
+			ErrMsg:      make(map[string]int, 2),
 		},
 		waitQuit:  make(chan struct{}),
 		Number:    n,
@@ -94,6 +102,25 @@ func (r *Report) Init() {
 	r.startReport()
 }
 
+func (r *Report) addComplete() {
+	atomic.AddUint64(&r.CompleteRequest, 1)
+}
+
+// 统计错误消息
+func (r *Report) addErrAndFailed(err error) {
+	r.lerr.Lock()
+	r.ErrMsg[err.Error()]++
+	r.lerr.Unlock()
+	atomic.AddUint64(&r.Failed, 1)
+}
+
+// 统计http code数量
+func (r *Report) addCode(code int) {
+	r.lerr.Lock()
+	r.StatusCodes[code]++
+	r.lerr.Unlock()
+}
+
 // 负责构造压测http 链接和统计压测元数据
 func (r *Report) Process(work chan struct{}) {
 	for range work {
@@ -101,27 +128,39 @@ func (r *Report) Process(work chan struct{}) {
 
 		req, err := cloneRequest(r.req)
 		if err != nil {
-			//todo 归类到错误报表里面
-			fmt.Printf("err = %s\n", err)
-			return
+			r.addErrAndFailed(err)
+			continue
 		}
 
 		resp, err := r.Do(req)
 		if err != nil {
-			//todo 归类到错误报表里面
-			fmt.Printf("err = %s\n", err)
-			return
+			r.addErrAndFailed(err)
+			continue
 		}
 
+		body, _ := req.GetBody()
+		if body != nil {
+			bodySize, _ := io.Copy(ioutil.Discard, body)
+			atomic.AddUint64(&r.TotalWriteBody, uint64(bodySize))
+		}
+
+		// 统计http code数量
+		r.addCode(resp.StatusCode)
+
 		bodySize := resp.ContentLength
-		if bodySize == -1 { // chunck size, 凭感觉加的, TODO 确认下
+
+		// http 如果使用chunck方式 ContentLength可能为-1, 凭感觉加的, TODO 确认下
+		if bodySize == -1 {
 			bodySize, err = io.Copy(ioutil.Discard, resp.Body)
 		}
 
+		r.calBody(resp, uint64(bodySize))
+
 		resp.Body.Close()
 
+		r.addComplete()
 		r.allResult <- result{
-			time:       float64(time.Now().Sub(start)) / float64(time.Millisecond),
+			time:       time.Now().Sub(start),
 			statusCode: resp.StatusCode,
 		}
 	}
@@ -134,19 +173,11 @@ func (r *Report) WaitAll() {
 }
 
 func (r *Report) addFail() {
-	atomic.AddInt32(&r.Failed, 1)
+	atomic.AddUint64(&r.Failed, 1)
 }
 
-func (r *Report) calBody(resp *http.Response) {
+func (r *Report) calBody(resp *http.Response, bodySize uint64) {
 
-	/*
-		bodyN := len(resp.Body)
-
-		r.length = bodyN
-
-	*/
-
-	bodyN := 0 //todo
 	hN := len(resp.Status)
 	hN += len(resp.Proto)
 	hN += 1 //space
@@ -163,9 +194,10 @@ func (r *Report) calBody(resp *http.Response) {
 
 	hN += 2
 
-	atomic.AddInt32(&r.TotalBody, int32(bodyN))
-	atomic.AddInt32(&r.TotalRead, int32(hN))
-	atomic.AddInt32(&r.TotalRead, int32(bodyN))
+	atomic.AddUint64(&r.TotalBody, uint64(bodySize))
+	atomic.AddUint64(&r.TotalRead, uint64(hN))
+	atomic.AddUint64(&r.TotalRead, uint64(bodySize))
+
 }
 
 func genTimeStr(now time.Time) string {
@@ -205,7 +237,6 @@ func (r *Report) startReport() {
 					}
 
 					r.allTimes = append(r.allTimes, v.time)
-					r.StatusCodes[v.statusCode]++
 				}
 			}
 		}
@@ -241,7 +272,6 @@ func (r *Report) startReport() {
 
 				r.SendNum++
 				r.allTimes = append(r.allTimes, v.time)
-				r.StatusCodes[v.statusCode]++
 			case <-r.ctx.Done():
 				return
 			}
@@ -253,6 +283,26 @@ func (r *Report) startReport() {
 func (r *Report) outputReport() {
 	r.Duration = time.Now().Sub(r.startTime)
 	r.Tps = float64(r.SendNum) / r.Duration.Seconds()
+	r.AllMean = float64(r.Concurrency) * float64(r.Duration) / float64(time.Millisecond) / float64(r.SendNum)
+	r.Mean = float64(r.Duration) / float64(r.SendNum) / float64(time.Millisecond)
+	r.Kbs = float64(r.TotalRead) / float64(1024) / r.Duration.Seconds()
+
+	allTimes := r.allTimes
+	sort.Slice(allTimes, func(i, j int) bool {
+		return allTimes[i] < allTimes[j]
+	})
+
+	if len(allTimes) > 1 {
+		r.Percentage55 = allTimes[int(float64(len(allTimes))*0.5)]
+		r.Percentage66 = allTimes[int(float64(len(allTimes))*0.66)]
+		r.Percentage75 = allTimes[int(float64(len(allTimes))*0.75)]
+		r.Percentage80 = allTimes[int(float64(len(allTimes))*0.80)]
+		r.Percentage90 = allTimes[int(float64(len(allTimes))*0.90)]
+		r.Percentage95 = allTimes[int(float64(len(allTimes))*0.95)]
+		r.Percentage98 = allTimes[int(float64(len(allTimes))*0.98)]
+		r.Percentage99 = allTimes[int(float64(len(allTimes))*0.99)]
+		r.Percentage100 = allTimes[len(allTimes)-1]
+	}
 
 	tmpl := newTemplate()
 	tmpl.Execute(os.Stdout, r.report)
