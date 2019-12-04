@@ -25,6 +25,7 @@ func setup_bench_number(total *int32) *gin.Engine {
 	return router
 }
 
+// 测试压测次数
 func Test_Bench_Number(t *testing.T) {
 	total := int32(0)
 	router := setup_bench_number(&total)
@@ -42,6 +43,7 @@ func Test_Bench_Number(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// 测试压测时间
 func Test_Bench_Durations(t *testing.T) {
 	total := int32(0)
 	router := setup_bench_number(&total)
@@ -60,4 +62,30 @@ func Test_Bench_Durations(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.LessOrEqual(t, int64(bench_number-100*time.Millisecond), int64(take))
+}
+
+// 测试压测频率
+func Test_Bench_Rate(t *testing.T) {
+	total := int32(0)
+	router := setup_bench_number(&total)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	number := 900
+	rate := 300
+	s := time.Now()
+	err := POST(ts.URL).
+		SetJSON(H{"hello": "world"}).
+		Filter().
+		Bench().
+		Rate(rate).
+		Concurrent(20).
+		Number(number).
+		Do()
+
+	take := time.Now().Sub(s)
+
+	assert.NoError(t, err)
+
+	assert.LessOrEqual(t, int64(take), int64(time.Duration(time.Duration(number/rate)*time.Second+100*time.Millisecond)))
+	assert.GreaterOrEqual(t, int64(take), int64(time.Duration(number/rate)*time.Second-time.Second))
 }

@@ -32,6 +32,10 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [form-data](#form-data)
         - [x-www-form-urlencoded](#x-www-form-urlencoded)
         - [callback](#callback)
+	- [benchmark](#benchmark)
+		- [number](#number)
+		- [duration](#duration)
+		- [rate](#rate)
     - [proxy](#proxy)
     - [cookie](#cookie)
     - [context](#context)
@@ -860,7 +864,99 @@ func main() {
 }
 
 ```
+## benchmark
+### number
+```go
+package main
 
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+const (
+	benchNumber     = 30000
+	benchConcurrent = 20
+)
+
+func main() {
+	err := gout.
+		POST(":8080").                     //压测本地8080端口
+		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
+		Filter().                          //打开过滤器
+		Bench().                           //选择bench功能
+		Concurrent(benchConcurrent).       //并发数
+		Number(benchNumber).               //压测次数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+```
+### duration
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"time"
+)
+
+const (
+	benchTime       = 10 * time.Second
+	benchConcurrent = 30
+)
+
+func main() {
+	err := gout.
+		POST(":8080").                     //压测本机8080端口
+		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
+		Filter().                          //打开过滤器
+		Bench().                           //选择bench功能
+		Concurrent(benchConcurrent).       //并发数
+		Durations(benchTime).              //压测时间
+		Do()
+
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+```
+### rate
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+const (
+	benchNumber     = 3000
+	benchConcurrent = 20
+)
+
+func main() {
+	err := gout.
+		POST(":8080").                     //压测本机8080端口
+		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
+		Filter().                          //打开过滤器
+		Bench().                           //选择bench功能
+		Rate(1000).                        //每秒发1000请求
+		Concurrent(benchConcurrent).       //并发数
+		Number(benchNumber).               //压测次数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+```
 ## proxy
 * SetProxy 设置代理服务地址
 ```go

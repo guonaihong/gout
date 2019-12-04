@@ -147,12 +147,7 @@ func (r *Report) Process(work chan struct{}) {
 		// 统计http code数量
 		r.addCode(resp.StatusCode)
 
-		bodySize := resp.ContentLength
-
-		// http 如果使用chunck方式 ContentLength可能为-1, 凭感觉加的, TODO 确认下
-		if bodySize == -1 {
-			bodySize, err = io.Copy(ioutil.Discard, resp.Body)
-		}
+		bodySize, err := io.Copy(ioutil.Discard, resp.Body)
 
 		r.calBody(resp, uint64(bodySize))
 
