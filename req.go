@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type Req struct {
@@ -36,6 +37,14 @@ type Req struct {
 	//cookie
 	cookies []*http.Cookie
 
+	timeout time.Duration
+
+	//自增id，主要给互斥API定优先级
+	//对于互斥api，后面的会覆盖前面的
+	index        int
+	timeoutIndex int
+	ctxIndex     int
+
 	c   context.Context
 	err error
 }
@@ -43,7 +52,7 @@ type Req struct {
 // req 结构布局说明，以decode为例
 // body 可以支持text, json, yaml, xml，所以定义成接口形式
 // headerDecode只有一个可能，就定义为具体类型。这里他们的decode实现也不一样
-// 有没有必要，归一化成一种???
+// 有没有必要，归一化成一种??? TODO:
 
 func (r *Req) clone() Req {
 	return Req{
@@ -63,6 +72,7 @@ func (r *Req) clone() Req {
 }
 
 func (r *Req) Reset() {
+	r.index = 0
 	r.err = nil
 	r.cookies = nil
 	r.formEncode = nil
@@ -167,6 +177,10 @@ func (r *Req) request() (*http.Request, error) {
 	req, err := http.NewRequest(r.method, r.url, body)
 	if err != nil {
 		return nil, err
+	}
+
+	if r.timeout > 0 && r.timeoutIndex > r.ctxIndex {
+		r.c, _ = context.WithTimeout(context.Background(), r.timeout)
 	}
 
 	if r.c != nil {

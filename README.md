@@ -36,6 +36,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [number](#number)
 		- [duration](#duration)
 		- [rate](#rate)
+	- [timeout](#timeout)
     - [proxy](#proxy)
     - [cookie](#cookie)
     - [context](#context)
@@ -417,19 +418,38 @@ func main() {
 ```
 ### SetHeader和BindHeader支持的更多类型
 ```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+)
+
 type testHeader struct {
-    CheckIn string `header:checkin`
+    CheckIn  string `header:checkin`
     CheckOut string `header:checkout`
 }
 
-t := testheader{}
+func main() {
 
-code := 0
+    t := testHeader{}
 
-if err := gout.GET(":8080/testquery").Code(&code).SetHeader(/*看下面支持的类型*/).BindHeader(&t).Do(); err != nil {
+    code := 0
+
+    err := gout.
+        GET(":8080/testquery").
+        Code(&code).
+        SetHeader( /*看下面支持的类型*/ ).
+        BindHeader(&t).
+        Do()
+    if err != nil {
+        fmt.Printf("fail:%s\n", err)
+    }   
 }
+
 ```
 * BindHeader支持的类型有
+结构体
 ```go
 // struct
 type testHeader struct {
@@ -437,7 +457,7 @@ type testHeader struct {
     CheckOut string `header:checkout`
 }
 ```
- 结构体
+
 * SetHeader支持的类型有
 ```go
 /*
@@ -567,18 +587,23 @@ func main() {
 		//打开debug模式
 		Debug(true).
 		//设置json到请求body
-		SetJSON(gout.H{"str": "foo",
-			"num":   100,
-			"bool":  false,
-			"null":  nil,
-			"array": gout.A{"foo", "bar", "baz"},
-			"obj":   gout.H{"a": 1, "b": 2},
-		}).Do()
+		SetJSON(
+			gout.H{
+				"str":   "foo",
+				"num":   100,
+				"bool":  false,
+				"null":  nil,
+				"array": gout.A{"foo", "bar", "baz"},
+				"obj":   gout.H{"a": 1, "b": 2},
+			},
+		).
+		Do()
 
 	if err != nil {
 		fmt.Printf("err = %v\n", err)
 	}
 }
+
 /*
 > POST /colorjson HTTP/1.1
 > Content-Type: application/json
@@ -866,6 +891,7 @@ func main() {
 ```
 ## benchmark
 ### number
+下面的例子，起了20并发。对:8080端口的服务，发送3000次请求进行压测，内容为json结构
 ```go
 package main
 
@@ -896,6 +922,7 @@ func main() {
 
 ```
 ### duration
+下面的例子，起了20并发。对:8080端口的服务，压测持续时间为10s，内容为json结构
 ```go
 package main
 
@@ -927,6 +954,7 @@ func main() {
 
 ```
 ### rate
+下面的例子，起了20并发。对:8080端口的服务，压测总次数为3000次，其中每秒发送1000次。内容为json结构
 ```go
 package main
 
@@ -953,6 +981,28 @@ func main() {
 
 	if err != nil {
 		fmt.Printf("%v\n", err)
+	}
+}
+
+```
+## timeout
+setimeout是request级别的超时方案。相比http.Client级别，更灵活。
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"time"
+)
+
+func main() {
+	err := gout.GET(":8080").
+		SetTimeout(2 * time.Second).
+		Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
 	}
 }
 

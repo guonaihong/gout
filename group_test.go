@@ -983,7 +983,7 @@ func TestCookie(t *testing.T) {
 
 // Server side testing context function
 func setupContext(t *testing.T) *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
 
 	router.GET("/cancel", func(c *gin.Context) {
 		ctx := c.Request.Context()
@@ -999,9 +999,9 @@ func setupContext(t *testing.T) *gin.Engine {
 		ctx := c.Request.Context()
 		select {
 		case <-ctx.Done():
-			fmt.Printf("timeout done\n")
+			fmt.Printf("ctx timeout done\n")
 		case <-time.After(2 * time.Second):
-			assert.Fail(t, "test timeout fail")
+			assert.Fail(t, "test ctx timeout fail")
 		}
 	})
 
@@ -1218,4 +1218,61 @@ func TestWWWForm(t *testing.T) {
 
 	err := POST(ts.URL).Debug(true).SetWWWForm(need).Do()
 	assert.NoError(t, err)
+}
+
+func setup_group_timeout(t *testing.T) *gin.Engine {
+	router := gin.New()
+
+	router.GET("/timeout", func(c *gin.Context) {
+		ctx := c.Request.Context()
+		select {
+		case <-ctx.Done():
+			fmt.Printf("setTimeout done\n")
+		case <-time.After(2 * time.Second):
+			assert.Fail(t, "test timeout fail")
+		}
+	})
+
+	return router
+}
+
+func Test_Group_Timeout(t *testing.T) {
+	router := setup_group_timeout(t)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	const (
+		longTimeout   = 400
+		middleTimeout = 300
+		shortTimeout  = 200
+	)
+	// 只设置timeout
+	err := GET(ts.URL + "/timeout").
+		SetTimeout(shortTimeout * time.Millisecond).
+		Do()
+	assert.Error(t, err)
+
+	// 使用互斥api的原则，后面的覆盖前面的
+	// 这里是SetTimeout生效, 超时时间200ms
+	ctx, _ := context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
+	s := time.Now()
+	err = GET(ts.URL + "/timeout").
+		WithContext(ctx).
+		SetTimeout(shortTimeout * time.Millisecond).
+		Do()
+
+	assert.Error(t, err)
+
+	assert.LessOrEqual(t, int(time.Now().Sub(s)), int(middleTimeout*time.Millisecond))
+
+	// 使用互斥api的原则，后面的覆盖前面的
+	// 这里是WithContext生效, 超时时间400ms
+	ctx, _ = context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
+	s = time.Now()
+	err = GET(ts.URL + "/timeout").
+		SetTimeout(shortTimeout * time.Millisecond).
+		WithContext(ctx).
+		Do()
+
+	assert.Error(t, err)
+	assert.GreaterOrEqual(t, int(time.Now().Sub(s)), int(middleTimeout*time.Millisecond))
 }
