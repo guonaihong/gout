@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const (
@@ -197,7 +198,16 @@ func (g *routerGroup) Callback(cb func(*Context) error) *routerGroup {
 	return g
 }
 
+func (g *routerGroup) SetTimeout(d time.Duration) *routerGroup {
+	g.Req.index++
+	g.Req.timeoutIndex = g.Req.index
+	g.Req.timeout = d
+	return g
+}
+
 func (g *routerGroup) WithContext(c context.Context) *routerGroup {
+	g.Req.index++
+	g.Req.ctxIndex = g.Req.index
 	g.Req.c = c
 	return g
 }
