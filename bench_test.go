@@ -19,7 +19,7 @@ func setup_bench_number(total *int32) *gin.Engine {
 	router := gin.New()
 	router.POST("/", func(c *gin.Context) {
 		atomic.AddInt32(total, 1)
-		//c.String(200, "12345")
+		c.String(200, "12345")
 	})
 
 	return router

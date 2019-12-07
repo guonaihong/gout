@@ -116,9 +116,9 @@ func (r *Report) addErrAndFailed(err error) {
 
 // 统计http code数量
 func (r *Report) addCode(code int) {
-	r.lerr.Lock()
+	r.lcode.Lock()
 	r.StatusCodes[code]++
-	r.lerr.Unlock()
+	r.lcode.Unlock()
 }
 
 // 负责构造压测http 链接和统计压测元数据
@@ -165,10 +165,6 @@ func (r *Report) Process(work chan struct{}) {
 func (r *Report) WaitAll() {
 	<-r.waitQuit
 	r.outputReport() //输出最终报表
-}
-
-func (r *Report) addFail() {
-	atomic.AddUint64(&r.Failed, 1)
 }
 
 func (r *Report) calBody(resp *http.Response, bodySize uint64) {
