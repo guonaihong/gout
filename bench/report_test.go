@@ -47,7 +47,7 @@ func newRequest(url string) (*http.Request, error) {
 	return http.NewRequest("GET", url, b)
 }
 
-// 测试正常情况
+// 测试正常情况, 次数
 func Test_Bench_Report_number(t *testing.T) {
 	const number = 1000
 
@@ -61,6 +61,26 @@ func Test_Bench_Report_number(t *testing.T) {
 	assert.NoError(t, err)
 
 	p := NewReport(ctx, 1, number, time.Duration(0), req, http.DefaultClient)
+
+	runReport(p, number)
+
+	assert.Equal(t, int32(p.CompleteRequest), int32(number))
+}
+
+// 测试正常情况, 时间
+func Test_Bench_Report_duration(t *testing.T) {
+	const number = 1000
+
+	total := int32(0)
+	router := setup_report_server(&total)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	ctx := context.Background()
+
+	req, err := newRequest(ts.URL)
+	assert.NoError(t, err)
+
+	p := NewReport(ctx, 1, 0, 300*time.Millisecond, req, http.DefaultClient)
 
 	runReport(p, number)
 
