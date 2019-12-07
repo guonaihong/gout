@@ -29,6 +29,7 @@ type Task struct {
 
 func (t *Task) init() {
 	t.work = make(chan struct{})
+	t.Concurrent = 1
 	t.ok = true
 }
 
