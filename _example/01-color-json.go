@@ -18,7 +18,7 @@ func server() {
 func main() {
 	go server()
 
-	time.Sleep(time.Millisecond * 500)
+	time.Sleep(time.Millisecond * 200)
 
 	fmt.Printf("\n\n=============color json===========\n\n")
 	err := gout.POST(":8080/colorjson").
