@@ -9,7 +9,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
 
 ## 内容
 - [安装](#安装)
-- [技能树](#技能树)
 - [迁移文档](#迁移文档)
 - [example](#example)
 - [quick start](#quick-start)
@@ -51,16 +50,12 @@ gout 是go写的http 客户端，为提高工作效率而开发
  - [特色功能示例](#特色功能示例)
     - [forward gin data](#forward-gin-data)
 
+- [FAQ](#FAQ)
+
 ## 安装
 ```
 env GOPATH=`pwd` go get github.com/guonaihong/gout
 ```
-## 技能树
-<details>
-
-![gout.png](https://github.com/guonaihong/images/blob/master/gout/gout.png)
-
-</details>
 
 ## 迁移文档
 主要方便下面的用户迁移到gout
@@ -1355,3 +1350,9 @@ func main() {
 // http client
 // curl '127.0.0.1:8080/query?size=10&page=20&ak=test'
 ```
+# FAQ
+
+## gout benchmark性能如何
+下面是与apache ab的性能对比 [_example/16d-benchmark-vs-ab.go](_example/16d-benchmark-vs-ab.go)
+
+![gout-vs-ab.png](https://github.com/guonaihong/images/blob/master/gout/gout-vs-ab.png?raw=true)
