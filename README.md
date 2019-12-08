@@ -50,7 +50,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
  - [特色功能示例](#特色功能示例)
     - [forward gin data](#forward-gin-data)
 
-- [FAQ](#FQA)
+- [FAQ](#FAQ)
 
 ## 安装
 ```
