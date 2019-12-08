@@ -8,14 +8,14 @@ import (
 )
 
 const (
-	benchTime       = 10 * time.Second
+	benchTime       = 4 * time.Second
 	benchConcurrent = 30
 )
 
 func server() {
 	router := gin.New()
 	router.POST("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{"key": "12345"})
+		c.String(200, "hello world:gout")
 	})
 
 	router.Run()
