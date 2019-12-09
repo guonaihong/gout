@@ -4,6 +4,18 @@ gout 是go写的http 客户端，为提高工作效率而开发
 [![Build Status](https://travis-ci.org/guonaihong/gout.png)](https://travis-ci.org/guonaihong/gout)
 [![codecov](https://codecov.io/gh/guonaihong/gout/branch/master/graph/badge.svg)](https://codecov.io/gh/guonaihong/gout)
 
+## feature
+* 支持GET/PUT/DELETE/PATH/HEAD/OPTIONS
+* 支持设置请求http header(可传struct,map,array,slice等类型)
+* 支持URL query(可传struct,map,array,slice,string等类型)
+* 支持json,xml,yaml编码到请求body里面(SetJSON/SetXML/SetYAML)
+* 支持io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64至请求body里面
+* 支持解析响应body里面的json,xml,yaml至结构体里(BindJSON/BindXML/BindYAML)
+* 支持解析响应body的内容至io.Writer, uint/uint8...int/int8...string...[]byte...float32,float64
+* 支持解析响应header至结构体里
+* 支持接口性能benchmark，可控制压测一定次数还是时间，可控制压测频率
+* 等等更多
+
 ## 演示
 ![gout-example.gif](https://github.com/guonaihong/images/blob/master/gout/gout-example.gif?raw=true)
 
