@@ -1,4 +1,4 @@
-GO ?= go
+GO ?= env CGO_ENABLED=0 go
 
 TESTFOLDER := $(shell $(GO) list ./... | grep -v from-xxx-to-gout-doc|grep -v testdata)
 
