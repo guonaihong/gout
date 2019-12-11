@@ -5,11 +5,13 @@ gout 是go写的http 客户端，为提高工作效率而开发
 [![codecov](https://codecov.io/gh/guonaihong/gout/branch/master/graph/badge.svg)](https://codecov.io/gh/guonaihong/gout)
 
 ## feature
-* 支持GET/PUT/DELETE/PATH/HEAD/OPTIONS
-* 支持设置请求http header(可传struct,map,array,slice等类型)
-* 支持URL query(可传struct,map,array,slice,string等类型)
-* 支持json,xml,yaml编码到请求body里面(SetJSON/SetXML/SetYAML)
-* 支持io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64至请求body里面
+* 支持设置 GET/PUT/DELETE/PATH/HEAD/OPTIONS
+* 支持设置请求 http header(可传 struct,map,array,slice 等类型)
+* 支持设置 URL query(可传 struct,map,array,slice,string 等类型)
+* 支持设置 json,xml,yaml 编码到请求 body 里面(SetJSON/SetXML/SetYAML)
+* 支持设置 form-data(可传 struct,map,array,slice 等类型)
+* 支持设置 x-www-form-urlencoded(可传 struct,map,array,slice 等类型) 
+* 支持 io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64 至请求 body 里面
 * 支持解析响应body里面的json,xml,yaml至结构体里(BindJSON/BindXML/BindYAML)
 * 支持解析响应body的内容至io.Writer, uint/uint8...int/int8...string...[]byte...float32,float64
 * 支持解析响应header至结构体里
@@ -20,11 +22,11 @@ gout 是go写的http 客户端，为提高工作效率而开发
 ![gout-example.gif](https://github.com/guonaihong/images/blob/master/gout/gout-example.gif?raw=true)
 
 ## 内容
-- [安装](#安装)
-- [迁移文档](#迁移文档)
+- [Installation](#Installation)
+- [Migrate documents](#Migrate-documents)
 - [example](#example)
 - [quick start](#quick-start)
-- [API示例](#api-示例)
+- [API Examples](#api-examples)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [group](#group)
     - [query](#query)
@@ -51,7 +53,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [proxy](#proxy)
     - [cookie](#cookie)
     - [context](#context)
-        - [timeout](#timeout)
         - [cancel](#cancel)
     - [unix socket](#unix-socket)
     - [http2 doc](#http2-doc)
@@ -64,12 +65,12 @@ gout 是go写的http 客户端，为提高工作效率而开发
 
 - [FAQ](#FAQ)
 
-## 安装
+## Installation
 ```
 env GOPATH=`pwd` go get github.com/guonaihong/gout
 ```
 
-## 迁移文档
+## Migrate documents
 主要方便下面的用户迁移到gout
 * [httplib](./to-gout-doc/beego-httplib.md)
 * [resty](./to-gout-doc/resty-doc.md)
@@ -161,7 +162,7 @@ func main() {
 
 */
  ```
-# API 示例
+# API examples
 ## GET POST PUT DELETE PATH HEAD OPTIONS
 ```go
 package main
@@ -1107,30 +1108,6 @@ func main() {
 
 ## context
 * WithContext设置context，可以取消http请求
-### timeout
-```go
-package main
-
-import (
-    "context"
-    "github.com/guonaihong/gout"
-    "time"
-)
-
-func main() {
-    // 给http请求 设置超时
-    ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
-
-    err := gout.
-        GET("127.0.0.1:8080/timeout"). //设置GET请求以及url地址
-        WithContext(ctx).              //设置context,　如果传过来的ctx超时，这个http请求就会被取消
-        Do()                           //结束函数
-
-    if err != nil {
-    }
-}
-
-```
 ### cancel
 ```go
 package main
