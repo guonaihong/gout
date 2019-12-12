@@ -5,6 +5,12 @@ type Filter struct {
 	g *routerGroup
 }
 
+// API performance stress test
 func (f *Filter) Bench() *Bench {
 	return &Bench{g: f.g}
+}
+
+// API retry
+func (f *Filter) Retry() *Retry {
+	return &Retry{g: f.g}
 }
