@@ -62,10 +62,14 @@ func (r *Retry) min(a, b time.Duration) time.Duration {
 	return a
 }
 
-func (r *Retry) sleep() time.Duration {
+func (r *Retry) getSleep() time.Duration {
 	temp := r.waitTime * time.Duration(math.Exp2(float64(r.currAttempt)))
+	if temp <= 0 {
+		temp = r.waitTime
+	}
 	temp = r.min(r.maxWaitTime, temp)
-	return time.Duration(int(temp)/2 + rand.Intn(int(temp)/2))
+	temp /= 2
+	return temp + time.Duration(rand.Intn(int(temp)))
 }
 
 func (r *Retry) Do() (err error) {
@@ -78,7 +82,7 @@ func (r *Retry) Do() (err error) {
 			return nil
 		}
 
-		sleep := r.sleep()
+		sleep := r.getSleep()
 
 		time.Sleep(sleep)
 
