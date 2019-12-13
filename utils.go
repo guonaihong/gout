@@ -1,9 +1,10 @@
 package gout
 
 import (
-	"github.com/guonaihong/gout/core"
 	"path"
 	"strings"
+
+	"github.com/guonaihong/gout/core"
 )
 
 const (
@@ -20,6 +21,8 @@ type A = core.A
 type FormFile = core.FormFile
 
 type FormMem = core.FormMem
+
+type FormType = core.FormType
 
 func lastChar(str string) uint8 {
 	if str == "" {

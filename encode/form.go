@@ -3,12 +3,15 @@ package encode
 import (
 	"bytes"
 	"fmt"
-	"github.com/guonaihong/gout/core"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
-	"path/filepath"
+	"net/textproto"
 	"reflect"
 	"strconv"
+	"strings"
+
+	"github.com/guonaihong/gout/core"
 )
 
 var _ Adder = (*FormEncode)(nil)
@@ -51,6 +54,8 @@ func toBytes(val reflect.Value) (all []byte, err error) {
 
 func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (err error) {
 	var all []byte
+	var contentType string
+	var fileRealName = key
 	if openFile {
 		var fileName string
 		switch v := v.Interface().(type) {
@@ -58,6 +63,14 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 			fileName = v
 		case []byte:
 			fileName = core.BytesToString(v)
+		case core.FormType:
+			s, ok := v.File.(string)
+			if !ok {
+				return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
+			}
+			fileName = s
+			fileRealName = v.FileName
+			contentType = v.ContentType
 		default:
 			return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
 		}
@@ -66,12 +79,28 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 			return err
 		}
 	} else {
-		if all, err = toBytes(v); err != nil {
-			return err
+		switch val := v.Interface().(type) {
+		case core.FormType:
+			content, ok := val.File.([]byte)
+			if !ok {
+				s, okToo := val.File.(string)
+				if !okToo {
+					return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
+				}
+				content = []byte(s)
+			}
+			all = content
+			contentType = val.ContentType
+			fileRealName = val.FileName
+		default:
+			if all, err = toBytes(v); err != nil {
+				return err
+			}
 		}
+
 	}
 
-	part, err := f.CreateFormFile(key, filepath.Base(key))
+	part, err := f.CreateFormFile(key, fileRealName, contentType)
 	if err != nil {
 		return err
 	}
@@ -82,8 +111,28 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 
 func (f *FormEncode) mapFormFile(key string, v reflect.Value, sf reflect.StructField) (next bool, err error) {
 	var all []byte
+	var fileName = key
+	var contentType string
 
 	switch val := v.Interface().(type) {
+	case core.FormType:
+
+		fileName = val.FileName
+		contentType = val.ContentType
+
+		switch ft := val.File.(type) {
+		case core.FormFile:
+			all, err = ioutil.ReadFile(string(ft))
+			if err != nil {
+				return false, err
+			}
+
+		case core.FormMem:
+			all = []byte(ft)
+		default:
+			return true, nil
+		}
+
 	case core.FormFile:
 		all, err = ioutil.ReadFile(string(val))
 		if err != nil {
@@ -96,13 +145,35 @@ func (f *FormEncode) mapFormFile(key string, v reflect.Value, sf reflect.StructF
 		return true, nil
 	}
 
-	part, err := f.CreateFormFile(key, filepath.Base(key))
+	part, err := f.CreateFormFile(key, fileName, contentType)
 	if err != nil {
 		return false, err
 	}
 
 	_, err = part.Write(all)
 	return false, err
+}
+
+//下方为原函数附带的方法
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+func escapeQuotes(s string) string {
+	return quoteEscaper.Replace(s)
+}
+
+//重写
+func (f *FormEncode) CreateFormFile(fieldName, fileName, contentType string) (io.Writer, error) {
+
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition",
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+			escapeQuotes(fieldName), escapeQuotes(fileName)))
+	h.Set("Content-Type", contentType)
+	return f.CreatePart(h)
 }
 
 func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (err error) {

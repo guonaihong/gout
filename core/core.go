@@ -10,6 +10,12 @@ type FormFile string
 
 type FormMem []byte
 
+type FormType struct {
+	FileName    string      //filename
+	ContentType string      //Content-Type:Mime-Type
+	File        interface{} //FromFile | FromMem (这里就是您的从文件地址中读取和从内存中读取)
+}
+
 type H map[string]interface{}
 
 type A []interface{}

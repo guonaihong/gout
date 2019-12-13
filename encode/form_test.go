@@ -3,14 +3,15 @@ package encode
 import (
 	"bytes"
 	"fmt"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 type formTest struct {
@@ -149,6 +150,20 @@ type test_Form_struct_fail2 struct {
 	Voice2 string `form:"voice2" form-file:"xxx"`
 }
 
+type test_Form_Second_struct_fail struct {
+	Mode   string        `form:"mode"`
+	Text   string        `form:"text"`
+	Voice  core.FormType `form:"voice" form-mem:"xxx"`
+	Voice2 core.FormType `form:"voice2" form-file:"true"`
+}
+
+type test_Form_Second_struct_fail2 struct {
+	Mode   string        `form:"mode"`
+	Text   string        `form:"text"`
+	Voice  core.FormType `form:"voice" form-mem:"true"`
+	Voice2 core.FormType `form:"voice2" form-file:"xxx"`
+}
+
 // 测试错误的情况
 func Test_Form_Fail(t *testing.T) {
 	var out bytes.Buffer
@@ -170,7 +185,36 @@ func Test_Form_Fail(t *testing.T) {
 			Text:   "good",
 			Voice:  "pcm1",
 			Voice2: "../testdata/voice.pcm",
-		}}}
+		}},
+		{NewFormEncode(&out), test_Form_Second_struct_fail{
+			Mode: "A",
+			Text: "good",
+			Voice: struct {
+				FileName    string
+				ContentType string
+				File        interface{}
+			}{FileName: "voice.pem", ContentType: "", File: "pcm1"},
+			Voice2: struct {
+				FileName    string
+				ContentType string
+				File        interface{}
+			}{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
+		}},
+		{NewFormEncode(&out), test_Form_Second_struct_fail2{
+			Mode: "A",
+			Text: "good",
+			Voice: struct {
+				FileName    string
+				ContentType string
+				File        interface{}
+			}{FileName: "voice.pem", ContentType: "", File: "pcm1"},
+			Voice2: struct {
+				FileName    string
+				ContentType string
+				File        interface{}
+			}{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
+		}},
+	}
 
 	for _, v := range tests {
 		err := Encode(v.data, v.f)
@@ -184,6 +228,14 @@ type test_Form_struct struct {
 	Text   string `form:"text"`
 	Voice  string `form:"voice" form-mem:"true"`
 	Voice2 string `form:"voice2" form-file:"true"`
+}
+
+//第二种测试情况
+type test_Form_Second_struct struct {
+	Mode   string        `form:"mode"`
+	Text   string        `form:"text"`
+	Voice  core.FormType `form:"voice" form-mem:"true"`
+	Voice2 core.FormType `form:"voice2" form-file:"true"`
 }
 
 // 测试正确的情况
@@ -204,6 +256,37 @@ func Test_Form(t *testing.T) {
 			Voice:  "pcm1",
 			Voice2: "../testdata/voice.pcm",
 		}},
+		{
+			NewFormEncode(&out), test_Form_Second_struct{
+				Mode: "A",
+				Text: "good",
+				Voice: struct {
+					FileName    string
+					ContentType string
+					File        interface{}
+				}{FileName: "voice.pem", ContentType: "", File: core.FormMem("pcm1")},
+				Voice2: struct {
+					FileName    string
+					ContentType string
+					File        interface{}
+				}{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")},
+			},
+		}, {
+			NewFormEncode(&out), test_Form_Second_struct{
+				Mode: "A",
+				Text: "good",
+				Voice: struct {
+					FileName    string
+					ContentType string
+					File        interface{}
+				}{FileName: "voice.pem", ContentType: "", File: "pcm1"},
+				Voice2: struct {
+					FileName    string
+					ContentType string
+					File        interface{}
+				}{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
+			},
+		},
 	}
 
 	for _, v := range tests {

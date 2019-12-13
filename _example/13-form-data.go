@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout"
-	"time"
 )
 
 type testForm struct {
