@@ -33,7 +33,6 @@ func Test_Form_toBytes(t *testing.T) {
 		{set: interface{}(1), need: []byte("1")},
 		{set: 1, need: []byte("1")},
 	}
-
 	fail := []formTest{
 		{set: time.Time{}},
 		{set: time.Duration(0)},
@@ -163,6 +162,12 @@ type test_Form_Second_struct_fail2 struct {
 	Voice  core.FormType `form:"voice" form-mem:"true"`
 	Voice2 core.FormType `form:"voice2" form-file:"xxx"`
 }
+type test_Form_Second_struct_fail_Type struct {
+	Mode   string        `form:"mode"`
+	Text   string        `form:"text"`
+	Voice  core.FormType `form:"voice" form-mem:"true"`
+	Voice2 core.FormType `form:"voice2" form-file:"true"`
+}
 
 // 测试错误的情况
 func Test_Form_Fail(t *testing.T) {
@@ -197,6 +202,18 @@ func Test_Form_Fail(t *testing.T) {
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
+		}},
+		{NewFormEncode(&out), test_Form_Second_struct_fail_Type{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: 123},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
+		}},
+		{NewFormEncode(&out), test_Form_Second_struct_fail_Type{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: 123},
 		}},
 	}
 
