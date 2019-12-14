@@ -27,13 +27,6 @@ type DataFlow struct {
 	out *Gout
 }
 
-func (df *DataFlow) Group(relativePath string) *DataFlow {
-	return &DataFlow{
-		basePath: joinPaths(df.basePath, relativePath),
-		out:      df.out,
-	}
-}
-
 func (df *DataFlow) GET(url string) *DataFlow {
 	df.Req = reqDef(Get, joinPaths(df.basePath, url), df.out)
 	return df

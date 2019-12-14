@@ -1,6 +1,8 @@
 package gout
 
 import (
+	"context"
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -76,15 +78,37 @@ func (r *Retry) Do() (err error) {
 	defer r.reset()
 	r.init()
 
+	req, err := r.df.request()
+	if err != nil {
+		return err
+	}
+
+	tk := time.NewTimer(r.maxWaitTime)
 	for i := 0; i < r.attempt; i++ {
-		err = r.df.Do()
+
+		resp, err := r.df.out.Client.Do(req)
 		if err == nil {
-			return nil
+			return r.df.bind(req, resp)
 		}
 
 		sleep := r.getSleep()
 
-		time.Sleep(sleep)
+		if r.df.out.opt.Debug {
+			fmt.Printf("filter:retry #current attempt:%d, wait time %v\n", r.currAttempt, sleep)
+		}
+
+		tk.Reset(sleep)
+		ctx := r.df.getContext()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+
+		select {
+		case <-tk.C:
+			// 外部可以使用context直接取消
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 
 		r.currAttempt++
 	}
