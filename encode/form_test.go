@@ -187,32 +187,16 @@ func Test_Form_Fail(t *testing.T) {
 			Voice2: "../testdata/voice.pcm",
 		}},
 		{NewFormEncode(&out), test_Form_Second_struct_fail{
-			Mode: "A",
-			Text: "good",
-			Voice: struct {
-				FileName    string
-				ContentType string
-				File        interface{}
-			}{FileName: "voice.pem", ContentType: "", File: "pcm1"},
-			Voice2: struct {
-				FileName    string
-				ContentType string
-				File        interface{}
-			}{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
+			Mode:   "A",
+			Text:   "good",
+			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
 		}},
 		{NewFormEncode(&out), test_Form_Second_struct_fail2{
-			Mode: "A",
-			Text: "good",
-			Voice: struct {
-				FileName    string
-				ContentType string
-				File        interface{}
-			}{FileName: "voice.pem", ContentType: "", File: "pcm1"},
-			Voice2: struct {
-				FileName    string
-				ContentType string
-				File        interface{}
-			}{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
+			Mode:   "A",
+			Text:   "good",
+			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
 		}},
 	}
 
@@ -249,6 +233,11 @@ func Test_Form(t *testing.T) {
 			"voice":  core.FormMem("pcm1"),
 			"voice2": core.FormFile("../testdata/voice.pcm"),
 		}},
+		{NewFormEncode(&out), core.H{
+			"mode":   "A",
+			"text":   "good",
+			"voice":  core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormMem("pcm1")},
+			"voice2": core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")},}},
 
 		{NewFormEncode(&out), test_Form_struct{
 			Mode:   "A",
@@ -256,37 +245,16 @@ func Test_Form(t *testing.T) {
 			Voice:  "pcm1",
 			Voice2: "../testdata/voice.pcm",
 		}},
-		{
-			NewFormEncode(&out), test_Form_Second_struct{
-				Mode: "A",
-				Text: "good",
-				Voice: struct {
-					FileName    string
-					ContentType string
-					File        interface{}
-				}{FileName: "voice.pem", ContentType: "", File: core.FormMem("pcm1")},
-				Voice2: struct {
-					FileName    string
-					ContentType string
-					File        interface{}
-				}{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")},
-			},
-		}, {
-			NewFormEncode(&out), test_Form_Second_struct{
-				Mode: "A",
-				Text: "good",
-				Voice: struct {
-					FileName    string
-					ContentType string
-					File        interface{}
-				}{FileName: "voice.pem", ContentType: "", File: "pcm1"},
-				Voice2: struct {
-					FileName    string
-					ContentType string
-					File        interface{}
-				}{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
-			},
-		},
+		{NewFormEncode(&out), test_Form_Second_struct{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormMem("pcm1")},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")},},},
+		{NewFormEncode(&out), test_Form_Second_struct{
+			Mode:   "A",
+			Text:   "good",
+			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},},},
 	}
 
 	for _, v := range tests {
