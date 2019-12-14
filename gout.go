@@ -6,7 +6,7 @@ import (
 
 type Gout struct {
 	*http.Client
-	routerGroup
+	DataFlow
 
 	opt DebugOption
 }
@@ -28,7 +28,7 @@ func New(c ...*http.Client) *Gout {
 		out.Client = c[0]
 	}
 
-	out.routerGroup.out = out
+	out.DataFlow.out = out
 	return out
 }
 
@@ -37,30 +37,30 @@ func Def() *Gout {
 	return New()
 }
 
-func GET(url string) *routerGroup {
+func GET(url string) *DataFlow {
 	return New().GET(url)
 }
 
-func POST(url string) *routerGroup {
+func POST(url string) *DataFlow {
 	return New().POST(url)
 }
 
-func PUT(url string) *routerGroup {
+func PUT(url string) *DataFlow {
 	return New().PUT(url)
 }
 
-func DELETE(url string) *routerGroup {
+func DELETE(url string) *DataFlow {
 	return New().DELETE(url)
 }
 
-func PATCH(url string) *routerGroup {
+func PATCH(url string) *DataFlow {
 	return New().PATCH(url)
 }
 
-func HEAD(url string) *routerGroup {
+func HEAD(url string) *DataFlow {
 	return New().HEAD(url)
 }
 
-func OPTIONS(url string) *routerGroup {
+func OPTIONS(url string) *DataFlow {
 	return New().OPTIONS(url)
 }
