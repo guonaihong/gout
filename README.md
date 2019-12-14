@@ -44,10 +44,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [form-data](#form-data)
         - [x-www-form-urlencoded](#x-www-form-urlencoded)
         - [callback](#callback)
-	- [benchmark](#benchmark)
-		- [number](#number)
-		- [duration](#duration)
-		- [rate](#rate)
 	- [timeout](#timeout)
     - [proxy](#proxy)
     - [cookie](#cookie)
@@ -59,6 +55,11 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [color](#color)
         - [customize](#customize)
         - [no-color](#no-color)
+	- [benchmark](#benchmark)
+		- [number](#number)
+		- [duration](#duration)
+		- [rate](#rate)
+	- [retry](#retry)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
@@ -875,102 +876,7 @@ func main() {
 }
 
 ```
-## benchmark
-### number
-下面的例子，起了20并发。对:8080端口的服务，发送3000次请求进行压测，内容为json结构
-```go
-package main
 
-import (
-	"fmt"
-	"github.com/guonaihong/gout"
-)
-
-const (
-	benchNumber     = 30000
-	benchConcurrent = 20
-)
-
-func main() {
-	err := gout.
-		POST(":8080").                     //压测本地8080端口
-		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
-		Filter().                          //打开过滤器
-		Bench().                           //选择bench功能
-		Concurrent(benchConcurrent).       //并发数
-		Number(benchNumber).               //压测次数
-		Do()
-
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-}
-
-```
-### duration
-下面的例子，起了20并发。对:8080端口的服务，压测持续时间为10s，内容为json结构
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/guonaihong/gout"
-	"time"
-)
-
-const (
-	benchTime       = 10 * time.Second
-	benchConcurrent = 30
-)
-
-func main() {
-	err := gout.
-		POST(":8080").                     //压测本机8080端口
-		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
-		Filter().                          //打开过滤器
-		Bench().                           //选择bench功能
-		Concurrent(benchConcurrent).       //并发数
-		Durations(benchTime).              //压测时间
-		Do()
-
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-}
-
-```
-### rate
-下面的例子，起了20并发。对:8080端口的服务，压测总次数为3000次，其中每秒发送1000次。内容为json结构
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/guonaihong/gout"
-)
-
-const (
-	benchNumber     = 3000
-	benchConcurrent = 20
-)
-
-func main() {
-	err := gout.
-		POST(":8080").                     //压测本机8080端口
-		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
-		Filter().                          //打开过滤器
-		Bench().                           //选择bench功能
-		Rate(1000).                        //每秒发1000请求
-		Concurrent(benchConcurrent).       //并发数
-		Number(benchNumber).               //压测次数
-		Do()
-
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-}
-
-```
 ## timeout
 setimeout是request级别的超时方案。相比http.Client级别，更灵活。
 ```go
@@ -1249,6 +1155,130 @@ func main() {
 		fmt.Printf("err = %v\n", err)
 	}
 }
+
+```
+## benchmark
+### number
+下面的例子，起了20并发。对:8080端口的服务，发送3000次请求进行压测，内容为json结构
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+const (
+	benchNumber     = 30000
+	benchConcurrent = 20
+)
+
+func main() {
+	err := gout.
+		POST(":8080").                     //压测本地8080端口
+		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
+		Filter().                          //打开过滤器
+		Bench().                           //选择bench功能
+		Concurrent(benchConcurrent).       //并发数
+		Number(benchNumber).               //压测次数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+```
+### duration
+下面的例子，起了20并发。对:8080端口的服务，压测持续时间为10s，内容为json结构
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"time"
+)
+
+const (
+	benchTime       = 10 * time.Second
+	benchConcurrent = 30
+)
+
+func main() {
+	err := gout.
+		POST(":8080").                     //压测本机8080端口
+		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
+		Filter().                          //打开过滤器
+		Bench().                           //选择bench功能
+		Concurrent(benchConcurrent).       //并发数
+		Durations(benchTime).              //压测时间
+		Do()
+
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+```
+### rate
+下面的例子，起了20并发。对:8080端口的服务，压测总次数为3000次，其中每秒发送1000次。内容为json结构
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+const (
+	benchNumber     = 3000
+	benchConcurrent = 20
+)
+
+func main() {
+	err := gout.
+		POST(":8080").                     //压测本机8080端口
+		SetJSON(gout.H{"hello": "world"}). //设置请求body内容
+		Filter().                          //打开过滤器
+		Bench().                           //选择bench功能
+		Rate(1000).                        //每秒发1000请求
+		Concurrent(benchConcurrent).       //并发数
+		Number(benchNumber).               //压测次数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+}
+
+```
+## retry
+retry 功能使用带抖动功能和指数的算法实现[backoff](http://www.awsarchitectureblog.com/2015/03/backoff.html)
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"time"
+)
+
+func main() {
+	err := gout.HEAD("127.0.0.1:8080").
+		Debug(true).                      //打开debug模式
+		Filter().                         //打开过滤器
+		Retry().                          //打开重试模式
+		Attempt(5).                       //最多重试5次
+		WaitTime(500 * time.Millisecond). //基本等待时间
+		MaxWaitTime(3 * time.Second).     //最长等待时间
+		Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
+
 
 ```
 # Unique features

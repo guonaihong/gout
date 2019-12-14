@@ -14,6 +14,10 @@ var (
 	RetryAttempt     = 1
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 // https://amazonaws-china.com/cn/blogs/architecture/exponential-backoff-and-jitter/
 type Retry struct {
 	df          *DataFlow
