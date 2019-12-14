@@ -54,23 +54,6 @@ type Req struct {
 // headerDecode只有一个可能，就定义为具体类型。这里他们的decode实现也不一样
 // 有没有必要，归一化成一种??? TODO:
 
-func (r *Req) clone() Req {
-	return Req{
-		method:      r.method,
-		url:         r.url,
-		formEncode:  r.formEncode,
-		bodyEncoder: r.bodyEncoder,
-		bodyDecoder: r.bodyDecoder,
-		queryEncode: r.queryEncode,
-		httpCode:    r.httpCode,
-		g:           r.g,
-		callback:    r.callback,
-		cookies:     r.cookies,
-		c:           r.c,
-		err:         r.err,
-	}
-}
-
 func (r *Req) Reset() {
 	r.index = 0
 	r.err = nil
@@ -203,31 +186,12 @@ func (r *Req) request() (*http.Request, error) {
 		}
 	}
 
+	r.addDefDebug()
+	r.addContextType(req)
 	return req, nil
 }
 
-func (r *Req) Do() (err error) {
-	if r.err != nil {
-		return r.err
-	}
-
-	// reset  Req
-	defer r.Reset()
-
-	req, err := r.request()
-	if err != nil {
-		return err
-	}
-
-	r.addDefDebug()
-	r.addContextType(req)
-	resp, err := r.g.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
+func (r *Req) bind(req *http.Request, resp *http.Response) (err error) {
 	if r.headerDecode != nil {
 		err = decode.Header.Decode(resp, r.headerDecode)
 		if err != nil {
@@ -262,6 +226,30 @@ func (r *Req) Do() (err error) {
 	}
 
 	return nil
+
+}
+
+func (r *Req) Do() (err error) {
+	if r.err != nil {
+		return r.err
+	}
+
+	// reset  Req
+	defer r.Reset()
+
+	req, err := r.request()
+	if err != nil {
+		return err
+	}
+
+	resp, err := r.g.Client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	return r.bind(req, resp)
 }
 
 func modifyURL(url string) string {

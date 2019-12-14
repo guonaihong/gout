@@ -2,12 +2,12 @@ package gout
 
 //所有的过滤器都在此文件注册
 type Filter struct {
-	g *routerGroup
+	df *DataFlow
 }
 
 // API performance stress test
 func (f *Filter) Bench() *Bench {
-	return &Bench{g: f.g}
+	return &Bench{df: f.df}
 }
 
 // API retry
