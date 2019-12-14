@@ -22,43 +22,42 @@ const (
 )
 
 type DataFlow struct {
-	basePath string
 	Req
 	out *Gout
 }
 
 func (df *DataFlow) GET(url string) *DataFlow {
-	df.Req = reqDef(Get, joinPaths(df.basePath, url), df.out)
+	df.Req = reqDef(Get, joinPaths("", url), df.out)
 	return df
 }
 
 func (df *DataFlow) POST(url string) *DataFlow {
-	df.Req = reqDef(Post, joinPaths(df.basePath, url), df.out)
+	df.Req = reqDef(Post, joinPaths("", url), df.out)
 	return df
 }
 
 func (df *DataFlow) PUT(url string) *DataFlow {
-	df.Req = reqDef(Put, joinPaths(df.basePath, url), df.out)
+	df.Req = reqDef(Put, joinPaths("", url), df.out)
 	return df
 }
 
 func (df *DataFlow) DELETE(url string) *DataFlow {
-	df.Req = reqDef(Delete, joinPaths(df.basePath, url), df.out)
+	df.Req = reqDef(Delete, joinPaths("", url), df.out)
 	return df
 }
 
 func (df *DataFlow) PATCH(url string) *DataFlow {
-	df.Req = reqDef(Patch, joinPaths(df.basePath, url), df.out)
+	df.Req = reqDef(Patch, joinPaths("", url), df.out)
 	return df
 }
 
 func (df *DataFlow) HEAD(url string) *DataFlow {
-	df.Req = reqDef(Head, joinPaths(df.basePath, url), df.out)
+	df.Req = reqDef(Head, joinPaths("", url), df.out)
 	return df
 }
 
 func (df *DataFlow) OPTIONS(url string) *DataFlow {
-	df.Req = reqDef(Options, joinPaths(df.basePath, url), df.out)
+	df.Req = reqDef(Options, joinPaths("", url), df.out)
 	return df
 }
 
