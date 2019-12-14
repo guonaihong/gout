@@ -59,7 +59,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [color](#color)
         - [customize](#customize)
         - [no-color](#no-color)
- - [特色功能示例](#特色功能示例)
+ - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
 - [FAQ](#FAQ)
@@ -1251,7 +1251,7 @@ func main() {
 }
 
 ```
-# 特色功能示例
+# Unique features
 ## forward gin data
 gout 设计之初就考虑到要和gin协同工作的可能性，下面展示如何方便地使用gout转发gin绑定的数据。
 ```go
