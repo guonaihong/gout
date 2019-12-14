@@ -203,31 +203,12 @@ func (r *Req) request() (*http.Request, error) {
 		}
 	}
 
+	r.addDefDebug()
+	r.addContextType(req)
 	return req, nil
 }
 
-func (r *Req) Do() (err error) {
-	if r.err != nil {
-		return r.err
-	}
-
-	// reset  Req
-	defer r.Reset()
-
-	req, err := r.request()
-	if err != nil {
-		return err
-	}
-
-	r.addDefDebug()
-	r.addContextType(req)
-	resp, err := r.g.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
+func (r *Req) bind(req *http.Request, resp *http.Response) (err error) {
 	if r.headerDecode != nil {
 		err = decode.Header.Decode(resp, r.headerDecode)
 		if err != nil {
@@ -262,6 +243,30 @@ func (r *Req) Do() (err error) {
 	}
 
 	return nil
+
+}
+
+func (r *Req) Do() (err error) {
+	if r.err != nil {
+		return r.err
+	}
+
+	// reset  Req
+	defer r.Reset()
+
+	req, err := r.request()
+	if err != nil {
+		return err
+	}
+
+	resp, err := r.g.Client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	return r.bind(req, resp)
 }
 
 func modifyURL(url string) string {

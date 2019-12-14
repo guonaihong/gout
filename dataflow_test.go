@@ -21,89 +21,9 @@ import (
 	"time"
 )
 
-type testGroup struct {
+type testDataFlow struct {
 	send  bool
 	total int32
-}
-
-func setupGroupRouter(t *testGroup) *gin.Engine {
-
-	router := gin.Default()
-
-	postFunc := func(c *gin.Context) {
-		atomic.AddInt32(&t.total, 1)
-	}
-
-	// Simple group: v1
-	v1 := router.Group("/v1")
-	{
-		v1.POST("/login", postFunc)
-		v1.POST("/submit", postFunc)
-		v1.POST("/read", postFunc)
-	}
-
-	// Simple group: v2
-	v2 := router.Group("/v2")
-	{
-		v2.POST("/login", postFunc)
-		v2.POST("/submit", postFunc)
-		v2.POST("/read", postFunc)
-	}
-
-	v2_1 := v2.Group("/v1")
-	{
-		v2_1.POST("/login", func(c *gin.Context) {
-			t.send = true
-			atomic.AddInt32(&t.total, 1)
-		})
-	}
-	return router
-}
-
-func TestGroupNew(t *testing.T) {
-	tstGroup := testGroup{}
-
-	router := setupGroupRouter(&tstGroup)
-
-	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-	defer ts.Close()
-
-	out := New(nil)
-
-	// http://127.0.0.1:80/v1
-	v1 := out.Group(ts.URL + "/v1")
-	err := v1.POST("/login").Next().
-		POST("/submit").Next().
-		POST("/read").Do()
-
-	if err != nil {
-		t.Errorf("error:%s\n", err)
-	}
-
-	// http://127.0.0.1:80/v2
-	v2 := out.Group(ts.URL + "/v2")
-	err = v2.POST("/login").Next().
-		POST("/submit").Next().
-		POST("/read").Do()
-
-	if err != nil {
-		t.Errorf("error:%s\n", err)
-	}
-
-	v2_1 := v2.Group("/v1")
-	err = v2_1.POST("/login").Do()
-
-	if err != nil {
-		t.Errorf("error:%s\n", err)
-	}
-
-	if tstGroup.total != 7 {
-		t.Errorf("got %d want 7\n", tstGroup.total)
-	}
-
-	if !tstGroup.send {
-		t.Errorf("/v2/v1/login fail\n")
-	}
 }
 
 type data struct {
@@ -1220,7 +1140,7 @@ func TestWWWForm(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func setup_group_timeout(t *testing.T) *gin.Engine {
+func setup_DataFlow(t *testing.T) *gin.Engine {
 	router := gin.New()
 
 	router.GET("/timeout", func(c *gin.Context) {
@@ -1236,8 +1156,8 @@ func setup_group_timeout(t *testing.T) *gin.Engine {
 	return router
 }
 
-func Test_Group_Timeout(t *testing.T) {
-	router := setup_group_timeout(t)
+func Test_DataFlow_Timeout(t *testing.T) {
+	router := setup_DataFlow(t)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	const (

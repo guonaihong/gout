@@ -11,7 +11,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持设置 json,xml,yaml 编码到请求 body 里面(SetJSON/SetXML/SetYAML)
 * 支持设置 form-data(可传 struct,map,array,slice 等类型)
 * 支持设置 x-www-form-urlencoded(可传 struct,map,array,slice 等类型) 
-* 支持 io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64 至请求 body 里面
+* 支持设置 io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64 至请求 body 里面
 * 支持解析响应body里面的json,xml,yaml至结构体里(BindJSON/BindXML/BindYAML)
 * 支持解析响应body的内容至io.Writer, uint/uint8...int/int8...string...[]byte...float32,float64
 * 支持解析响应header至结构体里
@@ -28,7 +28,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
 - [quick start](#quick-start)
 - [API Examples](#api-examples)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
-    - [group](#group)
     - [query](#query)
     - [http header](#http-header)
 		- [req header](#req-header)
@@ -195,27 +194,6 @@ func main() {
 	gout.OPTIONS(url).Do()
 }
 
-```
-## group
-路由组
-```go
-g := New()
-
-v1 := g.Group(ts.URL + "/v1")
-err := v1.POST("/login").Next(). // http://127.0.0.1:80/v1/login
-    POST("/submit").Next().      // http://127.0.0.1:80/v1/submit
-    POST("/read").Do()           // http://127.0.0.1:80/v1/read
-
-if err != nil {
-}
-
-v2 := g.Group(ts.URL + "/v2")
-err = v2.POST("/login").Next(). // http://127.0.0.1:80/v2/login
-    POST("/submit").Next().     // http://127.0.0.1:80/v2/submit
-    POST("/read").Do()          // http://127.0.0.1:80/v2/read
-
-if err != nil {
-}
 ```
 ## query
 
