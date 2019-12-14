@@ -14,7 +14,7 @@ var (
 
 // https://amazonaws-china.com/cn/blogs/architecture/exponential-backoff-and-jitter/
 type Retry struct {
-	g           *routerGroup
+	df          *DataFlow
 	attempt     int // Maximum number of attempts
 	currAttempt int
 	maxWaitTime time.Duration
@@ -77,7 +77,7 @@ func (r *Retry) Do() (err error) {
 	r.init()
 
 	for i := 0; i < r.attempt; i++ {
-		err = r.g.Do()
+		err = r.df.Do()
 		if err == nil {
 			return nil
 		}

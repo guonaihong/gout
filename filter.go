@@ -12,5 +12,5 @@ func (f *Filter) Bench() *Bench {
 
 // API retry
 func (f *Filter) Retry() *Retry {
-	return &Retry{g: f.g}
+	return &Retry{df: f.df}
 }
