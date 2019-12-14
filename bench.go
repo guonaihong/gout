@@ -9,7 +9,7 @@ import (
 type Bench struct {
 	bench.Task
 
-	g *routerGroup
+	df *DataFlow
 }
 
 func (b *Bench) Concurrent(c int) *Bench {
@@ -34,12 +34,12 @@ func (b *Bench) Durations(d time.Duration) *Bench {
 
 func (b *Bench) Do() error {
 	// 报表插件
-	req, err := b.g.Req.request()
+	req, err := b.df.Req.request()
 	if err != nil {
 		return err
 	}
 
-	client := b.g.out.Client
+	client := b.df.out.Client
 	if client == &DefaultClient {
 		client = &DefaultBenchClient
 	}
