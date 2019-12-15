@@ -86,7 +86,7 @@ func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (
 				if !okToo {
 					return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
 				}
-				content = []byte(s)
+				content = core.StringToBytes(s)
 			}
 			all = content
 			contentType = val.ContentType
