@@ -12,7 +12,7 @@ import (
 
 const (
 	bench_number = 3000
-	bench_time   = 2 * time.Second
+	bench_time   = 500 * time.Millisecond
 )
 
 func setup_bench_number(total *int32) *gin.Engine {
