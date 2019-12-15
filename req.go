@@ -162,10 +162,7 @@ func (r *Req) request() (*http.Request, error) {
 		return nil, err
 	}
 
-	if r.timeout > 0 && r.timeoutIndex > r.ctxIndex {
-		r.c, _ = context.WithTimeout(context.Background(), r.timeout)
-	}
-
+	_ = r.getContext()
 	if r.c != nil {
 		req = req.WithContext(r.c)
 	}
@@ -189,6 +186,13 @@ func (r *Req) request() (*http.Request, error) {
 	r.addDefDebug()
 	r.addContextType(req)
 	return req, nil
+}
+
+func (r *Req) getContext() context.Context {
+	if r.timeout > 0 && r.timeoutIndex > r.ctxIndex {
+		r.c, _ = context.WithTimeout(context.Background(), r.timeout)
+	}
+	return r.c
 }
 
 func (r *Req) bind(req *http.Request, resp *http.Response) (err error) {
