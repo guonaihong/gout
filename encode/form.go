@@ -31,7 +31,6 @@ func toBytes(val reflect.Value) (all []byte, err error) {
 	case []byte:
 		all = v
 	default:
-		fmt.Println(val.Kind())
 		if val.Kind() == reflect.Interface {
 			val = reflect.ValueOf(val.Interface())
 		}

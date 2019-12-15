@@ -122,7 +122,6 @@ func checkForm(t *testing.T, boundary string, out *bytes.Buffer) {
 		// key
 		key := p.FormName()
 		// slurp is value
-
 		v := need[key]
 		assert.Equal(t, v, string(slurp))
 	}
@@ -162,11 +161,24 @@ type test_Form_Second_struct_fail2 struct {
 	Voice  core.FormType `form:"voice" form-mem:"true"`
 	Voice2 core.FormType `form:"voice2" form-file:"xxx"`
 }
-type test_Form_Second_struct_fail_Type struct {
+
+type test_Form_Second_struct_Type_fail struct {
 	Mode   string        `form:"mode"`
 	Text   string        `form:"text"`
 	Voice  core.FormType `form:"voice" form-mem:"true"`
 	Voice2 core.FormType `form:"voice2" form-file:"true"`
+}
+
+type test_Form_Second_struct_Inner_fail struct {
+	Mode          string `form:"mode"`
+	Text          string `form:"text"`
+	core.FormType `form:"voice" form-mem:"xxx"`
+}
+
+type test_Form_Second_struct_Inner_fail2 struct {
+	Mode          string `form:"mode"`
+	Text          string `form:"text"`
+	core.FormType `form:"voice" form-file:"xxx"`
 }
 
 // 测试错误的情况
@@ -178,6 +190,18 @@ func Test_Form_Fail(t *testing.T) {
 			"text":   "good",
 			"voice":  core.FormMem("pcm1"),
 			"voice2": core.FormFile("Non-existent file"), //不存在的文件
+		}},
+		{NewFormEncode(&out), core.H{
+			"mode":   "A",
+			"text":   "good",
+			"voice":  core.FormMem("pcm1"),
+			"voice2": core.FormFile("Non-existent file"), //不存在的文件
+		}},
+		{NewFormEncode(&out), core.H{
+			"mode":   "A",
+			"text":   "good",
+			"voice":  core.FormType{FileName: "123.md", File: core.FormMem("pcm1")},
+			"voice2": core.FormType{FileName: "123.md", File: core.FormFile("Non-existent file")}, //不存在的文件
 		}},
 		{NewFormEncode(&out), test_Form_struct_fail2{
 			Mode:   "A",
@@ -203,18 +227,26 @@ func Test_Form_Fail(t *testing.T) {
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
 		}},
-		{NewFormEncode(&out), test_Form_Second_struct_fail_Type{
+		{NewFormEncode(&out), test_Form_Second_struct_Type_fail{
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: 123},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
 		}},
-		{NewFormEncode(&out), test_Form_Second_struct_fail_Type{
+		{NewFormEncode(&out), test_Form_Second_struct_Type_fail{
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: 123},
 		}},
+		{NewFormEncode(&out), test_Form_Second_struct_Inner_fail{
+			"A",
+			"good",
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},}},
+		{NewFormEncode(&out), test_Form_Second_struct_Inner_fail2{
+			"A",
+			"good",
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},}},
 	}
 
 	for _, v := range tests {
@@ -237,6 +269,19 @@ type test_Form_Second_struct struct {
 	Text   string        `form:"text"`
 	Voice  core.FormType `form:"voice" form-mem:"true"`
 	Voice2 core.FormType `form:"voice2" form-file:"true"`
+}
+
+//第三种测试情况
+type test_Form_Third_struct struct {
+	Mode          string `form:"mode"`
+	Text          string `form:"text"`
+	core.FormType `form:"voice" form-mem:"true"`
+}
+
+type test_Form_Third_struct2 struct {
+	Mode          string `form:"mode"`
+	Text          string `form:"text"`
+	core.FormType `form:"voice2" form-file:"true"`
 }
 
 // 测试正确的情况
@@ -272,6 +317,14 @@ func Test_Form(t *testing.T) {
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},},},
+		{NewFormEncode(&out), test_Form_Third_struct{
+			"A",
+			"good",
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},},},
+		{NewFormEncode(&out), test_Form_Third_struct2{
+			"A",
+			"good",
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},},},
 	}
 
 	for _, v := range tests {
