@@ -156,6 +156,10 @@ func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
 
 		typ := val.Type()
 
+		if strings.HasSuffix(typ.Name(), "FormType") {
+			return parseTagAndSet(val, sf, a)
+		}
+
 		for i := 0; i < typ.NumField(); i++ {
 
 			sf := typ.Field(i)
