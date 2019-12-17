@@ -6,32 +6,38 @@ import (
 	"time"
 )
 
+// Bench provide benchmark features
 type Bench struct {
 	bench.Task
 
 	df *DataFlow
 }
 
+// Concurrent set the number of benchmarks for concurrency
 func (b *Bench) Concurrent(c int) *Bench {
 	b.Task.Concurrent = c
 	return b
 }
 
+// Number set the number of benchmarks
 func (b *Bench) Number(n int) *Bench {
 	b.Task.Number = n
 	return b
 }
 
+// Rate set the frequency of the benchmark
 func (b *Bench) Rate(rate int) *Bench {
 	b.Task.Rate = rate
 	return b
 }
 
+// Durations set the benchmark time
 func (b *Bench) Durations(d time.Duration) *Bench {
 	b.Task.Duration = d
 	return b
 }
 
+// Do benchmark startup function
 func (b *Bench) Do() error {
 	// 报表插件
 	req, err := b.df.Req.request()

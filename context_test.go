@@ -16,7 +16,7 @@ type testHeader struct {
 	HeaderKey string `header:"headerKey"`
 }
 
-type testContextJson struct {
+type testContextJSON struct {
 	ErrMsg  string `json:"errmsg"`
 	ErrCode int    `json:"errcode"`
 }
@@ -222,7 +222,7 @@ func TestContext_fail(t *testing.T) {
 	s := testServrBodyJSON(t)
 	ts := httptest.NewServer(http.HandlerFunc(s.ServeHTTP))
 
-	var j, j2 testContextJson
+	var j, j2 testContextJSON
 
 	// BindJSON和Callback只能选一个
 	err := GET(ts.URL + "/200").BindJSON(&j).Callback(func(c *Context) error {

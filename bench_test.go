@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	bench_number = 3000
-	bench_time   = 500 * time.Millisecond
+	benchNumber = 3000
+	benchTime   = 500 * time.Millisecond
 )
 
-func setup_bench_number(total *int32) *gin.Engine {
+func setupBenchNumber(total *int32) *gin.Engine {
 	router := gin.New()
 	router.POST("/", func(c *gin.Context) {
 		atomic.AddInt32(total, 1)
@@ -28,7 +28,7 @@ func setup_bench_number(total *int32) *gin.Engine {
 // 测试压测次数
 func Test_Bench_Number(t *testing.T) {
 	total := int32(0)
-	router := setup_bench_number(&total)
+	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	err := POST(ts.URL).
@@ -36,17 +36,17 @@ func Test_Bench_Number(t *testing.T) {
 		Filter().
 		Bench().
 		Concurrent(20).
-		Number(bench_number).
+		Number(benchNumber).
 		Do()
 
-	assert.Equal(t, total, int32(bench_number))
+	assert.Equal(t, total, int32(benchNumber))
 	assert.NoError(t, err)
 }
 
 // 测试压测时间
 func Test_Bench_Durations(t *testing.T) {
 	total := int32(0)
-	router := setup_bench_number(&total)
+	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	s := time.Now()
@@ -55,19 +55,19 @@ func Test_Bench_Durations(t *testing.T) {
 		Filter().
 		Bench().
 		Concurrent(20).
-		Durations(bench_time).
+		Durations(benchTime).
 		Do()
 
 	take := time.Now().Sub(s)
 
 	assert.NoError(t, err)
-	assert.LessOrEqual(t, int64(bench_number-100*time.Millisecond), int64(take))
+	assert.LessOrEqual(t, int64(benchNumber-100*time.Millisecond), int64(take))
 }
 
 // 测试压测频率
 func Test_Bench_Rate(t *testing.T) {
 	total := int32(0)
-	router := setup_bench_number(&total)
+	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	number := 900

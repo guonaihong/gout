@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+// ToBodyType Returns the http body type,
+// which mainly affects color highlighting
 func ToBodyType(s string) color.BodyType {
 	switch strings.ToLower(s) {
 	case "json":
@@ -24,6 +26,7 @@ func ToBodyType(s string) color.BodyType {
 	return color.TxtType
 }
 
+// DebugOption Debug mode core data structure
 type DebugOption struct {
 	Write       io.Writer
 	Debug       bool
@@ -32,12 +35,15 @@ type DebugOption struct {
 	RspBodyType string
 }
 
+// DebugOpt is an interface for operating DebugOption
 type DebugOpt interface {
 	Apply(*DebugOption)
 }
 
+// DebugFunc DebugOpt is a function that manipulates core data structures
 type DebugFunc func(*DebugOption)
 
+// Apply is an interface for operating DebugOption
 func (f DebugFunc) Apply(o *DebugOption) {
 	f(o)
 }
@@ -48,6 +54,7 @@ func defaultDebug(o *DebugOption) {
 	o.Write = os.Stdout
 }
 
+// NoColor Turn off color highlight debug mode
 func NoColor() DebugOpt {
 	return DebugFunc(func(o *DebugOption) {
 		o.Color = false

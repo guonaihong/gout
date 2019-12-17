@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	retry_Count        = 3
-	retry_doesNotExist = ":6364"
+	retryCount        = 3
+	retryDoesNotExist = ":6364"
 )
 
-func setup_retry_fail() *gin.Engine {
+func setupRetryFail() *gin.Engine {
 	router := gin.New()
 
 	var done chan struct{}
@@ -26,7 +26,7 @@ func setup_retry_fail() *gin.Engine {
 	return router
 }
 
-func setup_retry_ok() *gin.Engine {
+func setupRetryOk() *gin.Engine {
 	router := gin.New()
 
 	router.GET("/", func(c *gin.Context) {
@@ -74,9 +74,9 @@ func Test_Retry_init(t *testing.T) {
 }
 func Test_Retry_Do(t *testing.T) {
 	// 6364是随便写的一个端口，如果CI/CD这台机器上有这个端口，就要换个不存在的
-	router := setup_retry_fail()
+	router := setupRetryFail()
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-	urls := []string{ts.URL, retry_doesNotExist}
+	urls := []string{ts.URL, retryDoesNotExist}
 	// 测试全部超时的情况
 	for _, u := range urls {
 		err := GET(u).
@@ -84,7 +84,7 @@ func Test_Retry_Do(t *testing.T) {
 			Debug(true).
 			Filter().
 			Retry().
-			Attempt(retry_Count).
+			Attempt(retryCount).
 			WaitTime(time.Millisecond * 10).
 			MaxWaitTime(time.Millisecond * 50).
 			Do()
@@ -92,7 +92,7 @@ func Test_Retry_Do(t *testing.T) {
 	}
 
 	// 测试正确的情况
-	router = setup_retry_ok()
+	router = setupRetryOk()
 	ts = httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 	urls = []string{ts.URL}
 	for _, u := range urls {
@@ -101,7 +101,7 @@ func Test_Retry_Do(t *testing.T) {
 			Debug(true).
 			Filter().
 			Retry().
-			Attempt(retry_Count).
+			Attempt(retryCount).
 			WaitTime(time.Millisecond * 10).
 			MaxWaitTime(time.Millisecond * 50).
 			Do()
