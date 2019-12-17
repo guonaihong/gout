@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// Req controls core data structure of http request
 type Req struct {
 	method string
 	url    string
@@ -49,11 +50,11 @@ type Req struct {
 	err error
 }
 
+// Reset 重置 Req结构体
 // req 结构布局说明，以decode为例
 // body 可以支持text, json, yaml, xml，所以定义成接口形式
 // headerDecode只有一个可能，就定义为具体类型。这里他们的decode实现也不一样
 // 有没有必要，归一化成一种??? TODO:
-
 func (r *Req) Reset() {
 	r.index = 0
 	r.err = nil
@@ -233,6 +234,7 @@ func (r *Req) bind(req *http.Request, resp *http.Response) (err error) {
 
 }
 
+// Do Send function
 func (r *Req) Do() (err error) {
 	if r.err != nil {
 		return r.err

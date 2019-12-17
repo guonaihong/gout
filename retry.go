@@ -9,15 +9,19 @@ import (
 )
 
 var (
-	RetryWaitTime    = 200 * time.Millisecond
+	// RetryWaitTime retry basic wait time
+	RetryWaitTime = 200 * time.Millisecond
+	// RetryMaxWaitTime Maximum retry wait time
 	RetryMaxWaitTime = 10 * time.Second
-	RetryAttempt     = 1
+	// RetryAttempt number of retries
+	RetryAttempt = 1
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// Retry is the core data structure of the retry function
 // https://amazonaws-china.com/cn/blogs/architecture/exponential-backoff-and-jitter/
 type Retry struct {
 	df          *DataFlow
@@ -27,16 +31,19 @@ type Retry struct {
 	waitTime    time.Duration
 }
 
+// Attempt set the number of retries
 func (r *Retry) Attempt(attempt int) *Retry {
 	r.attempt = attempt
 	return r
 }
 
+// WaitTime sets the basic wait time
 func (r *Retry) WaitTime(waitTime time.Duration) *Retry {
 	r.waitTime = waitTime
 	return r
 }
 
+// MaxWaitTime Sets the maximum wait time
 func (r *Retry) MaxWaitTime(maxWaitTime time.Duration) *Retry {
 	r.maxWaitTime = maxWaitTime
 	return r
@@ -78,6 +85,7 @@ func (r *Retry) getSleep() time.Duration {
 	return temp + time.Duration(rand.Intn(int(temp)))
 }
 
+// Do send function
 func (r *Retry) Do() (err error) {
 	defer r.reset()
 	r.init()

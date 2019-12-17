@@ -27,7 +27,7 @@ type testDataFlow struct {
 }
 
 type data struct {
-	Id   int    `json:"id" xml:"id"`
+	ID   int    `json:"id" xml:"id"`
 	Data string `json:"data" xml:"data"`
 }
 
@@ -56,7 +56,7 @@ func TestBindXML(t *testing.T) {
 
 	g := New(nil)
 
-	d.Id = 3
+	d.ID = 3
 	d.Data = "test data"
 
 	code := 200
@@ -87,7 +87,7 @@ func TestBindYAML(t *testing.T) {
 
 	g := New(nil)
 
-	d.Id = 3
+	d.ID = 3
 	d.Data = "test yaml data"
 
 	code := 200
@@ -116,11 +116,11 @@ func TestBindJSON(t *testing.T) {
 	defer ts.Close()
 
 	tests := []BindTest{
-		{InBody: data{Id: 9, Data: "早上测试结构体"}, OutBody: data{}},
+		{InBody: data{ID: 9, Data: "早上测试结构体"}, OutBody: data{}},
 		{InBody: H{"id": 10, "data": "早上测试map"}, OutBody: data{}},
 	}
 
-	for k, _ := range tests {
+	for k := range tests {
 		t.Logf("outbody type:%T:%p\n", tests[k].OutBody, &tests[k].OutBody)
 
 		err := POST(ts.URL + "/test.json").
@@ -135,7 +135,7 @@ func TestBindJSON(t *testing.T) {
 
 		assert.Equal(t, tests[k].httpCode, 200)
 
-		if tests[k].OutBody.(map[string]interface{})["id"].(float64) != float64(d3.Id) {
+		if tests[k].OutBody.(map[string]interface{})["id"].(float64) != float64(d3.ID) {
 			t.Errorf("got:%#v(P:%p), want:%#v(T:%T)\n", tests[k].OutBody, &tests[k].OutBody, tests[k].InBody, tests[k].InBody)
 		}
 
@@ -1140,7 +1140,7 @@ func TestWWWForm(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func setup_DataFlow(t *testing.T) *gin.Engine {
+func setupDataFlow(t *testing.T) *gin.Engine {
 	router := gin.New()
 
 	router.GET("/timeout", func(c *gin.Context) {
@@ -1157,7 +1157,7 @@ func setup_DataFlow(t *testing.T) *gin.Engine {
 }
 
 func Test_DataFlow_Timeout(t *testing.T) {
-	router := setup_DataFlow(t)
+	router := setupDataFlow(t)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	const (
