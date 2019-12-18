@@ -31,10 +31,10 @@ func (m *myFailRead) Read(p []byte) (n int, err error) {
 }
 func TestDecodeBodyFail(t *testing.T) {
 	var tm time.Time
-	err := DecodeBody(bytes.NewBufferString("1"), &tm)
+	err := Body(bytes.NewBufferString("1"), &tm)
 	assert.Error(t, err)
 
-	err = DecodeBody(&myFailRead{}, new(int))
+	err = Body(&myFailRead{}, new(int))
 	assert.Error(t, err)
 }
 
@@ -75,7 +75,7 @@ func testDecodeBody(t *testing.T, funcName string) {
 			body := NewBodyDecode(v.got)
 			body.Decode(v.r)
 		} else {
-			DecodeBody(v.r, v.got)
+			Body(v.r, v.got)
 		}
 		assert.Equal(t, v.need, v.got)
 	}

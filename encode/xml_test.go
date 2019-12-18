@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-type testXml struct {
+type testXML struct {
 	I int     `xml:"i"`
 	F float64 `xml:"f"`
 	S string  `xml:"s"`
@@ -23,7 +23,7 @@ func TestXMLEncode_Name(t *testing.T) {
 }
 
 func TestXMLEncode_Encode(t *testing.T) {
-	need := testXml{
+	need := testXML{
 		I: 100,
 		F: 3.14,
 		S: "test encode xml",
@@ -38,7 +38,7 @@ func TestXMLEncode_Encode(t *testing.T) {
 
 		x.Encode(&out)
 
-		got := testXml{}
+		got := testXML{}
 
 		err := xml.Unmarshal(out.Bytes(), &got)
 		assert.NoError(t, err)

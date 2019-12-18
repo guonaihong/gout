@@ -5,10 +5,12 @@ import (
 	"io"
 )
 
+// JSONDecode json decoder core data structure
 type JSONDecode struct {
 	obj interface{}
 }
 
+// NewJSONDecode create a new json decoder
 func NewJSONDecode(obj interface{}) *JSONDecode {
 	if obj == nil {
 		return nil
@@ -16,12 +18,14 @@ func NewJSONDecode(obj interface{}) *JSONDecode {
 	return &JSONDecode{obj: obj}
 }
 
+// Decode json decoder
 func (j *JSONDecode) Decode(r io.Reader) error {
 	decode := json.NewDecoder(r)
 	return decode.Decode(j.obj)
 }
 
-func DecodeJSON(r io.Reader, obj interface{}) error {
+// JSON json decoder
+func JSON(r io.Reader, obj interface{}) error {
 	decode := json.NewDecoder(r)
 	return decode.Decode(obj)
 }

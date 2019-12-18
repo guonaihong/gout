@@ -11,12 +11,17 @@ import (
 	"strings"
 )
 
+// BodyType 区分body的类型
 type BodyType int
 
 const (
-	JsonType BodyType = iota + 1
-	XmlType
-	YamlType
+	// JSONType http body是json类型的
+	JSONType BodyType = iota + 1
+	// XMLType http body是xml类型的
+	XMLType
+	// YAMLType http body是yaml类型的
+	YAMLType
+	// TxtType http body是txt类型的
 	TxtType
 )
 
@@ -37,6 +42,7 @@ const endArray = "]"
 const emptyMap = startMap + endMap
 const emptyArray = startArray + endArray
 
+// Formatter 是颜色高亮核心结构体
 type Formatter struct {
 	KeyColor        *Color // 设置key的颜色
 	StringColor     *Color // 设置string的颜色
@@ -51,6 +57,7 @@ type Formatter struct {
 	r io.Reader
 }
 
+// NewFormatEncoder 着色json/yaml/xml构造函数
 func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter {
 	// 如果颜色没打开，或者bodyType为txt
 	if openColor == false || bodyType == TxtType {
@@ -65,11 +72,11 @@ func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter
 	var obj map[string]interface{}
 
 	switch bodyType {
-	case JsonType:
+	case JSONType:
 		err = json.Unmarshal(all, &obj)
 		//todo xmlType and yamlType
-	case XmlType:
-	case YamlType:
+	case XMLType:
+	case YAMLType:
 	}
 	if err != nil {
 		return nil
@@ -113,6 +120,7 @@ func (f *Formatter) writeObjSep(buf *bytes.Buffer) {
 	}
 }
 
+// Marshal 给原始的结构化数据着色
 func (f *Formatter) Marshal(jsonObj interface{}) ([]byte, error) {
 	buffer := bytes.Buffer{}
 	f.marshalValue(jsonObj, &buffer, initialDepth)

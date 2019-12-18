@@ -33,7 +33,7 @@ func testDecodeXML(t *testing.T, funcName string) {
 			x := NewXMLDecode(v.got)
 			x.Decode(v.r)
 		} else {
-			DecodeXML(v.r, v.got)
+			XML(v.r, v.got)
 		}
 		assert.Equal(t, v.need, v.got)
 	}

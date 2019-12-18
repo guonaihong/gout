@@ -16,10 +16,12 @@ import (
 
 var _ Adder = (*FormEncode)(nil)
 
+// FormEncode form-data encoder structure
 type FormEncode struct {
 	*multipart.Writer
 }
 
+// NewFormEncode create a new form-data encoder
 func NewFormEncode(b *bytes.Buffer) *FormEncode {
 	return &FormEncode{Writer: multipart.NewWriter(b)}
 }
@@ -160,7 +162,7 @@ func escapeQuotes(s string) string {
 	return quoteEscaper.Replace(s)
 }
 
-//重写
+// CreateFormFile 重写原来net/http里面的CreateFormFile函数
 func (f *FormEncode) CreateFormFile(fieldName, fileName, contentType string) (io.Writer, error) {
 
 	if contentType == "" {
@@ -175,6 +177,7 @@ func (f *FormEncode) CreateFormFile(fieldName, fileName, contentType string) (io
 	return f.CreatePart(h)
 }
 
+// Add Encoder core function, used to set each key / value into the http form-data
 func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (err error) {
 	formFile := sf.Tag.Get("form-file")
 	formMem := sf.Tag.Get("form-mem")
@@ -227,10 +230,12 @@ func (f *FormEncode) formFieldWrite(key string, v reflect.Value) error {
 	return err
 }
 
+// End refresh data
 func (f *FormEncode) End() error {
 	return f.Close()
 }
 
+// Name form-data Encoder name
 func (f *FormEncode) Name() string {
 	return "form"
 }

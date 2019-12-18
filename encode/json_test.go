@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-type testJson struct {
+type testJSON struct {
 	I int     `json:"i"`
 	F float64 `json:"f"`
 	S string  `json:"s"`
@@ -24,7 +24,7 @@ func TestJSONEncode_Name(t *testing.T) {
 }
 
 func TestJSONEncode_Encode(t *testing.T) {
-	need := testJson{
+	need := testJSON{
 		I: 100,
 		F: 3.14,
 		S: "test encode json",
@@ -39,7 +39,7 @@ func TestJSONEncode_Encode(t *testing.T) {
 
 		j.Encode(&out)
 
-		got := testJson{}
+		got := testJSON{}
 
 		err := json.Unmarshal(out.Bytes(), &got)
 		assert.NoError(t, err)
