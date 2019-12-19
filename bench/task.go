@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// SubTasker 是task模块的核心接口
 type SubTasker interface {
 	Init()
 	Process(chan struct{})
@@ -14,6 +15,7 @@ type SubTasker interface {
 	WaitAll()
 }
 
+// Task Task模块的核心数据结构
 type Task struct {
 	Duration   time.Duration //压测时间
 	Number     int           //压测次数
@@ -145,6 +147,7 @@ func (t *Task) run(sub SubTasker) {
 	}
 }
 
+// Run Task模块的入口函数
 func (t *Task) Run(sub SubTasker) {
 	t.init()
 

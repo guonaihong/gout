@@ -37,14 +37,14 @@ b: bbb
 			x := NewYAMLDecode(v.got)
 			x.Decode(v.r)
 		} else {
-			DecodeYAML(v.r, v.got)
+			YAML(v.r, v.got)
 		}
 		assert.Equal(t, v.need, v.got)
 	}
 }
 
-func Test_yaml_DecodeYAML(t *testing.T) {
-	testDecodeYAML(t, "TestDecodeYAML")
+func Test_yaml_YAML(t *testing.T) {
+	testDecodeYAML(t, "TestYAML")
 }
 
 func Test_yaml_Decode(t *testing.T) {

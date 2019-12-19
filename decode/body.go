@@ -8,10 +8,12 @@ import (
 	"reflect"
 )
 
+// BodyDecode body decoder structure
 type BodyDecode struct {
 	obj interface{}
 }
 
+// NewBodyDecode create a new body decoder
 func NewBodyDecode(obj interface{}) *BodyDecode {
 	if obj == nil {
 		return nil
@@ -35,11 +37,13 @@ var convertBodyFunc = map[reflect.Kind]convert{
 	reflect.Float64: {bitSize: 64, cb: setFloatField},
 }
 
+// Decode body decoder
 func (b *BodyDecode) Decode(r io.Reader) error {
-	return DecodeBody(r, b.obj)
+	return Body(r, b.obj)
 }
 
-func DecodeBody(r io.Reader, obj interface{}) error {
+// Body body decoder
+func Body(r io.Reader, obj interface{}) error {
 	if w, ok := obj.(io.Writer); ok {
 		_, err := io.Copy(w, r)
 		return err

@@ -18,10 +18,10 @@ type testFormat struct {
 
 func Test_ColorCore_NewFormat_Nil(t *testing.T) {
 	data := []testFormat{
-		{nil, false, JsonType},
+		{nil, false, JSONType},
 		{nil, true, TxtType},
-		{&core.ReadCloseFail{}, true, JsonType},
-		{strings.NewReader("xxx"), true, JsonType},
+		{&core.ReadCloseFail{}, true, JSONType},
+		{strings.NewReader("xxx"), true, JSONType},
 	}
 
 	for _, d := range data {
@@ -47,7 +47,7 @@ func Test_ColorCore_Read(t *testing.T) {
 }`
 
 	NoColor = false
-	f := NewFormatEncoder(strings.NewReader(j), true /*open color*/, JsonType)
+	f := NewFormatEncoder(strings.NewReader(j), true /*open color*/, JSONType)
 	var out bytes.Buffer
 
 	io.Copy(&out, f)

@@ -33,7 +33,7 @@ func testDecodeJSON(t *testing.T, funcName string) {
 			j := NewJSONDecode(v.got)
 			j.Decode(v.r)
 		} else {
-			DecodeJSON(v.r, v.got)
+			JSON(v.r, v.got)
 		}
 		assert.Equal(t, v.need, v.got)
 	}

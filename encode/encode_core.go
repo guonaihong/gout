@@ -10,15 +10,18 @@ import (
 	"unsafe"
 )
 
+// ErrUnsupported Unsupported type error returned
 var ErrUnsupported = errors.New("Encode:Unsupported type")
 
 var emptyField = reflect.StructField{}
 
+// Adder interface
 type Adder interface {
 	Add(key string, v reflect.Value, sf reflect.StructField) error
 	Name() string
 }
 
+// Encode core entry function
 // in 的类型可以是
 // struct
 // map
@@ -156,6 +159,7 @@ func encode(val reflect.Value, sf reflect.StructField, a Adder) error {
 
 		typ := val.Type()
 
+		// TODO使用接口解耦具体类型
 		if strings.HasSuffix(typ.Name(), "FormType") {
 			return parseTagAndSet(val, sf, a)
 		}

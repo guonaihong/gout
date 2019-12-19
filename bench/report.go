@@ -46,6 +46,7 @@ type report struct {
 	ErrMsg          map[string]int
 }
 
+// Report 是报表核心数据结构
 type Report struct {
 	SendNum int // 已经发送的http 请求
 	report
@@ -65,6 +66,7 @@ type Report struct {
 	lcode sync.Mutex
 }
 
+// NewReport is a report initialization function
 func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.Request, client *http.Client) *Report {
 	step := 0
 	if n > 150 {
@@ -93,11 +95,12 @@ func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.
 	}
 }
 
+// Cancel report logic
 func (r *Report) Cancel() {
 	r.cancel()
 }
 
-// 初始化报表模块
+// Init 初始化报表模块, 后台会起一个统计go程
 func (r *Report) Init() {
 	r.startReport()
 }
@@ -121,7 +124,7 @@ func (r *Report) addCode(code int) {
 	r.lcode.Unlock()
 }
 
-// 负责构造压测http 链接和统计压测元数据
+// Process 负责构造压测http 链接和统计压测元数据
 func (r *Report) Process(work chan struct{}) {
 	for range work {
 		start := time.Now()
@@ -161,7 +164,7 @@ func (r *Report) Process(work chan struct{}) {
 	}
 }
 
-// 等待结束
+// WaitAll 等待结束
 func (r *Report) WaitAll() {
 	<-r.waitQuit
 	r.outputReport() //输出最终报表
@@ -171,7 +174,7 @@ func (r *Report) calBody(resp *http.Response, bodySize uint64) {
 
 	hN := len(resp.Status)
 	hN += len(resp.Proto)
-	hN += 1 //space
+	hN++    //space
 	hN += 2 //\r\n
 	for k, v := range resp.Header {
 		hN += len(k)

@@ -7,10 +7,12 @@ import (
 	"reflect"
 )
 
+// BodyEncode body encoder structure
 type BodyEncode struct {
 	obj interface{}
 }
 
+// NewBodyEncode create a new body encoder
 func NewBodyEncode(obj interface{}) *BodyEncode {
 	if obj == nil {
 		return nil
@@ -19,6 +21,7 @@ func NewBodyEncode(obj interface{}) *BodyEncode {
 	return &BodyEncode{obj: obj}
 }
 
+// Encode Add Encoder core function, used to set io.Writer into the http body
 func (b *BodyEncode) Encode(w io.Writer) error {
 	if r, ok := b.obj.(io.Reader); ok {
 		_, err := io.Copy(w, r)
@@ -35,7 +38,9 @@ func (b *BodyEncode) Encode(w io.Writer) error {
 	case reflect.String:
 	default:
 		if _, ok := val.Interface().([]byte); !ok {
-			return fmt.Errorf("type(%T) %s:", b.obj, core.ErrUnknownType.Error())
+			return fmt.Errorf("type(%T) %s",
+				b.obj,
+				core.ErrUnknownType)
 		}
 	}
 
@@ -44,6 +49,7 @@ func (b *BodyEncode) Encode(w io.Writer) error {
 	return err
 }
 
+// Name http body Encoder name
 func (b *BodyEncode) Name() string {
 	return "body"
 }

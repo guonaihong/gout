@@ -16,7 +16,7 @@ import (
 func ToBodyType(s string) color.BodyType {
 	switch strings.ToLower(s) {
 	case "json":
-		return color.JsonType
+		return color.JSONType
 	case "xml":
 		//return color.XmlType //TODO open
 	case "yaml":
