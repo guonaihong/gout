@@ -164,8 +164,55 @@ func Test_Core_setTimeField_Fail(t *testing.T) {
 	}
 }
 
+type decodeTest struct {
+	set  interface{}
+	need interface{}
+	in   string
+}
+
 func Test_Core_setTimeField(t *testing.T) {
 	//测试时间
+	format := "2006-01-02 15:04:05"
+	parseInLocation := func(layout, value string, locStr string) time.Time {
+		loc, err := time.LoadLocation(locStr)
+		assert.NoError(t, err)
+
+		tm, err := time.ParseInLocation(layout, value, loc)
+		assert.NoError(t, err)
+		return tm
+	}
+
+	tm := time.Now()
+	tests := []decodeTest{
+		{
+			&struct {
+				T time.Time `time_format:"2006-01-02 15:04:05" time_location:"Asia/Shanghai"`
+			}{},
+			&struct {
+				T time.Time `time_format:"2006-01-02 15:04:05" time_location:"Asia/Shanghai"`
+			}{T: parseInLocation(format, tm.Format(format), "Asia/Shanghai")},
+			tm.Format(format),
+		},
+		{
+			&struct {
+				T time.Time `time_format:"2006-01-02 15:04:05" time_location:"Asia/Chongqing"`
+			}{},
+			&struct {
+				T time.Time `time_format:"2006-01-02 15:04:05" time_location:"Asia/Chongqing"`
+			}{T: parseInLocation(format, tm.Format(format), "Asia/Chongqing")},
+			tm.Format(format),
+		},
+	}
+
+	for _, test := range tests {
+		val := reflect.ValueOf(test.set)
+		if val.Kind() == reflect.Ptr {
+			val = val.Elem()
+		}
+
+		err := setTimeField(test.in, 0, val.Type().Field(0), val.Field(0))
+		assert.NoError(t, err)
+	}
 }
 
 type emptySet struct{}
