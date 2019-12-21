@@ -1,6 +1,7 @@
 package gout
 
 import (
+	"github.com/guonaihong/gout/encode"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -32,5 +33,29 @@ func TestReq_isString(t *testing.T) {
 	for _, v := range test {
 		rv, _ := isString(v.set)
 		assert.Equal(t, v.need, rv)
+	}
+}
+
+// 测试request()函数调用出错的情况
+func TestReq_request_fail(t *testing.T) {
+
+	tests := []func() *Req{
+		func() *Req {
+			r := Req{}
+			r.bodyEncoder = encode.NewBodyEncode(&map[string]string{})
+			return &r
+		},
+		func() *Req {
+			r := Req{}
+			s := "hello"
+			r.formEncode = s
+			return &r
+		},
+	}
+
+	for _, test := range tests {
+		r := test()
+		_, err := r.request()
+		assert.Error(t, err)
 	}
 }
