@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/guonaihong/gout/color"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
@@ -80,5 +81,22 @@ func TestResetBodyAndPrint(t *testing.T) {
 		req, rsp := c()
 		err := do.resetBodyAndPrint(req, rsp)
 		assert.NoError(t, err, fmt.Sprintf("test index = %d", i))
+	}
+}
+
+func TestDebug_ToBodyType(t *testing.T) {
+	type bodyTest struct {
+		in   string
+		need color.BodyType
+	}
+
+	tests := []bodyTest{
+		{"json", color.JSONType},
+		{"", color.TxtType},
+	}
+
+	for _, test := range tests {
+		got := ToBodyType(test.in)
+		assert.Equal(t, test.need, got)
 	}
 }
