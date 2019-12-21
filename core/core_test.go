@@ -24,7 +24,7 @@ func Test_Core_LoopElem(t *testing.T) {
 	}
 
 	var pi *int
-	assert.Equal(t, reflect.ValueOf(pi).Interface().(*int), (*int)(nil))
+	assert.Equal(t, LoopElem(reflect.ValueOf(pi)), reflect.ValueOf(pi))
 }
 
 type testBytesToStr struct {
