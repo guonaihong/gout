@@ -5,6 +5,10 @@ gout 是go写的http 客户端，为提高工作效率而开发
 [![codecov](https://codecov.io/gh/guonaihong/gout/branch/master/graph/badge.svg)](https://codecov.io/gh/guonaihong/gout)
 [![Go Report Card](https://goreportcard.com/badge/github.com/guonaihong/gout)](https://goreportcard.com/report/github.com/guonaihong/gout)
 
+## 构架
+![gout-ad.png](https://github.com/guonaihong/images/blob/master/gout/gout-ad.png?raw=true)
+
+
 ## feature
 * 支持设置 GET/PUT/DELETE/PATH/HEAD/OPTIONS
 * 支持设置请求 http header(可传 struct,map,array,slice 等类型)
@@ -20,8 +24,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持retry-backoff
 * 等等更多
 
-## 构架
-![gout-ad.png](https://github.com/guonaihong/images/blob/master/gout/gout-ad.png?raw=true)
 ## 演示
 <details>
 

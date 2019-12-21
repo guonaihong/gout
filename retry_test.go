@@ -73,15 +73,20 @@ func Test_Retry_init(t *testing.T) {
 	assert.Equal(t, r1, r)
 }
 func Test_Retry_Do(t *testing.T) {
-	// 6364是随便写的一个端口，如果CI/CD这台机器上有这个端口，就要换个不存在的
+	// 6364是随便写的一个端口，如果CI/CD这台机器上有这个端口，就需换个不存在的
 	router := setupRetryFail()
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-	urls := []string{ts.URL, retryDoesNotExist}
+	urls := []string{ts.URL, retryDoesNotExist, retryDoesNotExist}
 	// 测试全部超时的情况
+
+	setTimeout := false
 	for _, u := range urls {
-		err := GET(u).
-			SetTimeout(10 * time.Millisecond).
-			Debug(true).
+		df := GET(u)
+		if u == retryDoesNotExist && !setTimeout || ts.URL == u {
+			df.SetTimeout(10 * time.Millisecond)
+			setTimeout = true
+		}
+		err := df.Debug(true).
 			Filter().
 			Retry().
 			Attempt(retryCount).

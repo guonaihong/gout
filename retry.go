@@ -2,6 +2,7 @@ package gout
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"math/rand"
@@ -15,6 +16,10 @@ var (
 	RetryMaxWaitTime = 10 * time.Second
 	// RetryAttempt number of retries
 	RetryAttempt = 1
+)
+
+var (
+	ErrRetryFail = errors.New("retry fail")
 )
 
 func init() {
@@ -125,5 +130,5 @@ func (r *Retry) Do() (err error) {
 		r.currAttempt++
 	}
 
-	return
+	return ErrRetryFail
 }
