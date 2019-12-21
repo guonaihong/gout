@@ -17,10 +17,16 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持解析响应body的内容至io.Writer, uint/uint8...int/int8...string...[]byte...float32,float64
 * 支持解析响应header至结构体里
 * 支持接口性能benchmark，可控制压测一定次数还是时间，可控制压测频率
+* 支持retry-backoff
 * 等等更多
 
+## 构架
+![gout-ad.png](https://github.com/guonaihong/images/blob/master/gout/gout-ad.png?raw=true)
 ## 演示
-![gout-example.gif](https://github.com/guonaihong/images/blob/master/gout/gout-example.gif?raw=true)
+<details>
+
+![gout-example.gif](https://raw.githubusercontent.com/guonaihong/images/master/gout/gout-example.gif)
+</details>
 
 ## 内容
 - [Installation](#Installation)
@@ -1353,4 +1359,4 @@ func main() {
 ## gout benchmark性能如何
 下面是与apache ab的性能对比 [_example/16d-benchmark-vs-ab.go](_example/16d-benchmark-vs-ab.go)
 
-![gout-vs-ab.png](https://github.com/guonaihong/images/blob/master/gout/gout-vs-ab.png?raw=true)
+![gout-vs-ab.png](https://raw.githubusercontent.com/guonaihong/images/master/gout/gout-vs-ab.png)
