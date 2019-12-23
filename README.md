@@ -76,7 +76,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 
 ## Installation
 ```
-env GOPATH=`pwd` go get github.com/guonaihong/gout
+go get github.com/guonaihong/gout
 ```
 
 ## Migrate documents
