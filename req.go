@@ -7,6 +7,7 @@ import (
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -48,6 +49,8 @@ type Req struct {
 
 	c   context.Context
 	err error
+
+	req *http.Request
 }
 
 // Reset 重置 Req结构体
@@ -67,6 +70,7 @@ func (r *Req) Reset() {
 	r.headerEncode = nil
 	r.queryEncode = nil
 	r.c = nil
+	r.req = nil
 }
 
 func isString(x interface{}) (string, bool) {
@@ -115,7 +119,13 @@ func (r *Req) addContextType(req *http.Request) {
 
 }
 
-func (r *Req) request() (*http.Request, error) {
+/*
+func (r *Req) setRequest(req *http.Request) {
+	r.req = req
+}
+*/
+
+func (r *Req) request() (req *http.Request, err error) {
 	body := &bytes.Buffer{}
 
 	// set http body
@@ -158,9 +168,20 @@ func (r *Req) request() (*http.Request, error) {
 		f.End()
 	}
 
-	req, err := http.NewRequest(r.method, r.url, body)
-	if err != nil {
-		return nil, err
+	req = r.req
+	if req == nil {
+		req, err = http.NewRequest(r.method, r.url, body)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		if len(r.method) > 0 {
+			req.Method = r.method
+		}
+
+		if len(r.url) > 0 {
+			req.URL, err = url.Parse(r.url)
+		}
 	}
 
 	_ = r.getContext()
@@ -178,6 +199,7 @@ func (r *Req) request() (*http.Request, error) {
 
 	// set http header
 	if r.headerEncode != nil {
+		//clearHeader(req.Header)
 		err = encode.Encode(r.headerEncode, encode.NewHeaderEncode(req))
 		if err != nil {
 			return nil, err
@@ -188,6 +210,14 @@ func (r *Req) request() (*http.Request, error) {
 	r.addContextType(req)
 	return req, nil
 }
+
+/*
+func clearHeader(header http.Header) {
+	for k := range header {
+		delete(header, k)
+	}
+}
+*/
 
 func (r *Req) getContext() context.Context {
 	if r.timeout > 0 && r.timeoutIndex > r.ctxIndex {

@@ -15,7 +15,7 @@ const (
 	get     = "GET"
 	post    = "POST"
 	put     = "PUT"
-	delete  = "DELETE"
+	delete2 = "DELETE"
 	patch   = "PATCH"
 	head    = "HEAD"
 	options = "OPTIONS"
@@ -48,7 +48,7 @@ func (df *DataFlow) PUT(url string) *DataFlow {
 
 // DELETE send HTTP DELETE method
 func (df *DataFlow) DELETE(url string) *DataFlow {
-	df.Req = reqDef(delete, joinPaths("", url), df.out)
+	df.Req = reqDef(delete2, joinPaths("", url), df.out)
 	return df
 }
 
@@ -67,6 +67,17 @@ func (df *DataFlow) HEAD(url string) *DataFlow {
 // OPTIONS send HTTP OPTIONS method
 func (df *DataFlow) OPTIONS(url string) *DataFlow {
 	df.Req = reqDef(options, joinPaths("", url), df.out)
+	return df
+}
+
+// SetURL set url
+func (df *DataFlow) SetURL(url string) *DataFlow {
+	if df.Req.url == "" {
+		df.Req = reqDef("", joinPaths("", url), df.out)
+	} else {
+		df.Req.url = url
+	}
+
 	return df
 }
 
