@@ -1029,6 +1029,48 @@ func setupDebug(t *testing.T) *gin.Engine {
 	return r
 }
 
+/*
+// TODO
+type myDup struct {
+	stdout *os.File
+}
+
+func (m *myDup) dup(t *testing.T) {
+	// stdout备份fd
+	stdoutFd2, err := syscall.Dup(1)
+	assert.NoError(t, err)
+
+	outFd, err := os.Create("./testdata/my.dat")
+	assert.NoError(t, err)
+
+	// 重定向stdout 到outFd
+	err = syscall.Dup2(int(outFd.Fd()), 1)
+	assert.NoError(t, err)
+	m.stdout = os.NewFile(uintptr(stdoutFd2), "mystdout")
+	outFd.Close()
+}
+
+func (m *myDup) reset() {
+	// 还原一个stdout
+	os.Stdout = m.stdout
+}
+
+func (m *myDup) empty() bool {
+	fd, err := os.Open("./testdata/my.dat")
+	if err != nil {
+		return false
+	}
+	defer fd.Close()
+
+	fi, err := fd.Stat()
+	if err != nil {
+		return false
+	}
+
+	return fi.Size() == 0
+}
+*/
+
 func TestDebug(t *testing.T) {
 	buf := &bytes.Buffer{}
 
@@ -1102,6 +1144,14 @@ func TestDebug(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, s, "true test debug")
+
+	//d := myDup{}
+	err = GET(ts.URL).Debug(false).SetBody("false test debug").BindBody(&s).Do()
+	//d.reset()
+
+	//assert.Equal(t, false, d.empty())
+	assert.NoError(t, err)
+	assert.Equal(t, s, "false test debug")
 }
 
 type testWWWForm struct {

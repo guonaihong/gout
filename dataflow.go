@@ -240,7 +240,9 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 	for _, v := range d {
 		switch opt := v.(type) {
 		case bool:
-			defaultDebug(&df.out.opt)
+			if opt {
+				defaultDebug(&df.out.opt)
+			}
 		case DebugOpt:
 			opt.Apply(&df.out.opt)
 		}
