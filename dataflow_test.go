@@ -1246,3 +1246,29 @@ func Test_DataFlow_Timeout(t *testing.T) {
 	assert.Error(t, err)
 	assert.GreaterOrEqual(t, int(time.Now().Sub(s)), int(middleTimeout*time.Millisecond))
 }
+
+func Test_DataFlow_SetURL(t *testing.T) {
+
+	const body = "set url ok"
+	server := func() *gin.Engine {
+		router := gin.New()
+		router.GET("/", func(c *gin.Context) {
+			c.String(200, body)
+		})
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(server.ServeHTTP))
+
+	// 情况1
+	s := ""
+	err := New().SetURL(ts.URL).SetBody(body).BindBody(&s).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, body, s)
+
+	// 情况2
+	s = ""
+	err = New().GET("123456").SetURL(ts.URL).SetBody(body).BindBody(&s).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, body, s)
+}
