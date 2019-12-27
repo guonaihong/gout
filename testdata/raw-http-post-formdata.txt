@@ -1,0 +1,33 @@
+POST / HTTP/1.1
+Host: 127.0.0.1:1234
+User-Agent: gurl
+Transfer-Encoding: chunked
+Accept: */*
+Content-Type: multipart/form-data; boundary=873b07ff17a9dcaac708c5751bdb88168205fde8ef782593925f3b3d03a9
+Accept-Encoding: gzip
+
+6c
+--873b07ff17a9dcaac708c5751bdb88168205fde8ef782593925f3b3d03a9
+Content-Disposition: form-data; name="a"
+
+
+1
+a
+6e
+
+--873b07ff17a9dcaac708c5751bdb88168205fde8ef782593925f3b3d03a9
+Content-Disposition: form-data; name="b"
+
+
+1
+b
+44
+
+--873b07ff17a9dcaac708c5751bdb88168205fde8ef782593925f3b3d03a9--
+
+0
+
+HTTP/1.1 200 OK
+Server: gurl-server
+Content-Length: 0
+

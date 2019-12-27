@@ -180,6 +180,10 @@ func (r *Req) request() (req *http.Request, err error) {
 
 		if len(r.url) > 0 {
 			req.URL, err = url.Parse(r.url)
+			if err != nil {
+				r.err = err
+				return
+			}
 		}
 	}
 

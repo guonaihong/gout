@@ -7,7 +7,7 @@ import (
 // Gout is the data structure at the beginning of everything
 type Gout struct {
 	*http.Client
-	DataFlow
+	DataFlow // TODO 优化
 
 	opt DebugOption
 }

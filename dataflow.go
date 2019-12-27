@@ -72,11 +72,16 @@ func (df *DataFlow) OPTIONS(url string) *DataFlow {
 
 // SetURL set url
 func (df *DataFlow) SetURL(url string) *DataFlow {
-	if df.Req.url == "" {
-		df.Req = reqDef("", joinPaths("", url), df.out)
-	} else {
-		df.Req.url = url
+	if df.err != nil {
+		return df
 	}
+
+	if df.Req.url == "" && df.Req.req == nil {
+		df.Req = reqDef("", joinPaths("", url), df.out)
+		return df
+	}
+
+	df.Req.url = modifyURL(joinPaths("", url))
 
 	return df
 }

@@ -2,6 +2,10 @@ package gout
 
 import (
 	"bufio"
+	"bytes"
+	"github.com/guonaihong/gout/core"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -12,20 +16,51 @@ func NewImport() *Import {
 	return &Import{}
 }
 
-func (i *Import) RawText(s string) *Text {
-	req, err := http.ReadRequest(bufio.NewReader(strings.NewReader(s)))
+func (i *Import) RawText(text interface{}) *Text {
+	var read io.Reader
+	r := &Text{}
+
+	out := New()
+	// TODO 函数
+	r.DataFlow.out = out
+	r.DataFlow.Req.g = out
+
+	switch body := text.(type) {
+	case string:
+		read = strings.NewReader(body)
+	case []byte:
+		read = bytes.NewReader(body)
+	default:
+		r.err = core.ErrUnknownType
+		return r
+	}
+
+	req, err := http.ReadRequest(bufio.NewReader(read))
 	if err != nil {
-		r := &Text{}
 		r.err = err
 		return r
 	}
 
-	r := &Text{}
-	r.setRequest(req)
-	out := New()
+	// TODO 探索下能否支持https
+	req.URL.Scheme = "http"
+	req.URL.Host = req.Host
+	req.RequestURI = ""
 
-	// todo 函数
-	r.DataFlow.out = out
-	r.DataFlow.Req.g = out
+	if req.GetBody == nil {
+		all, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			r.err = err
+			return r
+		}
+
+		req.GetBody = func() (io.ReadCloser, error) {
+			return ioutil.NopCloser(bytes.NewReader(all)), nil
+		}
+
+		req.Body = ioutil.NopCloser(bytes.NewReader(all))
+	}
+
+	r.setRequest(req)
+
 	return r
 }

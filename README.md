@@ -22,6 +22,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持解析响应header至结构体里
 * 支持接口性能benchmark，可控制压测一定次数还是时间，可控制压测频率
 * 支持retry-backoff
+* 支持发送裸http数据包
 * 等等更多
 
 ## 演示
@@ -69,6 +70,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [duration](#duration)
 		- [rate](#rate)
 	- [retry](#retry)
+	- [import](#import)
+		- [raw-http](#raw-http)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
@@ -1288,6 +1291,40 @@ func main() {
 	}
 }
 
+```
+# import
+## raw http
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+)
+
+func main() {
+
+    s := `POST /colorjson HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: Go-http-client/1.1
+Content-Length: 97
+Content-Type: application/json
+Accept-Encoding: gzip
+
+{"array":["foo","bar","baz"],"bool":false,"null":null,"num":100,"obj":{"a":1,"b":2},"str":"foo"}
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Fri, 27 Dec 2019 05:36:27 GMT
+Content-Length: 29
+
+{"int2":2,"str2":"str2 val"}
+    `
+    err := gout.NewImport().RawText(s).Debug(true).SetURL(":1234").Do()
+    if err != nil {
+        fmt.Printf("err = %s\n", err)
+        return
+    }
+}
 
 ```
 # Unique features
