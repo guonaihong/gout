@@ -102,7 +102,7 @@ func Test_Retry_Do(t *testing.T) {
 	urls = []string{ts.URL}
 	for _, u := range urls {
 		err := GET(u).
-			SetTimeout(11 * time.Millisecond).
+			SetTimeout(20 * time.Millisecond).
 			Debug(true).
 			Filter().
 			Retry().
