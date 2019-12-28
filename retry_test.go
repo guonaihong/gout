@@ -83,7 +83,7 @@ func Test_Retry_Do(t *testing.T) {
 	for _, u := range urls {
 		df := GET(u)
 		if u == retryDoesNotExist && !setTimeout || ts.URL == u {
-			df.SetTimeout(10 * time.Millisecond)
+			df.SetTimeout(11 * time.Millisecond)
 			setTimeout = true
 		}
 		err := df.Debug(true).
@@ -102,7 +102,7 @@ func Test_Retry_Do(t *testing.T) {
 	urls = []string{ts.URL}
 	for _, u := range urls {
 		err := GET(u).
-			SetTimeout(10 * time.Millisecond).
+			SetTimeout(11 * time.Millisecond).
 			Debug(true).
 			Filter().
 			Retry().
