@@ -119,11 +119,9 @@ func (r *Req) addContextType(req *http.Request) {
 
 }
 
-/*
 func (r *Req) setRequest(req *http.Request) {
 	r.req = req
 }
-*/
 
 func (r *Req) request() (req *http.Request, err error) {
 	body := &bytes.Buffer{}
@@ -169,6 +167,7 @@ func (r *Req) request() (req *http.Request, err error) {
 	}
 
 	req = r.req
+
 	if req == nil {
 		req, err = http.NewRequest(r.method, r.url, body)
 		if err != nil {
@@ -181,6 +180,10 @@ func (r *Req) request() (req *http.Request, err error) {
 
 		if len(r.url) > 0 {
 			req.URL, err = url.Parse(r.url)
+			if err != nil {
+				r.err = err
+				return
+			}
 		}
 	}
 
@@ -199,7 +202,7 @@ func (r *Req) request() (req *http.Request, err error) {
 
 	// set http header
 	if r.headerEncode != nil {
-		//clearHeader(req.Header)
+		clearHeader(req.Header)
 		err = encode.Encode(r.headerEncode, encode.NewHeaderEncode(req))
 		if err != nil {
 			return nil, err
@@ -211,13 +214,11 @@ func (r *Req) request() (req *http.Request, err error) {
 	return req, nil
 }
 
-/*
 func clearHeader(header http.Header) {
 	for k := range header {
 		delete(header, k)
 	}
 }
-*/
 
 func (r *Req) getContext() context.Context {
 	if r.timeout > 0 && r.timeoutIndex > r.ctxIndex {

@@ -901,6 +901,11 @@ func TestCookie(t *testing.T) {
 	assert.Equal(t, total, int32(2))
 }
 
+const (
+	withContextTimeout       = time.Millisecond * 300
+	withContextTimeoutServer = time.Millisecond * 600
+)
+
 // Server side testing context function
 func setupContext(t *testing.T) *gin.Engine {
 	router := gin.New()
@@ -910,7 +915,7 @@ func setupContext(t *testing.T) *gin.Engine {
 		select {
 		case <-ctx.Done():
 			fmt.Printf("cancel done\n")
-		case <-time.After(2 * time.Second):
+		case <-time.After(withContextTimeoutServer):
 			assert.Fail(t, "test cancel fail")
 		}
 	})
@@ -920,7 +925,7 @@ func setupContext(t *testing.T) *gin.Engine {
 		select {
 		case <-ctx.Done():
 			fmt.Printf("ctx timeout done\n")
-		case <-time.After(2 * time.Second):
+		case <-time.After(withContextTimeoutServer):
 			assert.Fail(t, "test ctx timeout fail")
 		}
 	})
@@ -930,7 +935,7 @@ func setupContext(t *testing.T) *gin.Engine {
 
 // test timeout
 func testWithContextTimeout(t *testing.T, ts *httptest.Server) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
+	ctx, _ := context.WithTimeout(context.Background(), withContextTimeout)
 
 	err := GET(ts.URL + "/timeout").WithContext(ctx).Do()
 	assert.Error(t, err)
@@ -940,7 +945,7 @@ func testWithContextTimeout(t *testing.T, ts *httptest.Server) {
 func testWithContextCancel(t *testing.T, ts *httptest.Server) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		time.Sleep(time.Second)
+		time.Sleep(withContextTimeout)
 		cancel()
 	}()
 

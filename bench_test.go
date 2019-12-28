@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	benchNumber = 3000
+	benchNumber = 300
 	benchTime   = 500 * time.Millisecond
 )
 
@@ -70,8 +70,8 @@ func Test_Bench_Rate(t *testing.T) {
 	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
-	number := 900
-	rate := 300
+	number := 800
+	rate := 400
 	s := time.Now()
 	err := POST(ts.URL).
 		SetJSON(H{"hello": "world"}).

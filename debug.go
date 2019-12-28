@@ -76,6 +76,10 @@ func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response)
 }
 
 func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
+	if t := req.Header.Get("Content-Type"); len(t) > 0 {
+		do.ReqBodyType = "json"
+	}
+
 	if t := rsp.Header.Get("Content-Type"); len(t) != 0 &&
 		strings.Index(t, "application/json") != -1 {
 		do.RspBodyType = "json"

@@ -1,6 +1,6 @@
 GO ?= env CGO_ENABLED=0 go
 
-TESTFOLDER := $(shell $(GO) list ./... | grep -v from-xxx-to-gout-doc|grep -v testdata)
+TESTFOLDER := $(shell $(GO) list ./... | grep -v to-gout-doc|grep -v _example|grep -v testdata)
 
 .PHONY: test
 test:
