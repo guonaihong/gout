@@ -1319,7 +1319,7 @@ Content-Length: 29
 
 {"int2":2,"str2":"str2 val"}
     `
-    err := gout.NewImport().RawText(s).Debug(true).SetURL(":1234").Do()
+    err := gout.NewImport().RawText(s).Debug(true).SetURL(":1234/colorjson").Do()
     if err != nil {
         fmt.Printf("err = %s\n", err)
         return
