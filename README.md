@@ -1312,7 +1312,7 @@ Accept-Encoding: gzip
 
 {"array":["foo","bar","baz"],"bool":false,"null":null,"num":100,"obj":{"a":1,"b":2},"str":"foo"}
     `
-	err := gout.NewImport().RawText(s).Debug(true).SetURL(":1234/colorjson").Do()
+	err := gout.NewImport().RawText(s).Debug(true).SetHost(":1234").Do()
 	if err != nil {
 		fmt.Printf("err = %s\n", err)
 		return

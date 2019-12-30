@@ -1277,3 +1277,29 @@ func Test_DataFlow_SetURL(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, body, s)
 }
+
+func Test_DataFlow_SetHost(t *testing.T) {
+
+	const body = "set host ok"
+	server := func() *gin.Engine {
+		router := gin.New()
+		router.GET("/", func(c *gin.Context) {
+			c.String(200, body)
+		})
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(server.ServeHTTP))
+
+	// 情况1
+	s := ""
+	err := New().SetHost(ts.URL).SetBody(body).BindBody(&s).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, body, s)
+
+	// 情况2
+	s = ""
+	err = New().GET("123456").SetHost(ts.URL).SetBody(body).BindBody(&s).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, body, s)
+}

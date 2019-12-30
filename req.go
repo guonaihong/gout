@@ -17,6 +17,7 @@ import (
 type Req struct {
 	method string
 	url    string
+	host   string
 
 	formEncode interface{}
 
@@ -123,6 +124,54 @@ func (r *Req) setRequest(req *http.Request) {
 	r.req = req
 }
 
+func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
+	req = r.req
+
+	defer func() {
+		if err != nil {
+			r.err = err
+			return
+		}
+
+		if len(r.method) > 0 {
+			req.Method = r.method
+		}
+
+		if len(r.url) > 0 {
+			req.URL, err = url.Parse(r.url)
+			if err != nil {
+				r.err = err
+				return
+			}
+		}
+
+		if len(r.host) > 0 {
+			urlStr := modifyURL(joinPaths("", r.host))
+			URL, err := url.Parse(urlStr)
+			if err != nil {
+				r.err = err
+				return
+			}
+
+			if req.URL == nil {
+				req.URL = URL
+				r.err = err
+				return
+			}
+
+			req.URL.Scheme = URL.Scheme
+			req.URL.Host = URL.Host
+
+		}
+	}()
+
+	if req == nil {
+		return http.NewRequest(r.method, r.url, body)
+	}
+
+	return
+}
+
 func (r *Req) request() (req *http.Request, err error) {
 	body := &bytes.Buffer{}
 
@@ -166,25 +215,9 @@ func (r *Req) request() (req *http.Request, err error) {
 		f.End()
 	}
 
-	req = r.req
-
-	if req == nil {
-		req, err = http.NewRequest(r.method, r.url, body)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		if len(r.method) > 0 {
-			req.Method = r.method
-		}
-
-		if len(r.url) > 0 {
-			req.URL, err = url.Parse(r.url)
-			if err != nil {
-				r.err = err
-				return
-			}
-		}
+	req, err = r.selectRequest(body)
+	if err != nil {
+		return nil, err
 	}
 
 	_ = r.getContext()

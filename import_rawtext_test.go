@@ -86,12 +86,24 @@ func Test_RawText_JSON(t *testing.T) {
 	var r, r1 result
 
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-	err = NewImport().RawText(all).Debug(true).SetURL(ts.URL + "/colorjson").Code(&code).BindJSON(&r).Do()
-	assert.NoError(t, err)
-	assert.Equal(t, code, 200)
-	r1 = result{"ok"}
-	assert.Equal(t, r, r1)
 
+	for _, testURL := range []string{ts.URL + "/colorjson"} {
+
+		err = NewImport().RawText(all).Debug(true).SetURL(testURL).Code(&code).BindJSON(&r).Do()
+		assert.NoError(t, err)
+		assert.Equal(t, code, 200)
+		r1 = result{"ok"}
+		assert.Equal(t, r, r1)
+	}
+
+	for _, testURL := range []string{ts.URL} {
+		err = NewImport().RawText(all).Debug(true).SetHost(testURL).Code(&code).BindJSON(&r).Do()
+
+		assert.NoError(t, err)
+		assert.Equal(t, code, 200)
+		r1 = result{"ok"}
+		assert.Equal(t, r, r1)
+	}
 }
 
 // 修改URL
@@ -147,6 +159,10 @@ func Test_RawText_fail(t *testing.T) {
 		assert.Error(t, err)
 	}
 
+	for _, v := range []interface{}{new(int), "xxxx"} {
+		err := NewImport().RawText(v).Debug(true).SetHost(ts.URL).Code(&code).Do()
+		assert.Error(t, err)
+	}
 }
 
 // 测试支持的类型

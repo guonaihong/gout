@@ -16,6 +16,8 @@ func NewImport() *Import {
 	return &Import{}
 }
 
+const rawTextSpace = "\r\n "
+
 func (i *Import) RawText(text interface{}) *Text {
 	var read io.Reader
 	r := &Text{}
@@ -27,8 +29,10 @@ func (i *Import) RawText(text interface{}) *Text {
 
 	switch body := text.(type) {
 	case string:
+		body = strings.TrimLeft(body, rawTextSpace)
 		read = strings.NewReader(body)
 	case []byte:
+		body = bytes.TrimLeft(body, rawTextSpace)
 		read = bytes.NewReader(body)
 	default:
 		r.err = core.ErrUnknownType

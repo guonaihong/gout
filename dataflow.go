@@ -70,6 +70,18 @@ func (df *DataFlow) OPTIONS(url string) *DataFlow {
 	return df
 }
 
+// SetHost set host
+func (df *DataFlow) SetHost(host string) *DataFlow {
+	if df.err != nil {
+		return df
+	}
+
+	df.Req.host = host
+
+	df.Req.g = df.out
+	return df
+}
+
 // SetURL set url
 func (df *DataFlow) SetURL(url string) *DataFlow {
 	if df.err != nil {
@@ -88,6 +100,7 @@ func (df *DataFlow) SetURL(url string) *DataFlow {
 
 // SetBody set the data to the http body
 func (df *DataFlow) SetBody(obj interface{}) *DataFlow {
+
 	df.Req.bodyEncoder = encode.NewBodyEncode(obj)
 	return df
 }
