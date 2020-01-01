@@ -6,12 +6,19 @@ import (
 )
 
 type Curl struct {
-	longOption bool
-	w          io.Writer
+	w               io.Writer
+	df              *DataFlow
+	longOption      bool
+	generateAndSend bool
 }
 
 func (c *Curl) LongOption() *Curl {
 	c.longOption = true
+	return c
+}
+
+func (c *Curl) GenerateAndSend() *Curl {
+	c.generateAndSend = true
 	return c
 }
 

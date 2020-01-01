@@ -7,5 +7,5 @@ type Export struct {
 }
 
 func (e *Export) Curl() *Curl {
-	return &Curl{}
+	return &Curl{df: e.df}
 }

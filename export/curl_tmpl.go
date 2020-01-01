@@ -5,11 +5,11 @@ import (
 )
 
 var shortTmpl = `
-curl{{if gt (len .Method) 0}} -X {{.Method}}{{end}} {{range $_, $header := .Header}}-H {{$header}} {{end}} {{if gt (len .Data) 0}}-d {{.Data}} {{end}}
+curl{{if gt (len .Method) 0}} -X {{.Method}}{{end}} {{range $_, $header := .Header}}-H {{$header}} {{end}} {{if gt (len .Data) 0}}-d {{.Data}} {{end}} {{.URL}}
 `
 
 var longTmpl = `
-curl{{if gt (len .Method) 0}} --request {{.Method}}{{end}} {{range $_, $header := .Header}}--header {{$header}} {{end}} {{if gt (len .Data) 0}}--data {{.Data}}{{end}}
+curl{{if gt (len .Method) 0}} --request {{.Method}}{{end}} {{range $_, $header := .Header}}--header {{$header}} {{end}} {{if gt (len .Data) 0}}--data {{.Data}}{{end}} --url {{.URL}}
 `
 
 func newTemplate(long bool) *template.Template {
