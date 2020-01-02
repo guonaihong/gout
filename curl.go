@@ -1,6 +1,7 @@
 package gout
 
 import (
+	"github.com/guonaihong/gout/export"
 	"io"
 	"os"
 )
@@ -17,7 +18,7 @@ func (c *Curl) LongOption() *Curl {
 	return c
 }
 
-func (c *Curl) GenerateAndSend() *Curl {
+func (c *Curl) GenAndSend() *Curl {
 	c.generateAndSend = true
 	return c
 }
@@ -32,6 +33,30 @@ func (c *Curl) SetOutput(w ...io.Writer) *Curl {
 	return c
 }
 
-func (c *Curl) Do() error {
-	return nil
+func (c *Curl) Do() (err error) {
+	req, err := c.df.Req.request()
+	if err != nil {
+		return err
+	}
+
+	client := c.df.out.Client
+
+	if c.generateAndSend {
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+
+		err = c.df.bind(req, resp)
+		if err != nil {
+			return err
+		}
+	}
+
+	w := io.Writer(os.Stdout)
+	if c.w != nil {
+		w = c.w
+	}
+
+	return export.GenCurl(req, c.longOption, w)
 }

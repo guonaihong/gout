@@ -101,9 +101,13 @@ func (r *Retry) Do() (err error) {
 	}
 
 	tk := time.NewTimer(r.maxWaitTime)
+	client := r.df.out.Client
+
 	for i := 0; i < r.attempt; i++ {
 
-		resp, err := r.df.out.Client.Do(req)
+		// 这里不使用DataFlow.Do()方法原因是为了效率
+		// 只需经过一次编码器得到request,后面就是多次使用
+		resp, err := client.Do(req)
 		if err == nil {
 			return r.df.bind(req, resp)
 		}

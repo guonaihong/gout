@@ -24,6 +24,18 @@ type curl struct {
 	FormData []Form
 }
 
+func (c *curl) formData(req *http.Request) error {
+	contentType := req.Header.Get("Content-Type")
+	if strings.Index(contentType, "multipart/form-data") == -1 {
+		return nil
+	}
+
+	c.Data = ""
+
+	//TODO 解析formdata
+	return nil
+}
+
 func GenCurl(req *http.Request, long bool, w io.Writer) error {
 	c := curl{}
 
@@ -38,8 +50,8 @@ func GenCurl(req *http.Request, long bool, w io.Writer) error {
 	for index, hKey := range header {
 		hVal := req.Header[hKey]
 
-		// TODO转义
-		header[index] = fmt.Sprintf("'%s:%s'", hKey, strings.Join(hVal, ","))
+		header[index] = fmt.Sprintf(`%s:%s`, hKey, strings.Join(hVal, ","))
+		header[index] = fmt.Sprintf("%q", header[index])
 	}
 
 	c.Header = header
@@ -53,10 +65,11 @@ func GenCurl(req *http.Request, long bool, w io.Writer) error {
 		return err
 	}
 
-	c.URL = fmt.Sprintf("'%s'", req.URL.String())
+	c.URL = fmt.Sprintf(`%q`, req.URL.String())
 	c.Method = req.Method
-	c.Data = fmt.Sprintf("'%s'", core.BytesToString(all))
+	c.Data = fmt.Sprintf(`%q`, core.BytesToString(all))
 
+	c.formData(req)
 	tp := newTemplate(long)
 	return tp.Execute(w, c)
 }
