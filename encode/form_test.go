@@ -61,6 +61,7 @@ func Test_Form_FormFileWrite(t *testing.T) {
 	}
 
 	// TODO v0.0.3 换更好的测试策略，数据设置进去，再解析出来
+	// checkForm已经实现
 	for _, v := range []bool{true, false} {
 		for _, vv := range f {
 			var out bytes.Buffer
@@ -242,11 +243,11 @@ func Test_Form_Fail(t *testing.T) {
 		{NewFormEncode(&out), test_Form_Second_struct_Inner_fail{
 			"A",
 			"good",
-			core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},}},
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"}}},
 		{NewFormEncode(&out), test_Form_Second_struct_Inner_fail2{
 			"A",
 			"good",
-			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},}},
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"}}},
 	}
 
 	for _, v := range tests {
@@ -299,7 +300,7 @@ func Test_Form(t *testing.T) {
 			"mode":   "A",
 			"text":   "good",
 			"voice":  core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormMem("pcm1")},
-			"voice2": core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")},}},
+			"voice2": core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")}}},
 
 		{NewFormEncode(&out), test_Form_struct{
 			Mode:   "A",
@@ -311,20 +312,20 @@ func Test_Form(t *testing.T) {
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormMem("pcm1")},
-			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")},},},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")}}},
 		{NewFormEncode(&out), test_Form_Second_struct{
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
-			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},},},
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"}}},
 		{NewFormEncode(&out), test_Form_Third_struct{
 			"A",
 			"good",
-			core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},},},
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"}}},
 		{NewFormEncode(&out), test_Form_Third_struct2{
 			"A",
 			"good",
-			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},},},
+			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"}}},
 	}
 
 	for _, v := range tests {
