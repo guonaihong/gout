@@ -21,8 +21,16 @@ func NewJSONEncode(obj interface{}) *JSONEncode {
 
 // Encode json encoder
 func (j *JSONEncode) Encode(w io.Writer) error {
-	encode := json.NewEncoder(w)
-	return encode.Encode(j.obj)
+	//encode := json.NewEncoder(w)
+	all, err := json.Marshal(j.obj)
+	if err != nil {
+		return err
+	}
+
+	// 不使用Encode函数的原因，encode结束之后会自作聪明的加'\n'
+	//return encode.Encode(j.obj)
+	_, err = w.Write(all)
+	return err
 }
 
 // Name json Encoder name

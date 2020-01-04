@@ -34,3 +34,32 @@ func Test_Export_Curl_GenCurl(t *testing.T) {
 
 	GenCurl(req, true, os.Stdout)
 }
+
+func Test_Export_isExists(t *testing.T) {
+	tst := []string{"../testdata/voice.pcm", "../testdata/raw-http-post-json.txt"}
+
+	for _, fName := range tst {
+		assert.Equal(t, isExists(fName), true, fName)
+	}
+
+	notExists := []string{"a.txt", "b.txt"}
+	for _, fName := range notExists {
+		assert.Equal(t, isExists(fName), false, fName)
+	}
+}
+
+func Test_Export_getFileName(t *testing.T) {
+	type need struct {
+		need string
+		got  string
+	}
+
+	tst := []need{
+		{"../testdata/voice.pcm", "../testdata/voice.pcm.0"},
+		{"../testdata/raw-http-post-json.txt", "../testdata/raw-http-post-json.txt.0"},
+	}
+
+	for _, v := range tst {
+		assert.Equal(t, getFileName(v.need), v.got)
+	}
+}

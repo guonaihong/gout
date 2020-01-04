@@ -23,17 +23,16 @@ func (c *Curl) GenAndSend() *Curl {
 	return c
 }
 
-func (c *Curl) SetOutput(w ...io.Writer) *Curl {
-	if len(w) == 0 {
-		c.w = os.Stdout
-		return c
-	}
-
-	c.w = w[0]
+func (c *Curl) SetOutput(w io.Writer) *Curl {
+	c.w = w
 	return c
 }
 
 func (c *Curl) Do() (err error) {
+	if c.w == nil {
+		c.w = os.Stdout
+	}
+
 	req, err := c.df.Req.request()
 	if err != nil {
 		return err
@@ -42,6 +41,8 @@ func (c *Curl) Do() (err error) {
 	client := c.df.out.Client
 
 	if c.generateAndSend {
+		// 清空状态，Setxxx函数拆开使用就不会有问题
+		defer c.df.Reset()
 		resp, err := client.Do(req)
 		if err != nil {
 			return err

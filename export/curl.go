@@ -138,7 +138,9 @@ func GenCurl(req *http.Request, long bool, w io.Writer) error {
 
 	c.URL = fmt.Sprintf(`%q`, req.URL.String())
 	c.Method = req.Method
-	c.Data = fmt.Sprintf(`%q`, core.BytesToString(all))
+	if len(all) > 0 {
+		c.Data = fmt.Sprintf(`%q`, core.BytesToString(all))
+	}
 	c.formData(req)
 	c.header(req)
 	tp := newTemplate(long)

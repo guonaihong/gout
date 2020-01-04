@@ -219,6 +219,10 @@ func (r *Req) request() (req *http.Request, err error) {
 	if err != nil {
 		return nil, err
 	}
+	// 放这个位置不会误删除SetForm的http header
+	if r.headerEncode != nil {
+		clearHeader(req.Header)
+	}
 
 	_ = r.getContext()
 	if r.c != nil {
@@ -235,7 +239,6 @@ func (r *Req) request() (req *http.Request, err error) {
 
 	// set http header
 	if r.headerEncode != nil {
-		clearHeader(req.Header)
 		err = encode.Encode(r.headerEncode, encode.NewHeaderEncode(req))
 		if err != nil {
 			return nil, err
