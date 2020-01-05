@@ -23,6 +23,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持接口性能benchmark，可控制压测一定次数还是时间，可控制压测频率
 * 支持retry-backoff
 * 支持发送裸http数据包
+* 支持导出curl命令
 * 等等更多
 
 ## 演示
@@ -66,12 +67,14 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [customize](#customize)
         - [no-color](#no-color)
 	- [benchmark](#benchmark)
-		- [number](#number)
-		- [duration](#duration)
-		- [rate](#rate)
-	- [retry](#retry)
+		- [benchmarking a certain number of times](#benchmark-number)
+		- [benchmarking for a certain time](#benchmark-duration)
+		- [benchmarking at a fixed frequency](#benchmark-rate)
+	- [retry backoff](#retry-backoff)
 	- [import](#import)
-		- [raw-http](#raw-http)
+		- [send raw http request](#send-raw-http-request)
+	- [export](#export)
+		- [generate curl command](#generate-curl-command)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
@@ -1170,7 +1173,7 @@ func main() {
 
 ```
 ## benchmark
-### number
+### benckmark number
 下面的例子，起了20并发。对:8080端口的服务，发送3000次请求进行压测，内容为json结构
 ```go
 package main
@@ -1201,7 +1204,7 @@ func main() {
 }
 
 ```
-### duration
+### benchmark-duration
 下面的例子，起了20并发。对:8080端口的服务，压测持续时间为10s，内容为json结构
 ```go
 package main
@@ -1233,7 +1236,7 @@ func main() {
 }
 
 ```
-### rate
+### benchmark-rate
 下面的例子，起了20并发。对:8080端口的服务，压测总次数为3000次，其中每秒发送1000次。内容为json结构
 ```go
 package main
@@ -1265,7 +1268,7 @@ func main() {
 }
 
 ```
-## retry
+## retry-backoff
 retry 功能使用带抖动功能和指数的算法实现[backoff](http://www.awsarchitectureblog.com/2015/03/backoff.html)
 ```go
 package main
@@ -1293,7 +1296,7 @@ func main() {
 
 ```
 # import
-## raw http
+## send raw http request
 ```go
 package main
 
@@ -1317,6 +1320,35 @@ Accept-Encoding: gzip
 		fmt.Printf("err = %s\n", err)
 		return
 	}
+}
+
+```
+# export
+## generate curl command
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+)
+
+func main() {
+    // 1.formdata
+    err := gout.GET(":1234").
+        SetForm(gout.A{"text", "good", "mode", "A", "voice", gout.FormFile("./t8.go")}).
+        Export().Curl().Do()
+    // output:
+    // curl -X GET -F "text=good" -F "mode=A" -F "voice=@./voice" "http://127.0.0.1:1234"
+
+    // 2.json body
+    err = gout.GET(":1234").
+        SetJSON(gout.H{"key1": "val1", "key2": "val2"}).
+        Export().Curl().Do()
+    // output:
+    // curl -X GET -H "Content-Type:application/json" -d "{\"key1\":\"val1\",\"key2\":\"val2\"}" "http://127.0.0.1:1234"
+
+    fmt.Printf("%v\n", err)
 }
 
 ```

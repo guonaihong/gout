@@ -124,6 +124,7 @@ func (c *curl) header(req *http.Request) {
 	c.Header = header
 }
 
+// GenCurl used to generate curl commands
 func GenCurl(req *http.Request, long bool, w io.Writer) error {
 	c := curl{}
 	body, err := req.GetBody()
