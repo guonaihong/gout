@@ -2,7 +2,10 @@ package gout
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -90,4 +93,36 @@ func Test_Curl(t *testing.T) {
 		assert.Equal(t, strings.TrimSpace(buf.String()), v.need)
 	}
 
+}
+
+func Test_Curl_GenAnsSend(t *testing.T) {
+	type testData struct {
+		A string
+		B string
+	}
+
+	yes := false
+	router := func(b *bool) *gin.Engine {
+		router := gin.Default()
+
+		router.POST("/test.json", func(c *gin.Context) {
+			test := testData{}
+			c.BindJSON(&test)
+			*b = true
+		})
+
+		return router
+	}(&yes)
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	var out strings.Builder
+	err := POST(ts.URL + "/test.json").SetJSON(H{"a": "a", "b": "b"}).Export().Curl().SetOutput(&out).GenAndSend().Do()
+	assert.NoError(t, err)
+	assert.Equal(t, yes, true)
+	need := fmt.Sprintf(`curl -X POST -H "Content-Type:application/json" -d "{\"a\":\"a\",\"b\":\"b\"}" "%s/test.json"`, ts.URL)
+
+	//fmt.Printf("got(%s)", out.String())
+	//fmt.Printf("need(%s)", need)
+	assert.Equal(t, strings.TrimSpace(out.String()), need)
 }
