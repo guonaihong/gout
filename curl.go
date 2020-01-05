@@ -33,6 +33,8 @@ func (c *Curl) Do() (err error) {
 		c.w = os.Stdout
 	}
 
+	w := c.w
+
 	req, err := c.df.Req.request()
 	if err != nil {
 		return err
@@ -52,11 +54,6 @@ func (c *Curl) Do() (err error) {
 		if err != nil {
 			return err
 		}
-	}
-
-	w := io.Writer(os.Stdout)
-	if c.w != nil {
-		w = c.w
 	}
 
 	return export.GenCurl(req, c.longOption, w)
