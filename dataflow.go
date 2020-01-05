@@ -289,3 +289,8 @@ func (df *DataFlow) Do() (err error) {
 func (df *DataFlow) Filter() *Filter {
 	return &Filter{df: df}
 }
+
+// Export filter function, use this function to turn on the filter function
+func (df *DataFlow) Export() *Export {
+	return &Export{df: df}
+}

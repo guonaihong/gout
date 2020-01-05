@@ -46,4 +46,11 @@ func TestJSONEncode_Encode(t *testing.T) {
 		assert.Equal(t, got, need)
 	}
 
+	// test fail
+	for _, v := range []interface{}{func() {}} {
+		j := NewJSONEncode(v)
+		out.Reset()
+		err := j.Encode(&out)
+		assert.Error(t, err)
+	}
 }
