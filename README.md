@@ -39,33 +39,33 @@ gout 是go写的http 客户端，为提高工作效率而开发
 - [quick start](#quick-start)
 - [API Examples](#api-examples)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
-    - [query](#query)
+    - [Query Parameters](#Query-Parameters)
     - [http header](#http-header)
-		- [req header](#req-header)
-		- [rsp header](#rsp-header)
+		- [Set request header](#Set-request-header)
+		- [Parsing the response header](#Parsing-the-response-header)
     - [http body](#http-body)
         - [body](#body)
             - [SetBody](#setbody)
             - [BindBody](#bindbody)
         - [json](#json)
-            - [SetJSON](#setjson)
-            - [BindJSON](#bindjson)
+            - [Serialize json to request body](#Serialize-json-to-request-body)
+            - [Parsed http response body in json format](#Parsed-http-response-body-in-json-format)
         - [yaml](#yaml)
         - [xml](#xml)
         - [form-data](#form-data)
         - [x-www-form-urlencoded](#x-www-form-urlencoded)
         - [callback](#callback)
-	- [timeout](#timeout)
+	- [Set request timeout](#Set-request-timeout)
     - [proxy](#proxy)
     - [cookie](#cookie)
     - [context](#context)
-        - [cancel](#cancel)
+        - [Cancel a sending request](#Cancel-a-sending-request)
     - [unix socket](#unix-socket)
     - [http2 doc](#http2-doc)
     - [debug mode](#debug-mode)
-        - [color](#color)
-        - [customize](#customize)
-        - [no-color](#no-color)
+        - [Turn on debug mode](#Turn-on-debug-mode)
+        - [Turn off color highlighting in debug mode](#Turn-off-color-highlighting-in-debug-mode)
+		- [Custom debug mode](#Custom-debug-mode)
 	- [benchmark](#benchmark)
 		- [benchmarking a certain number of times](#benchmark-number)
 		- [benchmarking for a certain time](#benchmark-duration)
@@ -211,7 +211,7 @@ func main() {
 }
 
 ```
-## query
+## Query Parameters
 
 ### SetQuery
 ```go
@@ -318,7 +318,7 @@ SetQuery([]string{"active", "enable", "action", "drop"})`
 ```
 
 ## http header
-#### req header
+#### Set request header
 ```go
 package main
 
@@ -367,7 +367,7 @@ func main() {
 < Content-Length: 0
 */
 ```
-#### rsp header
+#### Parsing the response header
 ```go
 package main
 
@@ -575,7 +575,7 @@ func main() {
 * array, slice
 
 ### json
-#### setjson
+#### Serialize json to request body
 ```go
 package main
 
@@ -629,7 +629,7 @@ func main() {
 */
 
 ```
-#### bindjson
+#### Parsed http response body in json format
 ```go
 package main
 
@@ -892,7 +892,7 @@ func main() {
 
 ```
 
-## timeout
+## Set request timeout
 setimeout是request级别的超时方案。相比http.Client级别，更灵活。
 ```go
 package main
@@ -1007,7 +1007,7 @@ func main() {
 
 ## context
 * WithContext设置context，可以取消http请求
-### cancel
+### Cancel a sending request
 ```go
 package main
 
@@ -1092,15 +1092,14 @@ func main() {
 
 ```
 ## debug mode
-### color
-该模式主要方便调试用的，默认开启颜色高亮
-* Debug(true)
+### Turn on debug mode
+该模式主要方便调试用的，默认开启颜色高亮(如果要关闭颜色高亮，请往下看)
 
 ```go
 func main() {
 	
 	err := gout.POST(":8080/colorjson").
-		Debug(true).
+		Debug(true). //打开debug模式
 		SetJSON(gout.H{"str": "foo",
 			"num":   100,
 			"bool":  false,
@@ -1114,8 +1113,29 @@ func main() {
 	}
 }
 ```
-### customize
-debug 自定义模式，可传递函数。下面的只有传递IOS_DEBUG环境变量才输出日志
+### Turn off color highlighting in debug mode
+使用gout.NoColor()传入Debug函数关闭颜色高亮
+```go
+func main() {
+	
+	err := gout.POST(":8080/colorjson").
+		Debug(gout.NoColor()).
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
+
+```
+### Custom debug mode
+debug 自定义模式，可传递函数。下面演示用环境变量开启debug模式(只有传递IOS_DEBUG环境变量才输出日志)
 ```go
 package main
 
@@ -1150,27 +1170,6 @@ func main() {
 }
 
 // env IOS_DEBUG=true go run customize.go
-```
-### no-color
-no-color 使用gout.NoColor()关闭颜色高亮
-```go
-func main() {
-	
-	err := gout.POST(":8080/colorjson").
-		Debug(gout.NoColor()).
-		SetJSON(gout.H{"str": "foo",
-			"num":   100,
-			"bool":  false,
-			"null":  nil,
-			"array": gout.A{"foo", "bar", "baz"},
-			"obj":   gout.H{"a": 1, "b": 2},
-		}).Do()
-
-	if err != nil {
-		fmt.Printf("err = %v\n", err)
-	}
-}
-
 ```
 ## benchmark
 ### benckmark number
