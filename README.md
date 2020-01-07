@@ -45,8 +45,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [Parsing the response header](#Parsing-the-response-header)
     - [http body](#http-body)
         - [body](#body)
-            - [SetBody](#setbody)
-            - [BindBody](#bindbody)
+            - [Set the data to the http request body](#Set-the-data-to-the-http-request-body)
+            - [Parse the response body into a variable](#Parse-the-response-body-into-a-variable)
         - [json](#json)
             - [Serialize json to request body](#Serialize-json-to-request-body)
             - [Parsed http response body in json format](#Parsed-http-response-body-in-json-format)
@@ -489,7 +489,7 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 
 ## http body
 ### body
-#### SetBody
+#### Set the data to the http request body
 ```go
 // SetBody 设置string, []byte等类型数据到http body里面
 // SetBody支持的更多数据类型可看下面
@@ -532,7 +532,7 @@ send string
 */
 
 ```
-#### bindBody
+#### Parse the response body into a variable
 ```go
 // BindBody bind body到string, []byte等类型变量里面
 package main
