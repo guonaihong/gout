@@ -1,4 +1,4 @@
-package gout
+package dataflow
 
 import (
 	"github.com/guonaihong/gout/encode"
@@ -55,7 +55,7 @@ func TestReq_request_fail(t *testing.T) {
 
 	for _, test := range tests {
 		r := test()
-		_, err := r.request()
+		_, err := r.Request()
 		assert.Error(t, err)
 	}
 }

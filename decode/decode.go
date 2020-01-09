@@ -5,7 +5,7 @@ import (
 )
 
 // Decoder Decoder interface
-type Decoder interface {
+type Decoder2 interface {
 	Decode(*http.Request, interface{})
 }
 

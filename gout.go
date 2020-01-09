@@ -1,78 +1,64 @@
 package gout
 
 import (
+	"github.com/guonaihong/gout/dataflow"
+	_ "github.com/guonaihong/gout/export"
+	_ "github.com/guonaihong/gout/filter"
 	"net/http"
+	"os"
 )
 
-// Gout is the data structure at the beginning of everything
-type Gout struct {
-	*http.Client
-	DataFlow // TODO 优化
+// debug
+type DebugOption = dataflow.DebugOption
+type DebugOpt = dataflow.DebugOpt
+type DebugFunc = dataflow.DebugFunc
 
-	opt DebugOption
+func NoColor() DebugOpt {
+	return DebugFunc(func(o *DebugOption) {
+		o.Color = false
+		o.Debug = true
+		o.Write = os.Stdout
+	})
 }
 
-var (
-	// DefaultClient The default http client, which has a connection pool
-	DefaultClient = http.Client{}
-	// DefaultBenchClient is the default http client used by the benchmark,
-	// which has a connection pool
-	DefaultBenchClient = http.Client{
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost: 10000,
-		},
-	}
-)
+type Context = dataflow.Context
 
 // New function is mainly used when passing custom http client
-func New(c ...*http.Client) *Gout {
-	out := &Gout{}
-	if len(c) == 0 || c[0] == nil {
-		out.Client = &DefaultClient
-	} else {
-		out.Client = c[0]
-	}
-
-	out.DataFlow.out = out
-	return out
-}
-
-// Def 是一个被弃用的函数
-func Def() *Gout {
-	return New()
+func New(c ...*http.Client) *dataflow.Gout {
+	return dataflow.New(c...)
 }
 
 // GET send HTTP GET method
-func GET(url string) *DataFlow {
-	return New().GET(url)
+func GET(url string) *dataflow.DataFlow {
+	return dataflow.New().GET(url)
 }
 
 // POST send HTTP POST method
-func POST(url string) *DataFlow {
-	return New().POST(url)
+func POST(url string) *dataflow.DataFlow {
+	return dataflow.New().POST(url)
 }
 
 // PUT send HTTP PUT method
-func PUT(url string) *DataFlow {
-	return New().PUT(url)
+func PUT(url string) *dataflow.DataFlow {
+	return dataflow.New().PUT(url)
 }
 
 // DELETE send HTTP DELETE method
-func DELETE(url string) *DataFlow {
-	return New().DELETE(url)
+func DELETE(url string) *dataflow.DataFlow {
+	return dataflow.New().DELETE(url)
 }
 
 // PATCH send HTTP PATCH method
-func PATCH(url string) *DataFlow {
-	return New().PATCH(url)
+func PATCH(url string) *dataflow.DataFlow {
+	return dataflow.New().PATCH(url)
 }
 
 // HEAD send HTTP HEAD method
-func HEAD(url string) *DataFlow {
-	return New().HEAD(url)
+func HEAD(url string) *dataflow.DataFlow {
+	return dataflow.New().HEAD(url)
 }
 
 // OPTIONS send HTTP OPTIONS method
-func OPTIONS(url string) *DataFlow {
-	return New().OPTIONS(url)
+func OPTIONS(url string) *dataflow.DataFlow {
+	return dataflow.New().OPTIONS(url)
 }

@@ -1,4 +1,4 @@
-package gout
+package dataflow
 
 import (
 	"bytes"
@@ -22,8 +22,8 @@ type Req struct {
 	formEncode interface{}
 
 	// http body
-	bodyEncoder Encoder
-	bodyDecoder Decoder
+	bodyEncoder encode.Encoder
+	bodyDecoder decode.Decoder
 
 	// http header
 	headerEncode interface{}
@@ -49,7 +49,7 @@ type Req struct {
 	ctxIndex     int
 
 	c   context.Context
-	err error
+	Err error
 
 	req *http.Request
 }
@@ -61,7 +61,7 @@ type Req struct {
 // 有没有必要，归一化成一种??? TODO:
 func (r *Req) Reset() {
 	r.index = 0
-	r.err = nil
+	r.Err = nil
 	r.cookies = nil
 	r.formEncode = nil
 	r.bodyEncoder = nil
@@ -93,7 +93,7 @@ func isString(x interface{}) (string, bool) {
 
 func (r *Req) addDefDebug() {
 	if r.bodyEncoder != nil {
-		switch bodyType := r.bodyEncoder.(Encoder); bodyType.Name() {
+		switch bodyType := r.bodyEncoder.(encode.Encoder); bodyType.Name() {
 		case "json":
 			r.g.opt.ReqBodyType = "json"
 		case "xml":
@@ -107,7 +107,7 @@ func (r *Req) addDefDebug() {
 
 func (r *Req) addContextType(req *http.Request) {
 	if r.bodyEncoder != nil {
-		switch bodyType := r.bodyEncoder.(Encoder); bodyType.Name() {
+		switch bodyType := r.bodyEncoder.(encode.Encoder); bodyType.Name() {
 		case "json":
 			req.Header.Add("Content-Type", "application/json")
 		case "xml":
@@ -120,7 +120,7 @@ func (r *Req) addContextType(req *http.Request) {
 
 }
 
-func (r *Req) setRequest(req *http.Request) {
+func (r *Req) SetRequest(req *http.Request) {
 	r.req = req
 }
 
@@ -129,7 +129,7 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 
 	defer func() {
 		if err != nil {
-			r.err = err
+			r.Err = err
 			return
 		}
 
@@ -140,7 +140,7 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 		if len(r.url) > 0 {
 			req.URL, err = url.Parse(r.url)
 			if err != nil {
-				r.err = err
+				r.Err = err
 				return
 			}
 		}
@@ -149,13 +149,13 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 			urlStr := modifyURL(joinPaths("", r.host))
 			URL, err := url.Parse(urlStr)
 			if err != nil {
-				r.err = err
+				r.Err = err
 				return
 			}
 
 			if req.URL == nil {
 				req.URL = URL
-				r.err = err
+				r.Err = err
 				return
 			}
 
@@ -172,7 +172,8 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 	return
 }
 
-func (r *Req) request() (req *http.Request, err error) {
+// Request Get the http.Request object
+func (r *Req) Request() (req *http.Request, err error) {
 	body := &bytes.Buffer{}
 
 	// set http body
@@ -224,7 +225,7 @@ func (r *Req) request() (req *http.Request, err error) {
 		clearHeader(req.Header)
 	}
 
-	_ = r.getContext()
+	_ = r.GetContext()
 	if r.c != nil {
 		req = req.WithContext(r.c)
 	}
@@ -256,14 +257,14 @@ func clearHeader(header http.Header) {
 	}
 }
 
-func (r *Req) getContext() context.Context {
+func (r *Req) GetContext() context.Context {
 	if r.timeout > 0 && r.timeoutIndex > r.ctxIndex {
 		r.c, _ = context.WithTimeout(context.Background(), r.timeout)
 	}
 	return r.c
 }
 
-func (r *Req) bind(req *http.Request, resp *http.Response) (err error) {
+func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 	if r.headerDecode != nil {
 		err = decode.Header.Decode(resp, r.headerDecode)
 		if err != nil {
@@ -301,28 +302,32 @@ func (r *Req) bind(req *http.Request, resp *http.Response) (err error) {
 
 }
 
+func (r *Req) Client() *http.Client {
+	return r.g.Client
+}
+
 // Do Send function
 func (r *Req) Do() (err error) {
-	if r.err != nil {
-		return r.err
+	if r.Err != nil {
+		return r.Err
 	}
 
 	// reset  Req
 	defer r.Reset()
 
-	req, err := r.request()
+	req, err := r.Request()
 	if err != nil {
 		return err
 	}
 
-	resp, err := r.g.Client.Do(req)
+	resp, err := r.Client().Do(req)
 	if err != nil {
 		return err
 	}
 
 	defer resp.Body.Close()
 
-	return r.bind(req, resp)
+	return r.Bind(req, resp)
 }
 
 func modifyURL(url string) string {

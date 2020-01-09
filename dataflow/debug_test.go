@@ -1,10 +1,11 @@
-package gout
+package dataflow
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
 	"github.com/guonaihong/gout/color"
+	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
@@ -28,7 +29,7 @@ func TestResetBodyAndPrintFail(t *testing.T) {
 			// GetBody不为空的情况, 但是GetBody第二参数返回错误
 			req, _ := http.NewRequest("GET", "/", nil)
 			rsp := http.Response{}
-			req.GetBody = func() (io.ReadCloser, error) { return &ReadCloseFail{}, errors.New("fail") }
+			req.GetBody = func() (io.ReadCloser, error) { return &core.ReadCloseFail{}, errors.New("fail") }
 			rsp.Body = ioutil.NopCloser(bytes.NewReader(nil))
 			return req, &rsp
 		},
@@ -36,7 +37,7 @@ func TestResetBodyAndPrintFail(t *testing.T) {
 			// GetBody不为空的情况, 但是io.Copy时候返回错误
 			req, _ := http.NewRequest("GET", "/", nil)
 			rsp := http.Response{}
-			req.GetBody = func() (io.ReadCloser, error) { return &ReadCloseFail{}, nil }
+			req.GetBody = func() (io.ReadCloser, error) { return &core.ReadCloseFail{}, nil }
 			rsp.Body = ioutil.NopCloser(bytes.NewReader(nil))
 			return req, &rsp
 		},
@@ -45,7 +46,7 @@ func TestResetBodyAndPrintFail(t *testing.T) {
 			req, _ := http.NewRequest("GET", "/", &bytes.Buffer{})
 			req.GetBody = func() (io.ReadCloser, error) { return ioutil.NopCloser(bytes.NewReader(nil)), nil }
 			rsp := http.Response{}
-			rsp.Body = ioutil.NopCloser(&ReadCloseFail{})
+			rsp.Body = ioutil.NopCloser(&core.ReadCloseFail{})
 			return req, &rsp
 		},
 	}

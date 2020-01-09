@@ -3,6 +3,7 @@ package gout
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/dataflow"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -81,7 +82,7 @@ func Test_Retry_Do(t *testing.T) {
 
 	setTimeout := false
 	for _, u := range urls {
-		df := GET(u)
+		df := dataflow.GET(u)
 		if u == retryDoesNotExist && !setTimeout || ts.URL == u {
 			df.SetTimeout(11 * time.Millisecond)
 			setTimeout = true
@@ -101,7 +102,7 @@ func Test_Retry_Do(t *testing.T) {
 	ts = httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 	urls = []string{ts.URL}
 	for _, u := range urls {
-		err := GET(u).
+		err := dataflow.GET(u).
 			// TODO 20 ms超时有时候会失败,分析下
 			SetTimeout(30 * time.Millisecond).
 			Debug(true).

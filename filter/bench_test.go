@@ -2,6 +2,8 @@ package gout
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/dataflow"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -31,8 +33,8 @@ func Test_Bench_Number(t *testing.T) {
 	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
-	err := POST(ts.URL).
-		SetJSON(H{"hello": "world"}).
+	err := dataflow.POST(ts.URL).
+		SetJSON(core.H{"hello": "world"}).
 		Filter().
 		Bench().
 		Concurrent(20).
@@ -50,8 +52,8 @@ func Test_Bench_Durations(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	s := time.Now()
-	err := POST(ts.URL).
-		SetJSON(H{"hello": "world"}).
+	err := dataflow.POST(ts.URL).
+		SetJSON(core.H{"hello": "world"}).
 		Filter().
 		Bench().
 		Concurrent(20).
@@ -73,8 +75,8 @@ func Test_Bench_Rate(t *testing.T) {
 	number := 800
 	rate := 400
 	s := time.Now()
-	err := POST(ts.URL).
-		SetJSON(H{"hello": "world"}).
+	err := dataflow.POST(ts.URL).
+		SetJSON(core.H{"hello": "world"}).
 		Filter().
 		Bench().
 		Rate(rate).

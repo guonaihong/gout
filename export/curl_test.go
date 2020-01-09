@@ -1,148 +1,130 @@
 package export
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/dataflow"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"mime/multipart"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
-	"text/template"
 )
 
-func Test_Export_Curl_newTemplate(t *testing.T) {
-	ts := []*template.Template{newTemplate(false), newTemplate(true)}
+const (
+	testCurlHeader = 1 << iota
+	testCurlForm
+	testCurlQuery
+	testLong
+	testJSON
+)
 
-	for _, v := range ts {
-		c := curl{
-			Method: "GET",
-			Header: []string{"appkey:appkeyval", "sid:hello"},
-			Data:   "good",
+type testCurl struct {
+	flags int
+	need  string
+}
+
+// 测试生成curl命令
+func Test_Curl(t *testing.T) {
+
+	tests := []testCurl{
+		{testCurlHeader, `curl -X POST -H "H1:hv1" -H "H2:hv2" "http://www.qq.com"`},
+
+		{testCurlHeader | testCurlQuery, `curl -X POST -H "H1:hv1" -H "H2:hv2" "http://www.qq.com?q1=qv1&q2=qv2"`},
+		{testCurlHeader | testCurlQuery | testCurlForm, `curl -X POST -H "H1:hv1" -H "H2:hv2" -F "mode=A" -F "text=good" -F "voice=@./voice" "http://www.qq.com?q1=qv1&q2=qv2"`},
+		{testCurlHeader | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --url "http://www.qq.com"`},
+		{testCurlHeader | testCurlQuery | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
+		{testCurlHeader | testCurlQuery | testCurlForm | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --form "mode=A" --form "text=good" --form "voice=@./voice" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
+
+		{testCurlHeader | testJSON, `curl -X POST -H "Content-Type:application/json" -H "H1:hv1" -H "H2:hv2" -d "{\"jk1\":\"jv1\"}" "http://www.qq.com"`},
+		{testCurlHeader | testCurlQuery | testJSON, `curl -X POST -H "Content-Type:application/json" -H "H1:hv1" -H "H2:hv2" -d "{\"jk1\":\"jv1\"}" "http://www.qq.com?q1=qv1&q2=qv2"`},
+
+		{testCurlHeader | testLong | testJSON, `curl --request POST --header "Content-Type:application/json" --header "H1:hv1" --header "H2:hv2" --data "{\"jk1\":\"jv1\"}" --url "http://www.qq.com"`},
+		{testCurlHeader | testCurlQuery | testLong | testJSON, `curl --request POST --header "Content-Type:application/json" --header "H1:hv1" --header "H2:hv2" --data "{\"jk1\":\"jv1\"}" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
+	}
+
+	for _, v := range tests {
+		var buf strings.Builder
+
+		g := dataflow.POST("www.qq.com")
+		if v.flags&testCurlHeader > 0 {
+			g.SetHeader(core.A{"h1", "hv1", "h2", "hv2"})
 		}
 
-		err := v.Execute(os.Stdout, c)
+		if v.flags&testCurlQuery > 0 {
+			g.SetQuery(core.A{"q1", "qv1", "q2", "qv2"})
+		}
+		if v.flags&testCurlForm > 0 {
+			g.SetForm(
+				core.A{
+					"mode", "A",
+					"text", "good",
+					"voice", core.FormFile("../testdata/voice.pcm")},
+			)
+		}
 
+		if v.flags&testJSON > 0 {
+			g.SetJSON(
+				core.H{
+					"jk1": "jv1",
+				},
+			)
+		}
+
+		c := g.Export().Curl()
+		if v.flags&testLong > 0 {
+			c.LongOption()
+		}
+		c.SetOutput(&buf)
+
+		err := c.Do()
 		assert.NoError(t, err)
-	}
-}
 
-func Test_Export_Curl_GenCurl(t *testing.T) {
-	req, err := http.NewRequest("POST", "http://127.0.0.1:8080/test/path?q1=v1", strings.NewReader("wo shi body"))
-	req.Header.Add("h1", "v1")
-	req.Header.Add("h1", "v2")
-
-	assert.NoError(t, err)
-
-	GenCurl(req, true, os.Stdout)
-}
-
-func Test_Export_isExists(t *testing.T) {
-	tst := []string{"../testdata/voice.pcm", "../testdata/raw-http-post-json.txt"}
-
-	for _, fName := range tst {
-		assert.Equal(t, isExists(fName), true, fName)
-	}
-
-	notExists := []string{"a.txt", "b.txt"}
-	for _, fName := range notExists {
-		assert.Equal(t, isExists(fName), false, fName)
-	}
-}
-
-func Test_Export_formdata(t *testing.T) {
-	type need struct {
-		data []interface{}
-		need []string
-	}
-
-	tst := []need{
-		{[]interface{}{"text", "good", "voice", core.FormFile("../testdata/voice.pcm"), "mode", "a"}, []string{`"text=good"`, `"voice=@./voice"`, `"mode=a"`}},
-	}
-
-	defer func() {
-		os.Remove("./voice")
+		os.Remove(fmt.Sprintf("./voice"))
 		for i := 0; i < 10; i++ {
 			os.Remove(fmt.Sprintf("./voice.%d", i))
 		}
-	}()
-	genFormdata := func(data []interface{}) (*http.Request, error) {
-		b := &bytes.Buffer{}
-		w := multipart.NewWriter(b)
 
-		for i := 0; i < len(data); i += 2 {
-			var key string
-			switch v := data[i].(type) {
-			case string:
-				key = v
-			default:
-				return nil, errors.New("fail")
-			}
-
-			switch v := data[i+1].(type) {
-			case string:
-				part, err := w.CreateFormField(key)
-				_, err = part.Write([]byte(v))
-				assert.NoError(t, err)
-				if err != nil {
-					return nil, err
-				}
-			case core.FormFile:
-				part, err := w.CreateFormFile(key, key)
-				if err != nil {
-					return nil, err
-				}
-
-				all, err := ioutil.ReadFile(string(v))
-				if err != nil {
-					return nil, err
-				}
-				part.Write(all)
-
-			default:
-				return nil, errors.New("fail")
-			}
-		}
-
-		w.Close()
-		req, err := http.NewRequest("GET", "www.qq.com", b)
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Add("Content-Type", w.FormDataContentType())
-		return req, nil
-
-	}
-
-	for _, tv := range tst {
-		req, err := genFormdata(tv.data)
-		assert.NoError(t, err)
 		if err != nil {
 			return
 		}
-		c := curl{}
-		_ = c.formData(req)
-		assert.NoError(t, err)
-		assert.Equal(t, tv.need, c.FormData)
+
+		fmt.Printf("%s\n%s\n", buf.String(), v.need)
+		assert.Equal(t, strings.TrimSpace(buf.String()), v.need)
 	}
+
 }
 
-func Test_Export_getFileName(t *testing.T) {
-	type need struct {
-		need string
-		got  string
+func Test_Curl_GenAnsSend(t *testing.T) {
+	type testData struct {
+		A string
+		B string
 	}
 
-	tst := []need{
-		{"../testdata/voice.pcm", "../testdata/voice.pcm.0"},
-		{"../testdata/raw-http-post-json.txt", "../testdata/raw-http-post-json.txt.0"},
-	}
+	yes := false
+	router := func(b *bool) *gin.Engine {
+		router := gin.Default()
 
-	for _, v := range tst {
-		assert.Equal(t, getFileName(v.need), v.got)
-	}
+		router.POST("/test.json", func(c *gin.Context) {
+			test := testData{}
+			c.BindJSON(&test)
+			*b = true
+		})
+
+		return router
+	}(&yes)
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	var out strings.Builder
+	err := dataflow.POST(ts.URL + "/test.json").SetJSON(core.H{"a": "a", "b": "b"}).Export().Curl().SetOutput(&out).GenAndSend().Do()
+	assert.NoError(t, err)
+	assert.Equal(t, yes, true)
+	need := fmt.Sprintf(`curl -X POST -H "Content-Type:application/json" -d "{\"a\":\"a\",\"b\":\"b\"}" "%s/test.json"`, ts.URL)
+
+	//fmt.Printf("got(%s)", out.String())
+	//fmt.Printf("need(%s)", need)
+	assert.Equal(t, strings.TrimSpace(out.String()), need)
 }
