@@ -1,149 +1,66 @@
 package export
 
 import (
-	"fmt"
-	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/dataflow"
 	"io"
-	"io/ioutil"
-	"mime/multipart"
-	"net/http"
 	"os"
-	"sort"
-	"strings"
 )
 
-type curl struct {
-	Header []string
-	Method string
-	Data   string
-	URL    string
+var _ dataflow.Curl = (*Curl)(nil)
 
-	FormData []string
+type Curl struct {
+	w               io.Writer
+	df              *dataflow.DataFlow
+	longOption      bool
+	generateAndSend bool
 }
 
-const boundary = "boundary="
-
-func isExists(path string) bool {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true
-	}
-	return false
+func (c *Curl) New(df *dataflow.DataFlow) interface{} {
+	return &Curl{df: df}
 }
 
-func getFileName(fName string) string {
-	count := 0
-	fileName := fName
-	for ; ; count++ {
-		if isExists(fileName) {
-			fileName = fmt.Sprintf("%s.%d", fName, count)
-			continue
-		}
-
-		break
-	}
-	return fileName
+func (c *Curl) LongOption() dataflow.Curl {
+	c.longOption = true
+	return c
 }
 
-func (c *curl) formData(req *http.Request) error {
-	contentType := req.Header.Get("Content-Type")
-	if strings.Index(contentType, "multipart/form-data") == -1 {
-		return nil
-	}
-	req.Header.Del("Content-Type")
+func (c *Curl) GenAndSend() dataflow.Curl {
+	c.generateAndSend = true
+	return c
+}
 
-	c.Data = ""
+func (c *Curl) SetOutput(w io.Writer) dataflow.Curl {
+	c.w = w
+	return c
+}
 
-	boundaryValue := ""
-
-	if pos := strings.Index(contentType, "boundary="); pos == -1 {
-		return nil
-	} else {
-		boundaryValue = strings.TrimSpace(contentType[pos+len(boundary):])
+func (c *Curl) Do() (err error) {
+	if c.w == nil {
+		c.w = os.Stdout
 	}
 
-	body, err := req.GetBody()
+	w := c.w
+
+	req, err := c.df.Request()
 	if err != nil {
 		return err
 	}
 
-	mr := multipart.NewReader(body, boundaryValue)
-	for {
-		p, err := mr.NextPart()
-		if err == io.EOF {
-			break
-		}
+	client := c.df.Client()
+
+	if c.generateAndSend {
+		// 清空状态，Setxxx函数拆开使用就不会有问题
+		defer c.df.Reset()
+		resp, err := client.Do(req)
 		if err != nil {
 			return err
 		}
 
-		var buf strings.Builder
-
-		buf.WriteString(p.FormName())
-		buf.WriteByte('=')
-
-		if p.FileName() != "" {
-
-			fileName := getFileName(p.FileName())
-			fd, err := os.Create(fileName)
-			if err != nil {
-				return err
-			}
-			io.Copy(fd, p)
-
-			buf.WriteString("@./")
-			buf.WriteString(fileName)
-
-			fd.Close()
-		} else {
-			io.Copy(&buf, p)
+		err = c.df.Bind(req, resp)
+		if err != nil {
+			return err
 		}
-
-		c.FormData = append(c.FormData, fmt.Sprintf("%q", buf.String()))
 	}
 
-	return nil
-}
-
-func (c *curl) header(req *http.Request) {
-	header := make([]string, 0, len(req.Header))
-
-	for k := range req.Header {
-		header = append(header, k)
-	}
-
-	sort.Strings(header)
-
-	for index, hKey := range header {
-		hVal := req.Header[hKey]
-
-		header[index] = fmt.Sprintf(`%s:%s`, hKey, strings.Join(hVal, ","))
-		header[index] = fmt.Sprintf("%q", header[index])
-	}
-
-	c.Header = header
-}
-
-// GenCurl used to generate curl commands
-func GenCurl(req *http.Request, long bool, w io.Writer) error {
-	c := curl{}
-	body, err := req.GetBody()
-	if err != nil {
-		return err
-	}
-
-	all, err := ioutil.ReadAll(body)
-	if err != nil {
-		return err
-	}
-
-	c.URL = fmt.Sprintf(`%q`, req.URL.String())
-	c.Method = req.Method
-	if len(all) > 0 {
-		c.Data = fmt.Sprintf(`%q`, core.BytesToString(all))
-	}
-	c.formData(req)
-	c.header(req)
-	tp := newTemplate(long)
-	return tp.Execute(w, c)
+	return GenCurl(req, c.longOption, w)
 }

@@ -1,4 +1,4 @@
-package gout
+package dataflow
 
 import (
 	"github.com/stretchr/testify/assert"

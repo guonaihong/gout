@@ -1,4 +1,4 @@
-package gout
+package encode
 
 import (
 	"io"

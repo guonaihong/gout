@@ -1,4 +1,4 @@
-package gout
+package dataflow
 
 import (
 	"github.com/gin-gonic/gin"
@@ -51,7 +51,7 @@ func TestContext_BindBodyJSON(t *testing.T) {
 	path := []string{"200", "500"}
 	count := 0
 	for _, p := range path {
-		err := Def().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
+		err := New().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
 			assert.NotEqual(t, c.Code, 404)
 
 			switch c.Code {
@@ -118,7 +118,7 @@ func TestContext_BindBodyYAML(t *testing.T) {
 	path := []string{"200", "500"}
 	count := 0
 	for _, p := range path {
-		err := Def().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
+		err := New().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
 			assert.NotEqual(t, c.Code, 404)
 
 			switch c.Code {
@@ -180,7 +180,7 @@ func TestContext_BindBodyXML(t *testing.T) {
 	path := []string{"200", "500"}
 	count := 0
 	for _, p := range path {
-		err := Def().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
+		err := New().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
 			assert.NotEqual(t, c.Code, 404)
 
 			switch c.Code {

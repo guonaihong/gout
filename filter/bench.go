@@ -3,6 +3,7 @@ package gout
 import (
 	"context"
 	"github.com/guonaihong/gout/bench"
+	"github.com/guonaihong/gout/dataflow"
 	"time"
 )
 
@@ -10,29 +11,34 @@ import (
 type Bench struct {
 	bench.Task
 
-	df *DataFlow
+	df *dataflow.DataFlow
+}
+
+// New
+func (b *Bench) New(df *dataflow.DataFlow) interface{} {
+	return &Bench{df: df}
 }
 
 // Concurrent set the number of benchmarks for concurrency
-func (b *Bench) Concurrent(c int) *Bench {
+func (b *Bench) Concurrent(c int) dataflow.Bencher {
 	b.Task.Concurrent = c
 	return b
 }
 
 // Number set the number of benchmarks
-func (b *Bench) Number(n int) *Bench {
+func (b *Bench) Number(n int) dataflow.Bencher {
 	b.Task.Number = n
 	return b
 }
 
 // Rate set the frequency of the benchmark
-func (b *Bench) Rate(rate int) *Bench {
+func (b *Bench) Rate(rate int) dataflow.Bencher {
 	b.Task.Rate = rate
 	return b
 }
 
 // Durations set the benchmark time
-func (b *Bench) Durations(d time.Duration) *Bench {
+func (b *Bench) Durations(d time.Duration) dataflow.Bencher {
 	b.Task.Duration = d
 	return b
 }
@@ -40,14 +46,14 @@ func (b *Bench) Durations(d time.Duration) *Bench {
 // Do benchmark startup function
 func (b *Bench) Do() error {
 	// 报表插件
-	req, err := b.df.Req.request()
+	req, err := b.df.Req.Request()
 	if err != nil {
 		return err
 	}
 
-	client := b.df.out.Client
-	if client == &DefaultClient {
-		client = &DefaultBenchClient
+	client := b.df.Client()
+	if client == &dataflow.DefaultClient {
+		client = &dataflow.DefaultBenchClient
 	}
 
 	r := bench.NewReport(context.Background(),

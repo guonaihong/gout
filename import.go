@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/dataflow"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,10 +23,9 @@ func (i *Import) RawText(text interface{}) *Text {
 	var read io.Reader
 	r := &Text{}
 
-	out := New()
+	out := dataflow.New()
 	// TODO 函数
-	r.DataFlow.out = out
-	r.DataFlow.Req.g = out
+	r.SetGout(out)
 
 	switch body := text.(type) {
 	case string:
@@ -35,13 +35,13 @@ func (i *Import) RawText(text interface{}) *Text {
 		body = bytes.TrimLeft(body, rawTextSpace)
 		read = bytes.NewReader(body)
 	default:
-		r.err = core.ErrUnknownType
+		r.Err = core.ErrUnknownType
 		return r
 	}
 
 	req, err := http.ReadRequest(bufio.NewReader(read))
 	if err != nil {
-		r.err = err
+		r.Err = err
 		return r
 	}
 
@@ -53,7 +53,7 @@ func (i *Import) RawText(text interface{}) *Text {
 	if req.GetBody == nil {
 		all, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			r.err = err
+			r.Err = err
 			return r
 		}
 
@@ -64,7 +64,7 @@ func (i *Import) RawText(text interface{}) *Text {
 		req.Body = ioutil.NopCloser(bytes.NewReader(all))
 	}
 
-	r.setRequest(req)
+	r.SetRequest(req)
 
 	return r
 }

@@ -1,4 +1,4 @@
-package gout
+package dataflow
 
 import (
 	"context"
@@ -72,7 +72,7 @@ func (df *DataFlow) OPTIONS(url string) *DataFlow {
 
 // SetHost set host
 func (df *DataFlow) SetHost(host string) *DataFlow {
-	if df.err != nil {
+	if df.Err != nil {
 		return df
 	}
 
@@ -84,7 +84,7 @@ func (df *DataFlow) SetHost(host string) *DataFlow {
 
 // SetURL set url
 func (df *DataFlow) SetURL(url string) *DataFlow {
-	if df.err != nil {
+	if df.Err != nil {
 		return df
 	}
 
@@ -158,7 +158,7 @@ func (df *DataFlow) UnixSocket(path string) *DataFlow {
 
 	transport, ok := df.out.Client.Transport.(*http.Transport)
 	if !ok {
-		df.Req.err = fmt.Errorf("UnixSocket:not found http.transport:%T", df.out.Client.Transport)
+		df.Req.Err = fmt.Errorf("UnixSocket:not found http.transport:%T", df.out.Client.Transport)
 		return df
 	}
 
@@ -173,7 +173,7 @@ func (df *DataFlow) UnixSocket(path string) *DataFlow {
 func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
 	proxy, err := url.Parse(modifyURL(proxyURL))
 	if err != nil {
-		df.Req.err = err
+		df.Req.Err = err
 		return df
 	}
 
@@ -183,7 +183,7 @@ func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
 
 	transport, ok := df.out.Client.Transport.(*http.Transport)
 	if !ok {
-		df.Req.err = fmt.Errorf("SetProxy:not found http.transport:%T", df.out.Client.Transport)
+		df.Req.Err = fmt.Errorf("SetProxy:not found http.transport:%T", df.out.Client.Transport)
 		return df
 	}
 
@@ -280,17 +280,26 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 	return df
 }
 
+func (df *DataFlow) IsDebug() bool {
+	return df.out.opt.Debug
+}
+
 // Do send function
 func (df *DataFlow) Do() (err error) {
 	return df.Req.Do()
 }
 
 // Filter filter function, use this function to turn on the filter function
-func (df *DataFlow) Filter() *Filter {
-	return &Filter{df: df}
+func (df *DataFlow) Filter() *filter {
+	return &filter{df: df}
 }
 
 // Export filter function, use this function to turn on the filter function
-func (df *DataFlow) Export() *Export {
-	return &Export{df: df}
+func (df *DataFlow) Export() *export {
+	return &export{df: df}
+}
+
+func (df *DataFlow) SetGout(out *Gout) {
+	df.out = out
+	df.Req.g = out
 }

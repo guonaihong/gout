@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guonaihong/gout/dataflow"
 	"math"
 	"math/rand"
 	"time"
@@ -22,34 +23,34 @@ var (
 	ErrRetryFail = errors.New("retry fail")
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 // Retry is the core data structure of the retry function
 // https://amazonaws-china.com/cn/blogs/architecture/exponential-backoff-and-jitter/
 type Retry struct {
-	df          *DataFlow
+	df          *dataflow.DataFlow
 	attempt     int // Maximum number of attempts
 	currAttempt int
 	maxWaitTime time.Duration
 	waitTime    time.Duration
 }
 
+func (r *Retry) New(df *dataflow.DataFlow) interface{} {
+	return &Retry{df: df}
+}
+
 // Attempt set the number of retries
-func (r *Retry) Attempt(attempt int) *Retry {
+func (r *Retry) Attempt(attempt int) dataflow.Retry {
 	r.attempt = attempt
 	return r
 }
 
 // WaitTime sets the basic wait time
-func (r *Retry) WaitTime(waitTime time.Duration) *Retry {
+func (r *Retry) WaitTime(waitTime time.Duration) dataflow.Retry {
 	r.waitTime = waitTime
 	return r
 }
 
 // MaxWaitTime Sets the maximum wait time
-func (r *Retry) MaxWaitTime(maxWaitTime time.Duration) *Retry {
+func (r *Retry) MaxWaitTime(maxWaitTime time.Duration) dataflow.Retry {
 	r.maxWaitTime = maxWaitTime
 	return r
 }
@@ -95,13 +96,13 @@ func (r *Retry) Do() (err error) {
 	defer r.reset()
 	r.init()
 
-	req, err := r.df.request()
+	req, err := r.df.Request()
 	if err != nil {
 		return err
 	}
 
 	tk := time.NewTimer(r.maxWaitTime)
-	client := r.df.out.Client
+	client := r.df.Client()
 
 	for i := 0; i < r.attempt; i++ {
 
@@ -109,17 +110,17 @@ func (r *Retry) Do() (err error) {
 		// 只需经过一次编码器得到request,后面就是多次使用
 		resp, err := client.Do(req)
 		if err == nil {
-			return r.df.bind(req, resp)
+			return r.df.Bind(req, resp)
 		}
 
 		sleep := r.getSleep()
 
-		if r.df.out.opt.Debug {
+		if r.df.IsDebug() {
 			fmt.Printf("filter:retry #current attempt:%d, wait time %v\n", r.currAttempt, sleep)
 		}
 
 		tk.Reset(sleep)
-		ctx := r.df.getContext()
+		ctx := r.df.GetContext()
 		if ctx == nil {
 			ctx = context.Background()
 		}

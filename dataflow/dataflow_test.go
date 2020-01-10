@@ -1,4 +1,4 @@
-package gout
+package dataflow
 
 import (
 	"bytes"
@@ -117,7 +117,7 @@ func TestBindJSON(t *testing.T) {
 
 	tests := []BindTest{
 		{InBody: data{ID: 9, Data: "早上测试结构体"}, OutBody: data{}},
-		{InBody: H{"id": 10, "data": "早上测试map"}, OutBody: data{}},
+		{InBody: core.H{"id": 10, "data": "早上测试map"}, OutBody: data{}},
 	}
 
 	for k := range tests {
@@ -275,7 +275,7 @@ func TestSetFormMap(t *testing.T) {
 	}
 
 	var err error
-	reqTestForm.ReqVoice, err = ioutil.ReadFile("testdata/voice.pcm")
+	reqTestForm.ReqVoice, err = ioutil.ReadFile("../testdata/voice.pcm")
 	assert.NoError(t, err)
 
 	router := setupForm2(t, reqTestForm)
@@ -286,9 +286,9 @@ func TestSetFormMap(t *testing.T) {
 	g := New(nil)
 	code := 0
 	err = g.POST(ts.URL + "/test.form").
-		SetForm(H{"mode": "A",
+		SetForm(core.H{"mode": "A",
 			"text":    "good morning",
-			"voice":   core.FormFile("testdata/voice.pcm"),
+			"voice":   core.FormFile("../testdata/voice.pcm"),
 			"voice2":  core.FormMem("pcm pcm"),
 			"int":     1,
 			"uint":    2,
@@ -746,65 +746,65 @@ func TestSetBody(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	code := 0
-	err := New(nil).POST(ts.URL).SetQuery(H{"int": true}).SetBody(1).Code(&code).Do()
+	err := New(nil).POST(ts.URL).SetQuery(core.H{"int": true}).SetBody(1).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"int8": true}).SetBody(int8(2)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"int8": true}).SetBody(int8(2)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"int16": true}).SetBody(int16(3)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"int16": true}).SetBody(int16(3)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"int32": true}).SetBody(int32(4)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"int32": true}).SetBody(int32(4)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"int64": true}).SetBody(int64(5)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"int64": true}).SetBody(int64(5)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 	//=====================uint start
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"uint": true}).SetBody(6).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"uint": true}).SetBody(6).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"uint8": true}).SetBody(uint8(7)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"uint8": true}).SetBody(uint8(7)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"uint16": true}).SetBody(uint16(8)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"uint16": true}).SetBody(uint16(8)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"uint32": true}).SetBody(uint32(9)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"uint32": true}).SetBody(uint32(9)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"uint64": true}).SetBody(uint64(10)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"uint64": true}).SetBody(uint64(10)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 	//============================== float start
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"float32": true}).SetBody(float32(11)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"float32": true}).SetBody(float32(11)).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"float64": true}).SetBody(float64(12)).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"float64": true}).SetBody(float64(12)).Code(&code).Do()
 
-	err = New(nil).POST(ts.URL).SetQuery(H{"string": true}).SetBody("test string").Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"string": true}).SetBody("test string").Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
 	// test bytes string
-	err = New(nil).POST(ts.URL).SetQuery(H{"bytes": true}).SetBody([]byte("test bytes")).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"bytes": true}).SetBody([]byte("test bytes")).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 
 	// test io.Reader
-	err = New(nil).POST(ts.URL).SetQuery(H{"reader": true}).SetBody(bytes.NewBufferString("test io.Reader")).Code(&code).Do()
+	err = New(nil).POST(ts.URL).SetQuery(core.H{"reader": true}).SetBody(bytes.NewBufferString("test io.Reader")).Code(&code).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 }
@@ -1011,13 +1011,13 @@ func TestUnixSocket(t *testing.T) {
 
 	c := http.Client{}
 	s := ""
-	err := New(&c).UnixSocket(path).POST("http://xxx/test/unix/").SetHeader(H{"h1": "v1", "h2": "v2"}).BindBody(&s).Do()
+	err := New(&c).UnixSocket(path).POST("http://xxx/test/unix/").SetHeader(core.H{"h1": "v1", "h2": "v2"}).BindBody(&s).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, s, "ok")
 
 	// 错误情况1
 	c.Transport = &TransportFail{}
-	err = New(&c).UnixSocket(path).POST("http://xxx/test/unix/").SetHeader(H{"h0": "v1", "h2": "v2"}).BindBody(&s).Do()
+	err = New(&c).UnixSocket(path).POST("http://xxx/test/unix/").SetHeader(core.H{"h0": "v1", "h2": "v2"}).BindBody(&s).Do()
 	assert.Error(t, err)
 }
 
