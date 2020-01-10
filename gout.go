@@ -30,35 +30,35 @@ func New(c ...*http.Client) *dataflow.Gout {
 
 // GET send HTTP GET method
 func GET(url string) *dataflow.DataFlow {
-	return dataflow.New().GET(url)
+	return dataflow.GET(url)
 }
 
 // POST send HTTP POST method
 func POST(url string) *dataflow.DataFlow {
-	return dataflow.New().POST(url)
+	return dataflow.POST(url)
 }
 
 // PUT send HTTP PUT method
 func PUT(url string) *dataflow.DataFlow {
-	return dataflow.New().PUT(url)
+	return dataflow.PUT(url)
 }
 
 // DELETE send HTTP DELETE method
 func DELETE(url string) *dataflow.DataFlow {
-	return dataflow.New().DELETE(url)
+	return dataflow.DELETE(url)
 }
 
 // PATCH send HTTP PATCH method
 func PATCH(url string) *dataflow.DataFlow {
-	return dataflow.New().PATCH(url)
+	return dataflow.PATCH(url)
 }
 
 // HEAD send HTTP HEAD method
 func HEAD(url string) *dataflow.DataFlow {
-	return dataflow.New().HEAD(url)
+	return dataflow.HEAD(url)
 }
 
 // OPTIONS send HTTP OPTIONS method
 func OPTIONS(url string) *dataflow.DataFlow {
-	return dataflow.New().OPTIONS(url)
+	return dataflow.OPTIONS(url)
 }

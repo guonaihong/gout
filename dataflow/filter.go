@@ -16,7 +16,7 @@ func (f *filter) Bench() Bencher {
 	b := filter.New(f.df)
 	bench, ok := b.(Bencher)
 	if !ok {
-		panic("filter.bench not found core.Bencher")
+		panic("filter.bench not found Bencher interface")
 	}
 	return bench
 
@@ -28,13 +28,13 @@ func (f *filter) Retry() Retry {
 
 	filter, ok := filters["retry"]
 	if !ok {
-		panic("filter.retry: not found")
+		panic("filter.retry: not found interface")
 	}
 
 	b := filter.New(f.df)
 	retry, ok := b.(Retry)
 	if !ok {
-		panic("filter.retry not found core.Bencher")
+		panic("filter.retry not found Retry")
 	}
 	return retry
 }
