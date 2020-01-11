@@ -33,6 +33,7 @@ func server() {
 	router.Run()
 }
 
+// 客户端example
 func callbackExample() {
 	r, str404 := Result{}, ""
 	code := 0
@@ -40,9 +41,9 @@ func callbackExample() {
 	err := gout.GET(":8080").Callback(func(c *gout.Context) (err error) {
 
 		switch c.Code {
-		case 200: //http code 200是json
+		case 200: //http code为200时，服务端返回的是json 结构
 			c.BindJSON(&r)
-		case 404: // http code 404 是html
+		case 404: //http code为404时，服务端返回是html 字符串
 			c.BindBody(&str404)
 		}
 		code = c.Code
@@ -59,7 +60,7 @@ func callbackExample() {
 }
 
 func main() {
-	go server()                        // 等会起测试服务
+	go server()                        //等会起测试服务
 	time.Sleep(time.Millisecond * 500) //用时间做个等待同步
 
 	callbackExample()

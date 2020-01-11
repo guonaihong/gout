@@ -862,7 +862,7 @@ float64=3.14&int=3&string=test-www-Form
 
 ### callback
 callback主要用在，服务端会返回多种格式body的场景, 比如404返回的是html, 200返回json。
-这时候要用Callback挂载多种处理函数
+这时候要用Callback挂载多种处理函数，处理不同的数据结构
 ```go
 
 func main() {
@@ -873,9 +873,9 @@ func main() {
 	err := gout.GET(":8080").Callback(func(c *gout.Context) (err error) {
 
 		switch c.Code {
-		case 200: //http code 200是json
+		case 200: //http code为200时，服务端返回的是json 结构
 			c.BindJSON(&r)
-		case 404: // http code 404 是html
+		case 404: //http code为404时，服务端返回是html 字符串
 			c.BindBody(&str404)
 		}
 		code = c.Code
