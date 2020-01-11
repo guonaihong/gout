@@ -870,15 +870,16 @@ func main() {
 	r, str404 := Result{}, ""
 	code := 0
 
-	err := gout.GET(":8080").Code(&code).Callback(func(c *gout.Context) (err error) {
+	err := gout.GET(":8080").Callback(func(c *gout.Context) (err error) {
 
 		switch c.Code {
-		case 200:
-			err = c.BindJSON(&r)
-		case 404:
-			err = c.BindBody(&str404)
+		case 200: //http code 200是json
+			c.BindJSON(&r)
+		case 404: // http code 404 是html
+			c.BindBody(&str404)
 		}
-		return
+		code = c.Code
+		return nil
 
 	}).Do()
 
@@ -887,7 +888,8 @@ func main() {
 		return
 	}
 
-	fmt.Printf("http code = %d, str404(%s), result(%v)\n", code, str404, r)
+	fmt.Printf("http code = %d, str404(%s) or json result(%v)\n", code, str404, r)
+
 }
 
 ```

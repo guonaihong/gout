@@ -22,7 +22,7 @@ type testContextJSON struct {
 }
 
 func testServrBodyJSON(t *testing.T) *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
 	r.GET("/:code", func(c *gin.Context) {
 
 		code := testContextStruct{}
@@ -50,47 +50,50 @@ func TestContext_BindBodyJSON(t *testing.T) {
 
 	path := []string{"200", "500"}
 	count := 0
+	type jsonResult struct {
+		Errcode int    `json:"errcode"`
+		Errmsg  string `json:"errmsg"`
+	}
+
+	var j jsonResult
+	var tHeader testHeader
+	var str string
 	for _, p := range path {
-		err := New().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
+		code := 0
+		err := New().GET(ts.URL + "/" + p).Debug(true).Callback(func(c *Context) error {
 			assert.NotEqual(t, c.Code, 404)
 
 			switch c.Code {
 			case 500:
-				var s string
-				err := c.BindBody(&s)
-				assert.NoError(t, err)
-				assert.Equal(t, "fail", s)
-
+				c.BindBody(&str)
 				count++
 			case 200:
-				type jsonResult struct {
-					Errcode int    `json:"errcode"`
-					Errmsg  string `json:"errmsg"`
-				}
-
-				var j jsonResult
-				err := c.BindJSON(&j)
-				assert.NoError(t, err)
-				assert.Equal(t, j.Errmsg, "ok")
-				assert.Equal(t, j.Errcode, 0)
+				c.BindJSON(&j)
 				count++
 			}
 
-			var tHeader testHeader
-			err := c.BindHeader(&tHeader)
-			assert.NoError(t, err)
+			code = c.Code
 
-			assert.Equal(t, tHeader.HeaderKey, "headerVal")
+			c.BindHeader(&tHeader)
+
 			return nil
 		}).Do()
+
 		assert.NoError(t, err)
+		if code == 500 {
+			assert.Equal(t, str, "fail")
+		} else if code == 200 {
+			assert.Equal(t, j.Errmsg, "ok")
+			assert.Equal(t, j.Errcode, 0)
+		}
+		assert.Equal(t, tHeader.HeaderKey, "headerVal")
 
 	}
 	assert.Equal(t, count, 2)
 }
 
 func testServrBodyYAML(t *testing.T) *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
 	r.GET("/:code", func(c *gin.Context) {
 
 		code := testContextStruct{}
@@ -117,42 +120,45 @@ func TestContext_BindBodyYAML(t *testing.T) {
 
 	path := []string{"200", "500"}
 	count := 0
+	type yamlResult struct {
+		Errcode int    `yaml:"errcode"`
+		Errmsg  string `yaml:"errmsg"`
+	}
+
+	var y yamlResult
+	var str string
 	for _, p := range path {
+		code := 0
 		err := New().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
 			assert.NotEqual(t, c.Code, 404)
 
 			switch c.Code {
 			case 500:
-				var s string
-				err := c.BindBody(&s)
-				assert.NoError(t, err)
-				assert.Equal(t, "fail", s)
-
+				c.BindBody(&str)
 				count++
+				code = c.Code
 			case 200:
-				type yamlResult struct {
-					Errcode int    `yaml:"errcode"`
-					Errmsg  string `yaml:"errmsg"`
-				}
-
-				var y yamlResult
-				err := c.BindYAML(&y)
-				assert.NoError(t, err)
-				assert.Equal(t, y.Errmsg, "ok")
-				assert.Equal(t, y.Errcode, 0)
 				count++
+				c.BindYAML(&y)
+				code = c.Code
 			}
 
 			return nil
 		}).Do()
 		assert.NoError(t, err)
+		if code == 500 {
+			assert.Equal(t, "fail", str)
+		} else if code == 200 {
+			assert.Equal(t, y.Errmsg, "ok")
+			assert.Equal(t, y.Errcode, 0)
+		}
 
 	}
 	assert.Equal(t, count, 2)
 }
 
 func testServrBodyXML(t *testing.T) *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
 	r.GET("/:code", func(c *gin.Context) {
 
 		code := testContextStruct{}
@@ -179,41 +185,43 @@ func TestContext_BindBodyXML(t *testing.T) {
 
 	path := []string{"200", "500"}
 	count := 0
+	var str string
+	var tHeader testHeader
+	type xmlResult struct {
+		Errcode int    `xml:"errcode"`
+		Errmsg  string `xml:"errmsg"`
+	}
+	var x xmlResult
+
 	for _, p := range path {
-		err := New().GET(ts.URL + "/" + p).Callback(func(c *Context) error {
+		code := 0
+		err := New().GET(ts.URL + "/" + p).Debug(true).Callback(func(c *Context) error {
 			assert.NotEqual(t, c.Code, 404)
 
 			switch c.Code {
 			case 500:
-				var s string
-				err := c.BindBody(&s)
-				assert.NoError(t, err)
-				assert.Equal(t, "fail", s)
-
+				c.BindBody(&str)
 				count++
 			case 200:
-				type xmlResult struct {
-					Errcode int    `xml:"errcode"`
-					Errmsg  string `xml:"errmsg"`
-				}
 
-				var x xmlResult
-				err := c.BindXML(&x)
-				assert.NoError(t, err)
-				assert.Equal(t, x.Errmsg, "ok")
-				assert.Equal(t, x.Errcode, 0)
+				c.BindXML(&x)
 				count++
 			}
 
-			var tHeader testHeader
-			err := c.BindHeader(&tHeader)
-			assert.NoError(t, err)
+			code = c.Code
+			c.BindHeader(&tHeader)
 
-			assert.Equal(t, tHeader.HeaderKey, "headerVal")
 			return nil
 		}).Do()
-		assert.NoError(t, err)
 
+		assert.NoError(t, err)
+		if code == 500 {
+			assert.Equal(t, "fail", str)
+		} else if code == 200 {
+			assert.Equal(t, x.Errmsg, "ok")
+			assert.Equal(t, x.Errcode, 0)
+		}
+		assert.Equal(t, tHeader.HeaderKey, "headerVal")
 	}
 	assert.Equal(t, count, 2)
 }
@@ -226,7 +234,8 @@ func TestContext_fail(t *testing.T) {
 
 	// BindJSON和Callback只能选一个
 	err := GET(ts.URL + "/200").BindJSON(&j).Callback(func(c *Context) error {
-		return c.BindJSON(&j2)
+		c.BindJSON(&j2)
+		return nil
 	}).Do()
 
 	assert.Error(t, err)

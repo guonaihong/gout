@@ -264,7 +264,7 @@ func (r *Req) GetContext() context.Context {
 	return r.c
 }
 
-func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
+func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (err error) {
 	if r.headerDecode != nil {
 		err = decode.Header.Decode(resp, r.headerDecode)
 		if err != nil {
@@ -272,7 +272,7 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 		}
 	}
 
-	if r.g.opt.Debug {
+	if openDebug {
 		// This is code(output debug info) be placed here
 		// all, err := ioutil.ReadAll(resp.Body)
 		// respBody  = bytes.NewReader(all)
@@ -290,10 +290,26 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 	if r.httpCode != nil {
 		*r.httpCode = resp.StatusCode
 	}
+	return nil
+}
+
+func (r *Req) getDataFlow() *DataFlow {
+	return &r.g.DataFlow
+}
+
+func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
+
+	if err = r.decode(req, resp, r.g.opt.Debug); err != nil {
+		return err
+	}
 
 	if r.callback != nil {
-		c := Context{Code: resp.StatusCode, Resp: resp}
+		c := Context{Code: resp.StatusCode, DataFlow: r.getDataFlow()}
 		if err := r.callback(&c); err != nil {
+			return err
+		}
+
+		if err = r.decode(req, resp, false); err != nil {
 			return err
 		}
 	}
