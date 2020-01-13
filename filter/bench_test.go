@@ -1,7 +1,9 @@
 package gout
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/dataflow"
 	"github.com/stretchr/testify/assert"
@@ -90,4 +92,28 @@ func Test_Bench_Rate(t *testing.T) {
 
 	assert.LessOrEqual(t, int64(take), int64(time.Duration(time.Duration(number/rate)*time.Second+100*time.Millisecond)))
 	assert.GreaterOrEqual(t, int64(take), int64(time.Duration(number/rate)*time.Second-time.Second))
+}
+
+// 测试自定义函数
+func Test_Bench_Loop(t *testing.T) {
+	uid := uuid.New()
+	i := int32(0)
+
+	total := int32(0)
+	router := setupBenchNumber(&total)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	err := NewBench().
+		Concurrent(25).
+		Number(2000).
+		Loop(func(c *dataflow.Context) error {
+			id := atomic.AddInt32(&i, 1)
+			c.POST(ts.URL).Debug(true).SetJSON(core.H{"sid": uid.String(),
+				"appkey": fmt.Sprintf("ak:%d", id),
+				"text":   fmt.Sprintf("test text :%d", id)})
+			return nil
+
+		}).Do()
+
+	assert.NoError(t, err)
 }

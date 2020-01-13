@@ -14,6 +14,7 @@ type Bencher interface {
 	Number(n int) Bencher
 	Rate(rate int) Bencher
 	Durations(d time.Duration) Bencher
+	Loop(func(c *Context) error) Bencher
 	Do() error
 }
 
