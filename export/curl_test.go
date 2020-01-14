@@ -21,6 +21,8 @@ const (
 	testJSON
 )
 
+const noPortExists = 12345
+
 type testCurl struct {
 	flags int
 	need  string
@@ -97,7 +99,8 @@ func Test_Curl(t *testing.T) {
 
 }
 
-func Test_Curl_GenAnsSend(t *testing.T) {
+func Test_Curl_GenAndSend(t *testing.T) {
+	// test ok
 	type testData struct {
 		A string
 		B string
@@ -111,6 +114,7 @@ func Test_Curl_GenAnsSend(t *testing.T) {
 			test := testData{}
 			c.BindJSON(&test)
 			*b = true
+			c.JSON(200, gin.H{"1": "1"})
 		})
 
 		return router
@@ -124,7 +128,18 @@ func Test_Curl_GenAnsSend(t *testing.T) {
 	assert.Equal(t, yes, true)
 	need := fmt.Sprintf(`curl -X POST -H "Content-Type:application/json" -d "{\"a\":\"a\",\"b\":\"b\"}" "%s/test.json"`, ts.URL)
 
-	//fmt.Printf("got(%s)", out.String())
-	//fmt.Printf("need(%s)", need)
 	assert.Equal(t, strings.TrimSpace(out.String()), need)
+
+	// ==================================
+	// test fail
+	tests := []dataflow.Curl{
+		dataflow.POST(fmt.Sprintf(":%d/test.json", noPortExists)).SetJSON(core.H{"a": "a", "b": "b"}).Export().Curl().GenAndSend(),
+		dataflow.POST(ts.URL + "/test.json").Debug(true).SetJSON(core.H{"a": "a", "b": "b"}).BindBody(&testData{}).Export().Curl().GenAndSend(),
+		dataflow.POST(ts.URL + "/test.json").Debug(true).SetBody(&testData{}).BindBody(&testData{}).Export().Curl().GenAndSend(),
+	}
+
+	for _, v := range tests {
+		err := v.Do()
+		assert.Error(t, err)
+	}
 }

@@ -70,6 +70,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [benchmarking a certain number of times](#benchmark-number)
 		- [benchmarking for a certain time](#benchmark-duration)
 		- [benchmarking at a fixed frequency](#benchmark-rate)
+		- [Custom benchmark functions](#Custom-benchmark-functions)
 	- [retry backoff](#retry-backoff)
 	- [import](#import)
 		- [send raw http request](#send-raw-http-request)
@@ -1269,6 +1270,42 @@ func main() {
 }
 
 ```
+### Custom benchmark functions
+自定义压测函数，构造每次不一样的http request数据
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/google/uuid"
+    "github.com/guonaihong/gout"
+    "github.com/guonaihong/gout/filter"
+    "sync/atomic"
+)
+
+func main() {
+    i := int32(0)
+
+    err := filter.NewBench().
+        Concurrent(30).
+        Number(30000).
+        Loop(func(c *gout.Context) error {
+            uid := uuid.New()
+            id := atomic.AddInt32(&i, 1)
+            c.POST(":1234").Debug(true).SetJSON(gout.H{"sid": uid.String(),
+                "appkey": fmt.Sprintf("ak:%d", id),
+                "text":   fmt.Sprintf("test text :%d", id)})
+            return nil
+
+        }).Do()
+
+    if err != nil {
+        fmt.Printf("err = %v\n", err)
+    }
+}
+
+```
+
 ## retry-backoff
 retry 功能使用带抖动功能和指数的算法实现[backoff](http://www.awsarchitectureblog.com/2015/03/backoff.html)
 ```go

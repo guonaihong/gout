@@ -1,4 +1,4 @@
-package gout
+package filter
 
 import (
 	"fmt"
@@ -105,7 +105,7 @@ func Test_Bench_Loop(t *testing.T) {
 
 	err := NewBench().
 		Concurrent(25).
-		Number(2000).
+		Number(benchNumber).
 		Loop(func(c *dataflow.Context) error {
 			id := atomic.AddInt32(&i, 1)
 			c.POST(ts.URL).Debug(true).SetJSON(core.H{"sid": uid.String(),
@@ -116,4 +116,5 @@ func Test_Bench_Loop(t *testing.T) {
 		}).Do()
 
 	assert.NoError(t, err)
+	assert.Equal(t, total, int32(benchNumber))
 }

@@ -1,4 +1,4 @@
-package gout
+package filter
 
 import (
 	"fmt"
@@ -73,6 +73,21 @@ func Test_Retry_init(t *testing.T) {
 	r1.init()
 	assert.Equal(t, r1, r)
 }
+
+// test fail
+func Test_Retry_fail(t *testing.T) {
+	router := setupRetryOk()
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	tests := []dataflow.Retry{
+		dataflow.POST(ts.URL + "/test.json").Debug(true).SetBody(&time.Time{}).Filter().Retry().Attempt(3),
+	}
+
+	for _, v := range tests {
+		err := v.Do()
+		assert.Error(t, err)
+	}
+}
+
 func Test_Retry_Do(t *testing.T) {
 	// 6364是随便写的一个端口，如果CI/CD这台机器上有这个端口，就需换个不存在的
 	router := setupRetryFail()
