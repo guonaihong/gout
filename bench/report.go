@@ -50,14 +50,14 @@ type report struct {
 type Report struct {
 	SendNum int // 已经发送的http 请求
 	report
-	Number    int // 发送总次数
-	step      int // 动态报表输出间隔
-	allResult chan result
-	waitQuit  chan struct{} //等待startReport函数结束
-	allTimes  []time.Duration
-	ctx       context.Context
-	cancel    func()
-	req       *http.Request
+	Number     int // 发送总次数
+	step       int // 动态报表输出间隔
+	allResult  chan result
+	waitQuit   chan struct{} //等待startReport函数结束
+	allTimes   []time.Duration
+	ctx        context.Context
+	cancel     func()
+	getRequest func() (*http.Request, error)
 
 	startTime time.Time
 	*http.Client
@@ -67,7 +67,14 @@ type Report struct {
 }
 
 // NewReport is a report initialization function
-func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.Request, client *http.Client) *Report {
+func NewReport(ctx context.Context,
+	c, n int,
+
+	duration time.Duration,
+
+	getRequest func() (*http.Request, error),
+
+	client *http.Client) *Report {
 	step := 0
 	if n > 150 {
 		if step = n / 10; step < 100 {
@@ -84,14 +91,14 @@ func NewReport(ctx context.Context, c, n int, duration time.Duration, req *http.
 			Duration:    duration,
 			ErrMsg:      make(map[string]int, 2),
 		},
-		waitQuit:  make(chan struct{}),
-		Number:    n,
-		step:      step,
-		ctx:       ctx,
-		cancel:    cancel,
-		req:       req,
-		Client:    client,
-		startTime: time.Now(),
+		waitQuit:   make(chan struct{}),
+		Number:     n,
+		step:       step,
+		ctx:        ctx,
+		cancel:     cancel,
+		getRequest: getRequest,
+		Client:     client,
+		startTime:  time.Now(),
 	}
 }
 
@@ -129,7 +136,7 @@ func (r *Report) Process(work chan struct{}) {
 	for range work {
 		start := time.Now()
 
-		req, err := cloneRequest(r.req)
+		req, err := r.getRequest()
 		if err != nil {
 			r.addErrAndFailed(err)
 			continue

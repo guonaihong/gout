@@ -1,9 +1,11 @@
-package gout
+package filter
 
 import (
 	"context"
 	"github.com/guonaihong/gout/bench"
+	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/dataflow"
+	"net/http"
 	"time"
 )
 
@@ -12,6 +14,12 @@ type Bench struct {
 	bench.Task
 
 	df *dataflow.DataFlow
+
+	getRequest func() (*http.Request, error)
+}
+
+func NewBench() *Bench {
+	return &Bench{}
 }
 
 // New
@@ -43,16 +51,46 @@ func (b *Bench) Durations(d time.Duration) dataflow.Bencher {
 	return b
 }
 
+func (b *Bench) Loop(cb func(c *dataflow.Context) error) dataflow.Bencher {
+	b.getRequest = func() (*http.Request, error) {
+		c := dataflow.Context{}
+		// TODO 优化，这里创建了两个dataflow对象
+		// c.SetGout和 c.getDataFlow 都依赖gout对象
+		// 后面的版本要先梳理下gout对象的定位
+		out := dataflow.New()
+		c.DataFlow = &dataflow.DataFlow{}
+		c.SetGout(out)
+		err := cb(&c)
+		if err != nil {
+			return nil, err
+		}
+
+		return c.Request()
+	}
+
+	return b
+}
+
 // Do benchmark startup function
 func (b *Bench) Do() error {
 	// 报表插件
-	req, err := b.df.Req.Request()
-	if err != nil {
-		return err
+	if b.getRequest == nil {
+		req, err := b.df.Req.Request()
+		if err != nil {
+			return err
+		}
+
+		b.getRequest = func() (*http.Request, error) {
+			return core.CloneRequest(req)
+		}
 	}
 
-	client := b.df.Client()
-	if client == &dataflow.DefaultClient {
+	var client *http.Client
+	if b.df != nil {
+		client = b.df.Client()
+	}
+
+	if client == &dataflow.DefaultClient || client == nil {
 		client = &dataflow.DefaultBenchClient
 	}
 
@@ -60,7 +98,7 @@ func (b *Bench) Do() error {
 		b.Task.Concurrent,
 		b.Task.Number,
 		b.Task.Duration,
-		req,
+		b.getRequest,
 		client)
 
 	// task是并发控制模块

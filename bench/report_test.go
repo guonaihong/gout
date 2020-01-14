@@ -57,10 +57,11 @@ func Test_Bench_Report_number(t *testing.T) {
 
 	ctx := context.Background()
 
-	req, err := newRequest(ts.URL)
-	assert.NoError(t, err)
+	getRequest := func() (*http.Request, error) {
+		return newRequest(ts.URL)
+	}
 
-	p := NewReport(ctx, 1, number, time.Duration(0), req, http.DefaultClient)
+	p := NewReport(ctx, 1, number, time.Duration(0), getRequest, http.DefaultClient)
 
 	runReport(p, number)
 
@@ -77,10 +78,11 @@ func Test_Bench_Report_duration(t *testing.T) {
 
 	ctx := context.Background()
 
-	req, err := newRequest(ts.URL)
-	assert.NoError(t, err)
+	getRequest := func() (*http.Request, error) {
+		return newRequest(ts.URL)
+	}
 
-	p := NewReport(ctx, 1, 0, 300*time.Millisecond, req, http.DefaultClient)
+	p := NewReport(ctx, 1, 0, 300*time.Millisecond, getRequest, http.DefaultClient)
 
 	runReport(p, number)
 
@@ -93,10 +95,11 @@ func Test_Bench_Report_fail(t *testing.T) {
 
 	ctx := context.Background()
 
-	req, err := newRequest("fail")
-	assert.NoError(t, err)
+	getRequest := func() (*http.Request, error) {
+		return newRequest("fail url")
+	}
 
-	p := NewReport(ctx, 1, number, time.Duration(0), req, http.DefaultClient)
+	p := NewReport(ctx, 1, number, time.Duration(0), getRequest, http.DefaultClient)
 
 	runReport(p, number)
 

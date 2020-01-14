@@ -1,4 +1,4 @@
-package gout
+package filter
 
 import (
 	"github.com/guonaihong/gout/dataflow"
