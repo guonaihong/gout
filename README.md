@@ -1287,12 +1287,15 @@ func main() {
     i := int32(0)
 
     err := filter.NewBench().
-        Concurrent(30).
-        Number(30000).
+        Concurrent(30). //开30个go程
+        Number(30000).  //压测30000次
         Loop(func(c *gout.Context) error {
-            uid := uuid.New()
-            id := atomic.AddInt32(&i, 1)
-            c.POST(":1234").Debug(true).SetJSON(gout.H{"sid": uid.String(),
+
+			// 下面的代码，每次生成不一样的http body 用于压测
+            uid := uuid.New()  //生成uuid
+            id := atomic.AddInt32(&i, 1) //生成id, 可以理解为++i，线程安全版本
+
+            c.POST(":1234").SetJSON(gout.H{"sid": uid.String(),
                 "appkey": fmt.Sprintf("ak:%d", id),
                 "text":   fmt.Sprintf("test text :%d", id)})
             return nil

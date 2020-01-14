@@ -31,9 +31,12 @@ func customize() {
 		Concurrent(benchConcurrent).
 		Number(benchNumber).
 		Loop(func(c *gout.Context) error {
+
+			// 下面的代码，每次生成不一样的http body 用于压测
 			uid := uuid.New()
 			id := atomic.AddInt32(&i, 1)
-			c.POST(":8080").Debug(true).SetJSON(gout.H{"sid": uid.String(),
+
+			c.POST(":8080").SetJSON(gout.H{"sid": uid.String(),
 				"appkey": fmt.Sprintf("ak:%d", id),
 				"text":   fmt.Sprintf("test text :%d", id)})
 			return nil
