@@ -577,6 +577,7 @@ func main() {
 
 ### json
 #### Serialize json to request body
+更多用法[json example](./_example/01-color-json.go)
 ```go
 package main
 

@@ -15,6 +15,7 @@ type Bench struct {
 
 	df *dataflow.DataFlow
 
+	r          *bench.Report
 	getRequest func() (*http.Request, error)
 }
 
@@ -71,6 +72,11 @@ func (b *Bench) Loop(cb func(c *dataflow.Context) error) dataflow.Bencher {
 	return b
 }
 
+func (b *Bench) GetReport(r *bench.Report) dataflow.Bencher {
+	b.r = r
+	return b
+}
+
 // Do benchmark startup function
 func (b *Bench) Do() error {
 	// 报表插件
@@ -103,5 +109,9 @@ func (b *Bench) Do() error {
 
 	// task是并发控制模块
 	b.Run(r)
+
+	if b.r != nil {
+		*b.r = *r
+	}
 	return nil
 }

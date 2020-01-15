@@ -1,6 +1,7 @@
 package dataflow
 
 import (
+	"github.com/guonaihong/gout/bench"
 	"io"
 	"time"
 )
@@ -15,6 +16,7 @@ type Bencher interface {
 	Rate(rate int) Bencher
 	Durations(d time.Duration) Bencher
 	Loop(func(c *Context) error) Bencher
+	GetReport(r *bench.Report) Bencher
 	Do() error
 }
 

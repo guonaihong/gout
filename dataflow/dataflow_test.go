@@ -1303,3 +1303,7 @@ func Test_DataFlow_SetHost(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, body, s)
 }
+
+// 测试不设置解码器的情况, TODO
+func Test_DataFlow_NoSetDecode(t *testing.T) {
+}
