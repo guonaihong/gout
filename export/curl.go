@@ -55,6 +55,7 @@ func (c *Curl) Do() (err error) {
 		if err != nil {
 			return err
 		}
+		defer resp.Body.Close()
 
 		err = c.df.Bind(req, resp)
 		if err != nil {

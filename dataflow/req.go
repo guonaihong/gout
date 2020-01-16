@@ -299,6 +299,19 @@ func (r *Req) getDataFlow() *DataFlow {
 	return &r.g.DataFlow
 }
 
+const maxBodySlurpSize = 4 * (2 << 10) // 4KB
+func clearBody(resp *http.Response) error {
+	// 这里限制下io.Copy的大小
+	_, err := io.CopyN(ioutil.Discard, resp.Body, maxBodySlurpSize)
+	if err == io.EOF {
+		err = nil
+	}
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 
 	if err = r.decode(req, resp, r.g.opt.Debug); err != nil {
@@ -318,17 +331,9 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 		}
 	}
 
-	const maxBodySlurpSize = 4 * (2 << 10) // 4KB
 	// 如果没有设置解码器
 	if r.bodyDecoder == nil {
-		// 这里限制下io.Copy的大小
-		_, err := io.CopyN(ioutil.Discard, resp.Body, maxBodySlurpSize)
-		if err == io.EOF {
-			err = nil
-		}
-		if err != nil {
-			return err
-		}
+		return clearBody(resp)
 	}
 
 	return nil
