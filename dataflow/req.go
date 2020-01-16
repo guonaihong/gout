@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -297,6 +299,19 @@ func (r *Req) getDataFlow() *DataFlow {
 	return &r.g.DataFlow
 }
 
+const maxBodySlurpSize = 4 * (2 << 10) // 4KB
+func clearBody(resp *http.Response) error {
+	// 这里限制下io.Copy的大小
+	_, err := io.CopyN(ioutil.Discard, resp.Body, maxBodySlurpSize)
+	if err == io.EOF {
+		err = nil
+	}
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 
 	if err = r.decode(req, resp, r.g.opt.Debug); err != nil {
@@ -304,6 +319,8 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 	}
 
 	if r.callback != nil {
+		// 注意这里的r.callback使用了r.DataFlow的地址, r.callback和r.decode操作的是同一个的DataFlow
+		// 执行r.callback只是装载解码器, 后面的r.decode才是真正的解码
 		c := Context{Code: resp.StatusCode, DataFlow: r.getDataFlow()}
 		if err := r.callback(&c); err != nil {
 			return err
@@ -312,6 +329,11 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 		if err = r.decode(req, resp, false); err != nil {
 			return err
 		}
+	}
+
+	// 如果没有设置解码器
+	if r.bodyDecoder == nil {
+		return clearBody(resp)
 	}
 
 	return nil

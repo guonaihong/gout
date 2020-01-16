@@ -1,9 +1,11 @@
 package filter
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/guonaihong/gout/bench"
 	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/dataflow"
 	"github.com/stretchr/testify/assert"
@@ -117,4 +119,35 @@ func Test_Bench_Loop(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, total, int32(benchNumber))
+}
+
+func Test_Bench_fail(t *testing.T) {
+
+	total := int32(0)
+	router := setupBenchNumber(&total)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	tests := []dataflow.Bencher{
+		dataflow.POST(ts.URL).SetBody(time.Time{}).Filter().Bench().Concurrent(25).Number(benchNumber),
+	}
+
+	for _, v := range tests {
+		err := v.Do()
+		assert.Error(t, err)
+	}
+
+	testErr := errors.New("Test_Bench_fail")
+	var r bench.Report
+	err := NewBench().
+		Concurrent(25).
+		Number(benchNumber).
+		GetReport(&r).
+		Loop(func(c *dataflow.Context) error {
+			return testErr
+		}).Do()
+
+	assert.NoError(t, err)
+	v, ok := r.ErrMsg[testErr.Error()]
+	assert.True(t, ok)
+	assert.Equal(t, v, benchNumber)
 }

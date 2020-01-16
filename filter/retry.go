@@ -110,6 +110,7 @@ func (r *Retry) Do() (err error) {
 		// 只需经过一次编码器得到request,后面就是多次使用
 		resp, err := client.Do(req)
 		if err == nil {
+			defer resp.Body.Close()
 			return r.df.Bind(req, resp)
 		}
 

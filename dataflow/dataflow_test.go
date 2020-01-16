@@ -1303,3 +1303,47 @@ func Test_DataFlow_SetHost(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, body, s)
 }
+
+func Test_DataFlow_Bind(t *testing.T) {
+	// 测试错误的情况
+	router := func() *gin.Engine {
+		router := gin.New()
+		router.GET("/", func(c *gin.Context) {
+			c.String(200, "test SetDecod3")
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	errs := []error{
+		// 测试不设置解码器的情况
+		func() error {
+			g := New().GET(ts.URL).SetJSON(core.H{"testkey": "testval"})
+			req, err := g.Request()
+			assert.NoError(t, err)
+			resp, err := DefaultClient.Do(req)
+			assert.NoError(t, err)
+			resp.Body = &core.ReadCloseFail{}
+			return g.Bind(req, resp)
+		}(),
+		// TOOD
+		/*
+			func() error {
+				var s string
+				defer func() { fmt.Printf("s = %s\n", s) }()
+				g := New().GET(ts.URL).SetJSON(core.H{"testkey": "testval"}).BindHeader(&s)
+				req, err := g.Request()
+				assert.NoError(t, err)
+				resp, err := DefaultClient.Do(req)
+				assert.NoError(t, err)
+				return g.Bind(req, resp)
+			}(),
+		*/
+	}
+
+	for _, e := range errs {
+		assert.Error(t, e)
+	}
+}

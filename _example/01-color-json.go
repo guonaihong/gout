@@ -15,12 +15,9 @@ func server() {
 
 	router.Run()
 }
-func main() {
-	go server()
 
-	time.Sleep(time.Millisecond * 200)
-
-	fmt.Printf("\n\n=============color json===========\n\n")
+func useMap() {
+	fmt.Printf("\n\n1.=============color json===========\n\n")
 	err := gout.POST(":8080/colorjson").
 		Debug(true).
 		SetJSON(gout.H{"str": "foo",
@@ -34,4 +31,36 @@ func main() {
 	if err != nil {
 		fmt.Printf("err = %v\n", err)
 	}
+}
+
+func useStruct() {
+
+	type req struct {
+		Str  string `json:"str"`
+		Num  int    `json:"num"`
+		Bool bool   `json:"bool"`
+		Null *int   `json:"null"`
+	}
+
+	fmt.Printf("\n\n2.=============color json===========\n\n")
+	err := gout.POST(":8080/colorjson").
+		Debug(true).
+		SetJSON(req{Str: "foo",
+			Num:  100,
+			Bool: false,
+			Null: nil,
+		}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
+
+func main() {
+	go server()
+
+	time.Sleep(time.Millisecond * 200)
+
+	useMap()
+	useStruct()
 }
