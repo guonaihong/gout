@@ -17,7 +17,7 @@ func server() {
 }
 
 func useMap() {
-	fmt.Printf("\n\n1.=============color json===========\n\n")
+	fmt.Printf("\n\n1.=============color json======map example=====\n\n")
 	err := gout.POST(":8080/colorjson").
 		Debug(true).
 		SetJSON(gout.H{"str": "foo",
@@ -42,7 +42,7 @@ func useStruct() {
 		Null *int   `json:"null"`
 	}
 
-	fmt.Printf("\n\n2.=============color json===========\n\n")
+	fmt.Printf("\n\n2.=============color json======struct example=====\n\n")
 	err := gout.POST(":8080/colorjson").
 		Debug(true).
 		SetJSON(req{Str: "foo",
@@ -56,6 +56,57 @@ func useStruct() {
 	}
 }
 
+var query = `
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "voice"
+          }
+        },
+        {
+          "match": {
+              "errcode": 3
+          }
+        },
+        {
+          "range": {
+            "time": {
+              "lt": "2020-01-13T23:16:04+08:00",
+              "gt": "2020-01-13T00:00:00+08:00"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+`
+
+func useString() {
+	fmt.Printf("\n\n3.=============color json======string example=====\n\n")
+	err := gout.POST(":8080/colorjson").
+		Debug(true).
+		SetJSON(query).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
+
+func useBytes() {
+	fmt.Printf("\n\n4.=============color json======bytes example=====\n\n")
+	err := gout.POST(":8080/colorjson").
+		Debug(true).
+		SetJSON(query).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
+
 func main() {
 	go server()
 
@@ -63,4 +114,6 @@ func main() {
 
 	useMap()
 	useStruct()
+	useString()
+	useBytes()
 }

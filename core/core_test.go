@@ -9,6 +9,11 @@ import (
 	"testing"
 )
 
+type testCore struct {
+	need interface{}
+	set  interface{}
+}
+
 func Test_Core_LoopElem(t *testing.T) {
 	s := "hello world"
 	p := &s
@@ -44,11 +49,6 @@ func Test_Core_BytesToString(t *testing.T) {
 	for _, test := range tests {
 		assert.Equal(t, BytesToString(test.set), test.need)
 	}
-}
-
-type testCore struct {
-	need interface{}
-	set  interface{}
 }
 
 func Test_Core_StringToBytes(t *testing.T) {
@@ -97,4 +97,22 @@ func Test_Bench_closeRequest(t *testing.T) {
 
 	// 测试body是否一样
 	assert.Equal(t, b, b3)
+}
+
+func Test_Core_GetBytes(t *testing.T) {
+	type getBytes struct {
+		need []byte
+		set  interface{}
+	}
+
+	tests := []getBytes{
+		{[]byte("ok"), "ok"},
+		{[]byte("ok"), []byte("ok")},
+		{nil, new(int)},
+	}
+
+	for _, test := range tests {
+		v, _ := GetBytes(test.set)
+		assert.Equal(t, test.need, v)
+	}
 }

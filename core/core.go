@@ -80,3 +80,13 @@ func CloneRequest(r *http.Request) (*http.Request, error) {
 	r0.Body, err = r.GetBody()
 	return r0, err
 }
+
+func GetBytes(v interface{}) (b []byte, ok bool) {
+	switch d := v.(type) {
+	case []byte:
+		return d, true
+	case string:
+		return StringToBytes(d), true
+	}
+	return nil, false
+}
