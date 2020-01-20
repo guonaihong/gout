@@ -32,7 +32,8 @@ func TestJSONEncode_Encode(t *testing.T) {
 
 	out := bytes.Buffer{}
 
-	data := []interface{}{need, &need}
+	s := `{"I" : 100, "F" : 3.14, "S":"test encode json"}`
+	data := []interface{}{need, &need, s, []byte(s)}
 	for _, v := range data {
 		j := NewJSONEncode(v)
 		out.Reset()

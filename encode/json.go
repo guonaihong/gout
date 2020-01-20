@@ -2,6 +2,7 @@ package encode
 
 import (
 	"encoding/json"
+	"github.com/guonaihong/gout/core"
 	"io"
 )
 
@@ -20,7 +21,14 @@ func NewJSONEncode(obj interface{}) *JSONEncode {
 }
 
 // Encode json encoder
-func (j *JSONEncode) Encode(w io.Writer) error {
+func (j *JSONEncode) Encode(w io.Writer) (err error) {
+	if v, ok := core.GetBytes(j.obj); ok {
+		if json.Valid(v) {
+			_, err = w.Write(v)
+			return err
+		}
+	}
+
 	//encode := json.NewEncoder(w)
 	all, err := json.Marshal(j.obj)
 	if err != nil {
