@@ -294,9 +294,19 @@ func (df *DataFlow) Filter() *filter {
 	return &filter{df: df}
 }
 
+// F filter function, use this function to turn on the filter function
+func (df *DataFlow) F() *filter {
+	return df.Filter()
+}
+
 // Export filter function, use this function to turn on the filter function
 func (df *DataFlow) Export() *export {
 	return &export{df: df}
+}
+
+// E filter function, use this function to turn on the filter function
+func (df *DataFlow) E() *export {
+	return df.Export()
 }
 
 func (df *DataFlow) SetGout(out *Gout) {
