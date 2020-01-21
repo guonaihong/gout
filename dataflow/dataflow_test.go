@@ -1347,3 +1347,16 @@ func Test_DataFlow_Bind(t *testing.T) {
 		assert.Error(t, e)
 	}
 }
+
+func Test_DataFlow_Fileter_Export(t *testing.T) {
+	tests := []interface{}{
+		New().Filter(),
+		New().F(),
+		New().Export(),
+		New().E(),
+	}
+
+	for _, test := range tests {
+		assert.NotNil(t, test)
+	}
+}
