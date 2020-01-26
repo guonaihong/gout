@@ -14,7 +14,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持设置请求 http header(可传 struct,map,array,slice 等类型)
 * 支持设置 URL query(可传 struct,map,array,slice,string 等类型)
 * 支持设置 json 编码到请求 body 里面(可传map, struct, string, []byte 等类型)
-* 支持设置 xml,yaml 编码到请求 body 里面(SetJSON/SetXML/SetYAML)
+* 支持设置 xml 编码到请求 body 里面(可传struct, string, []byte 等类型)
+* 支持设置 yaml 编码到请求 body 里面(SetJSON/SetXML/SetYAML)
 * 支持设置 form-data(可传 struct,map,array,slice 等类型)
 * 支持设置 x-www-form-urlencoded(可传 struct,map,array,slice 等类型) 
 * 支持设置 io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64 至请求 body 里面
@@ -260,6 +261,8 @@ func main() {
 
 ```
 ### SetQuery支持的更多数据类型
+<details>
+
 ```go
 package main
 
@@ -318,6 +321,8 @@ SetQuery(&testQuery{CheckIn:2019-06-18, CheckOut:2019-06-18})
 // ?active=enable&action=drop
 SetQuery([]string{"active", "enable", "action", "drop"})`
 ```
+
+</details>
 
 ## http header
 #### Set request header
@@ -421,6 +426,8 @@ func main() {
 
 ```
 ### SetHeader和BindHeader支持的更多类型
+<details>
+
 ```go
 package main
 
@@ -452,6 +459,8 @@ func main() {
 }
 
 ```
+
+
 * BindHeader支持的类型有
 结构体
 ```go
@@ -488,6 +497,8 @@ SetHeader(&testHeader{CheckIn:2019-06-18, CheckOut:2019-06-18})
 // -H active:enable -H action:drop
 SetHeader([]string{"active", "enable", "action", "drop"})
 ```
+
+</details>
 
 ## http body
 ### body
