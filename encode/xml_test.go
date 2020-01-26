@@ -31,7 +31,10 @@ func TestXMLEncode_Encode(t *testing.T) {
 
 	out := bytes.Buffer{}
 
-	data := []interface{}{need, &need}
+	x := `
+<testXML><i>100</i><f>3.14</f><s>test encode xml</s></testXML>
+	`
+	data := []interface{}{need, &need, x}
 	for _, v := range data {
 		x := NewXMLEncode(v)
 		out.Reset()
@@ -43,5 +46,13 @@ func TestXMLEncode_Encode(t *testing.T) {
 		err := xml.Unmarshal(out.Bytes(), &got)
 		assert.NoError(t, err)
 		assert.Equal(t, got, need)
+	}
+
+	// test fail
+	for _, v := range []interface{}{`<testxml>`} {
+		x := NewXMLEncode(v)
+		out.Reset()
+		err := x.Encode(&out)
+		assert.Error(t, err)
 	}
 }

@@ -48,7 +48,7 @@ func TestJSONEncode_Encode(t *testing.T) {
 	}
 
 	// test fail
-	for _, v := range []interface{}{func() {}} {
+	for _, v := range []interface{}{func() {}, `{"query":"value"`} {
 		j := NewJSONEncode(v)
 		out.Reset()
 		err := j.Encode(&out)

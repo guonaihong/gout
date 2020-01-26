@@ -2,9 +2,12 @@ package encode
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/guonaihong/gout/core"
 	"io"
 )
+
+var ErrNotJSON = errors.New("Not json data")
 
 // JSONEncode json encoder structure
 type JSONEncode struct {
@@ -23,10 +26,11 @@ func NewJSONEncode(obj interface{}) *JSONEncode {
 // Encode json encoder
 func (j *JSONEncode) Encode(w io.Writer) (err error) {
 	if v, ok := core.GetBytes(j.obj); ok {
-		if json.Valid(v) {
-			_, err = w.Write(v)
-			return err
+		if b := json.Valid(v); !b {
+			return ErrNotJSON
 		}
+		_, err = w.Write(v)
+		return err
 	}
 
 	//encode := json.NewEncoder(w)

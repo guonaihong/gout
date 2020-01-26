@@ -28,11 +28,8 @@ func server() {
 	router.Run()
 }
 
-func main() {
+func useStruct() {
 	var rsp data
-	go server()
-	time.Sleep(time.Millisecond * 500) //sleep下等服务端真正起好
-
 	code := 200
 
 	err := gout.POST(":8080/test.xml").
@@ -45,4 +42,45 @@ func main() {
 	if err != nil || code != 200 {
 		fmt.Printf("%v:%d\n", err, code)
 	}
+}
+
+func useString() {
+	var rsp data
+	code := 200
+
+	err := gout.POST(":8080/test.xml").
+		Debug(true).
+		SetXML(`<data><id>3</id><Data>test data</Data></data>`).
+		BindXML(&rsp).
+		Code(&code).
+		Do()
+
+	if err != nil || code != 200 {
+		fmt.Printf("%v:%d\n", err, code)
+	}
+}
+
+func useBytes() {
+	var rsp data
+	code := 200
+
+	err := gout.POST(":8080/test.xml").
+		Debug(true).
+		SetXML([]byte(`<data><id>3</id><Data>test data</Data></data>`)).
+		BindXML(&rsp).
+		Code(&code).
+		Do()
+
+	if err != nil || code != 200 {
+		fmt.Printf("%v:%d\n", err, code)
+	}
+}
+
+func main() {
+	go server()
+	time.Sleep(time.Millisecond * 500) //sleep下等服务端真正起好
+
+	useStruct()
+	useString()
+	useBytes()
 }
