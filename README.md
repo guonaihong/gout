@@ -6,7 +6,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 [![Go Report Card](https://goreportcard.com/badge/github.com/guonaihong/gout)](https://goreportcard.com/report/github.com/guonaihong/gout)
 
 ## 构架
-![gout-ad.png](https://github.com/guonaihong/images/blob/master/gout/gout-ad.png?raw=true)
+![gout-ad.png](https://github.com/guonaihong/images/blob/master/gout/gout-v0.0.8.png?raw=true)
 
 
 ## feature
