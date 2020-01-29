@@ -13,10 +13,10 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持设置 GET/PUT/DELETE/PATH/HEAD/OPTIONS
 * 支持设置请求 http header(可传 struct,map,array,slice 等类型)
 * 支持设置 URL query(可传 struct,map,array,slice,string 等类型)
-* 支持设置 json 编码到请求 body 里面(可传map, struct, string, []byte 等类型)
+* 支持设置 json 编码到请求 body 里面(可传struct, map, string, []byte 等类型)
 * 支持设置 xml 编码到请求 body 里面(可传struct, string, []byte 等类型)
-* 支持设置 yaml 编码到请求 body 里面(SetJSON/SetXML/SetYAML)
-* 支持设置 form-data(可传 struct,map,array,slice 等类型)
+* 支持设置 yaml 编码到请求 body 里面(可传struct, map, string, []byte 等类型)
+* 支持设置 form-data(可传 struct, map, array, slice 等类型)
 * 支持设置 x-www-form-urlencoded(可传 struct,map,array,slice 等类型) 
 * 支持设置 io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64 至请求 body 里面
 * 支持解析响应body里面的json,xml,yaml至结构体里(BindJSON/BindXML/BindYAML)

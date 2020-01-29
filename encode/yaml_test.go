@@ -31,7 +31,11 @@ func TestYAMLEncode_Encode(t *testing.T) {
 
 	out := bytes.Buffer{}
 
-	data := []interface{}{need, &need}
+	s := `
+i: 100
+f: 3.14
+s: test encode yaml`
+	data := []interface{}{need, &need, s, []byte(s)}
 	for _, v := range data {
 		x := NewYAMLEncode(v)
 		out.Reset()
@@ -43,5 +47,13 @@ func TestYAMLEncode_Encode(t *testing.T) {
 		err := yaml.Unmarshal(out.Bytes(), &got)
 		assert.NoError(t, err)
 		assert.Equal(t, got, need)
+	}
+
+	// test fail
+	for _, v := range []interface{}{`I:100 {}`} {
+		y := NewYAMLEncode(v)
+		out.Reset()
+		err := y.Encode(&out)
+		assert.Error(t, err)
 	}
 }

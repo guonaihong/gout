@@ -115,6 +115,7 @@ func (r *Req) addContextType(req *http.Request) {
 		case "xml":
 			req.Header.Add("Content-Type", "application/xml")
 		case "yaml":
+			req.Header.Add("Content-Type", "application/x-yaml")
 		case "www-form":
 			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		}
