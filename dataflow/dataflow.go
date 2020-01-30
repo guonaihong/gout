@@ -99,6 +99,11 @@ func (df *DataFlow) SetURL(url string) *DataFlow {
 	return df
 }
 
+func (df *DataFlow) SetRequest(req *http.Request) *DataFlow {
+	df.req = req
+	return df
+}
+
 // SetBody set the data to the http body
 func (df *DataFlow) SetBody(obj interface{}) *DataFlow {
 

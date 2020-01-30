@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -1366,4 +1367,29 @@ func Test_DataFlow_Fileter_Export(t *testing.T) {
 	for _, test := range tests {
 		assert.NotNil(t, test)
 	}
+}
+
+func Test_DataFlow_SetRequest(t *testing.T) {
+	var d3 data
+	router := func() *gin.Engine {
+		router := gin.Default()
+
+		router.POST("/test.json", func(c *gin.Context) {
+			c.BindJSON(&d3)
+			c.JSON(200, d3)
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	needData := data{ID: 3, Data: "test data"}
+	gotData := data{}
+
+	req, err := http.NewRequest("POST", ts.URL+"/test.json", strings.NewReader(`{"id":3, "data":"test data"}`))
+	assert.NoError(t, err)
+	err = New().SetRequest(req).BindJSON(&gotData).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, gotData, needData)
 }

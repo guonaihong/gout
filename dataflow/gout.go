@@ -34,6 +34,7 @@ func New(c ...*http.Client) *Gout {
 	}
 
 	out.DataFlow.out = out
+	out.DataFlow.Req.g = out
 	return out
 }
 
