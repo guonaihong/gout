@@ -851,6 +851,13 @@ func TestProxy(t *testing.T) {
 
 }
 
+func TestSetSOCKS5(t *testing.T) {
+	// test fail
+	c := http.Client{}
+	err := New(&c).GET("www.qq.com").SetSOCKS5("wowowow").Do()
+	assert.Error(t, err)
+}
+
 func setupCookie(t *testing.T, total *int32) *gin.Engine {
 
 	router := gin.Default()
