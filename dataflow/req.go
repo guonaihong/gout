@@ -123,10 +123,6 @@ func (r *Req) addContextType(req *http.Request) {
 
 }
 
-func (r *Req) SetRequest(req *http.Request) {
-	r.req = req
-}
-
 func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 	req = r.req
 
@@ -342,6 +338,10 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 }
 
 func (r *Req) Client() *http.Client {
+	if r.g == nil {
+		return &DefaultClient
+	}
+
 	return r.g.Client
 }
 

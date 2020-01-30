@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
 	"net/url"
@@ -98,6 +99,11 @@ func (df *DataFlow) SetURL(url string) *DataFlow {
 	return df
 }
 
+func (df *DataFlow) SetRequest(req *http.Request) *DataFlow {
+	df.req = req
+	return df
+}
+
 // SetBody set the data to the http body
 func (df *DataFlow) SetBody(obj interface{}) *DataFlow {
 
@@ -150,13 +156,26 @@ func (df *DataFlow) SetYAML(obj interface{}) *DataFlow {
 	return df
 }
 
-// UnixSocket 函数会修改Transport, 请像对待全局变量一样对待UnixSocket
-func (df *DataFlow) UnixSocket(path string) *DataFlow {
+func (df *DataFlow) initTransport() {
 	if df.out.Client.Transport == nil {
 		df.out.Client.Transport = &http.Transport{}
 	}
+}
 
-	transport, ok := df.out.Client.Transport.(*http.Transport)
+func (df *DataFlow) getTransport() (*http.Transport, bool) {
+	// 直接return df.out.Client.Transport.(*http.Transport) 等于下面的写法
+	// ts := df.out.Client.Transport.(*http.Transport)
+	// return ts 编译会报错
+	ts, ok := df.out.Client.Transport.(*http.Transport)
+	return ts, ok
+}
+
+// UnixSocket 函数会修改Transport, 请像对待全局变量一样对待UnixSocket
+func (df *DataFlow) UnixSocket(path string) *DataFlow {
+
+	df.initTransport()
+
+	transport, ok := df.getTransport()
 	if !ok {
 		df.Req.Err = fmt.Errorf("UnixSocket:not found http.transport:%T", df.out.Client.Transport)
 		return df
@@ -177,11 +196,9 @@ func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
 		return df
 	}
 
-	if df.out.Client.Transport == nil {
-		df.out.Client.Transport = &http.Transport{}
-	}
+	df.initTransport()
 
-	transport, ok := df.out.Client.Transport.(*http.Transport)
+	transport, ok := df.getTransport()
 	if !ok {
 		df.Req.Err = fmt.Errorf("SetProxy:not found http.transport:%T", df.out.Client.Transport)
 		return df
@@ -189,6 +206,26 @@ func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
 
 	transport.Proxy = http.ProxyURL(proxy)
 
+	return df
+}
+
+// SetSOCKS5 函数会修改Transport,请像对待全局变量一样对待SetSOCKS5
+func (df *DataFlow) SetSOCKS5(addr string) *DataFlow {
+	dialer, err := proxy.SOCKS5("tcp", addr, nil, proxy.Direct)
+	if err != nil {
+		df.Req.Err = err
+		return df
+	}
+
+	df.initTransport()
+
+	transport, ok := df.getTransport()
+	if !ok {
+		df.Req.Err = fmt.Errorf("SetSOCKS5:not found http.transport:%T", df.out.Client.Transport)
+		return df
+	}
+
+	transport.Dial = dialer.Dial
 	return df
 }
 
