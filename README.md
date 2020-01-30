@@ -59,6 +59,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [callback](#callback)
 	- [Set request timeout](#Set-request-timeout)
     - [proxy](#proxy)
+	- [socks5](#socks5)
     - [cookie](#cookie)
     - [context](#context)
         - [Cancel a sending request](#Cancel-a-sending-request)
@@ -961,6 +962,38 @@ func main() {
 	fmt.Println(s)
 }
 
+```
+## socks5
+* SetSOCKS5 设置socks5地址
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+    "log"
+    "net/http"
+)
+
+func main() {
+    c := &http.Client{}
+    s := ""
+    err := gout.
+        New(c).
+        GET("www.qq.com").
+        // 设置proxy服务地址
+        SetSOCKS5("127.0.0.1:7000").
+        // 绑定返回数据到s里面
+        BindBody(&s).
+        Do()
+
+    if err != nil {
+        log.Println(err)
+        return
+    }   
+
+    fmt.Println(s)
+}
 ```
 ## cookie
 * SetCookies设置cookie, 可以设置一个或者多个cookie
