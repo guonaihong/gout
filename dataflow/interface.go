@@ -24,6 +24,7 @@ type Retry interface {
 	Attempt(attempt int) Retry
 	WaitTime(waitTime time.Duration) Retry
 	MaxWaitTime(maxWaitTime time.Duration) Retry
+	Func(func(c *Context) error) Retry
 	Do() error
 }
 

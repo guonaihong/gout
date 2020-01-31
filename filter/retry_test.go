@@ -1,8 +1,10 @@
 package filter
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/dataflow"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -128,5 +130,120 @@ func Test_Retry_Do(t *testing.T) {
 			MaxWaitTime(time.Millisecond * 50).
 			Do()
 		assert.NoError(t, err)
+	}
+}
+
+func Test_Retry_Func(t *testing.T) {
+	router := setupRetryOk()
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	// test ok
+	for _, err := range []error{
+		// 演示使用备用端口
+		func() error {
+			//获取一个没有绑定服务的端口
+			port := core.GetNoPortExists()
+			s := ""
+
+			err := dataflow.GET(":" + port).Debug(true).BindBody(&s).F().
+				Retry().Attempt(3).WaitTime(time.Millisecond * 10).MaxWaitTime(time.Millisecond * 50).
+				Func(func(c *dataflow.Context) error {
+					if c.Error != nil {
+						c.SetHost(ts.URL)
+						return ErrRetry
+					}
+					return nil
+
+				}).Do()
+
+			assert.NoError(t, err)
+			if err != nil {
+				return err
+			}
+			assert.Equal(t, s, "ok")
+			return nil
+		}(),
+		// 演示根据服务端不同错误码进行重试
+		func() error {
+			first := true
+			// mock 服务端函数
+			router := func() *gin.Engine {
+				router := gin.New()
+
+				router.GET("/code", func(c *gin.Context) {
+					if first {
+						c.String(209, "209")
+						first = false
+					} else {
+						c.String(200, "ok")
+					}
+				})
+
+				return router
+			}()
+			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+			s := ""
+			err := dataflow.GET(ts.URL + "/code").Debug(true).BindBody(&s).F().
+				Retry().Attempt(3).WaitTime(time.Millisecond * 10).MaxWaitTime(time.Millisecond * 50).
+				Func(func(c *dataflow.Context) error {
+					if c.Error != nil || c.Code == 209 {
+						return ErrRetry
+					}
+
+					return nil
+
+				}).Do()
+
+			assert.NoError(t, err)
+			if err != nil {
+				return err
+			}
+			assert.Equal(t, s, "ok")
+			return nil
+		}(),
+	} {
+		assert.NoError(t, err)
+	}
+
+	// test fail
+
+	for _, err := range []error{
+		func() error {
+
+			s := ""
+			err := dataflow.GET(ts.URL).Debug(true).BindBody(&s).F().
+				Retry().Attempt(3).WaitTime(time.Millisecond * 10).MaxWaitTime(time.Millisecond * 50).
+				Func(func(c *dataflow.Context) error {
+
+					return errors.New("Do not retry")
+
+				}).Do()
+			assert.Error(t, err)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(),
+		func() error {
+			s := ""
+			err := dataflow.GET(ts.URL).Debug(true).BindBody(&s).F().
+				Retry().Attempt(3).WaitTime(time.Millisecond * 10).MaxWaitTime(time.Millisecond * 50).
+				Func(func(c *dataflow.Context) error {
+					// setbody不支持结构体，为了构造r.df.Request()返回错误
+					c.SetBody(time.Time{})
+
+					return ErrRetry
+
+				}).Do()
+			assert.Error(t, err)
+			if err != nil {
+				return err
+			}
+			return nil
+
+		}(),
+	} {
+		assert.Error(t, err)
 	}
 }

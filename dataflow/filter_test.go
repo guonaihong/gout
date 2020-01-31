@@ -53,9 +53,15 @@ func (t *testRetry) Attempt(attempt int) Retry {
 func (t *testRetry) WaitTime(waitTime time.Duration) Retry {
 	return t
 }
+
 func (t *testRetry) MaxWaitTime(maxWaitTime time.Duration) Retry {
 	return t
 }
+
+func (t *testRetry) Func(func(c *Context) error) Retry {
+	return t
+}
+
 func (t *testRetry) Do() error {
 	return nil
 }
