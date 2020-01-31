@@ -1415,7 +1415,7 @@ func useRetryFuncCode() {
 ```
 
 ### retry conditions backupurl
-指定条件进行重试，这里的例子是默认url不能访问，使用backup url进行访问。
+指定条件进行重试，这里的例子是默认url不能访问，使用backup url进行访问
 [完整代码](_example/19b-retry-customize-backup.go)
 ```go
 package main
