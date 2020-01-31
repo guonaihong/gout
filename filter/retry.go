@@ -7,6 +7,7 @@ import (
 	"github.com/guonaihong/gout/dataflow"
 	"math"
 	"math/rand"
+	"net/http"
 	"time"
 )
 
@@ -21,6 +22,7 @@ var (
 
 var (
 	ErrRetryFail = errors.New("retry fail")
+	ErrRetry     = errors.New("need to retry")
 )
 
 // Retry is the core data structure of the retry function
@@ -31,6 +33,7 @@ type Retry struct {
 	currAttempt int
 	maxWaitTime time.Duration
 	waitTime    time.Duration
+	cb          func(c *dataflow.Context) error
 }
 
 func (r *Retry) New(df *dataflow.DataFlow) interface{} {
@@ -52,6 +55,11 @@ func (r *Retry) WaitTime(waitTime time.Duration) dataflow.Retry {
 // MaxWaitTime Sets the maximum wait time
 func (r *Retry) MaxWaitTime(maxWaitTime time.Duration) dataflow.Retry {
 	r.maxWaitTime = maxWaitTime
+	return r
+}
+
+func (r *Retry) Func(cb func(c *dataflow.Context) error) dataflow.Retry {
+	r.cb = cb
 	return r
 }
 
@@ -91,6 +99,14 @@ func (r *Retry) getSleep() time.Duration {
 	return temp + time.Duration(rand.Intn(int(temp)))
 }
 
+func (r *Retry) genContext(resp *http.Response, err error) *dataflow.Context {
+	code := 0
+	if resp != nil {
+		code = resp.StatusCode
+	}
+	return &dataflow.Context{DataFlow: r.df, Error: err, Code: code}
+}
+
 // Do send function
 func (r *Retry) Do() (err error) {
 	defer r.reset()
@@ -106,10 +122,32 @@ func (r *Retry) Do() (err error) {
 
 	for i := 0; i < r.attempt; i++ {
 
-		// 这里不使用DataFlow.Do()方法原因是为了效率
-		// 只需经过一次编码器得到request,后面就是多次使用
+		// 这里只要调用Func方法，且回调函数返回ErrRetry 会生成新的*http.Request对象
+		// 不使用DataFlow.Do()方法原因基于两方面考虑
+		// 1.为了效率只需经过一次编码器得到*http.Request,如果需要重试几次后面是多次使用解码器.Bind()函数
+		// 2.为了更灵活的控制
 		resp, err := client.Do(req)
-		if err == nil {
+		if r.cb != nil {
+			err = r.cb(r.genContext(resp, err))
+			if err != nil {
+				if resp != nil {
+					r.df.Bind(req, resp) //为的是输出debug信息
+					resp.Body.Close()
+				}
+
+				if err != ErrRetry {
+					return err
+				}
+
+				var err2 error
+				req, err2 = r.df.Request()
+				if err2 != nil {
+					return err2
+				}
+			}
+		}
+
+		if err == nil && resp != nil {
 			defer resp.Body.Close()
 			return r.df.Bind(req, resp)
 		}
