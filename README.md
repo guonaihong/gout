@@ -76,7 +76,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [Custom benchmark functions](#Custom-benchmark-functions)
 	- [retry backoff](#retry-backoff)
 		- [Specify the retry conditions, when equal to a certain http code](#retry-conditions-httpcode)
-		- [Specify retry conditions. The default URL cannot be accessed. Use the backup URL](#retry-conditions-backurl)
+		- [Specify retry conditions. The default URL cannot be accessed. Use the backup URL](#retry-conditions-backupurl)
 	- [import](#import)
 		- [send raw http request](#send-raw-http-request)
 	- [export](#export)
