@@ -23,7 +23,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持解析响应body的内容至io.Writer, uint/uint8...int/int8...string...[]byte...float32,float64
 * 支持解析响应header至结构体里
 * 支持接口性能benchmark，可控制压测一定次数还是时间，可控制压测频率
-* 支持retry-backoff
+* 支持retry-backoff，可以指定重试条件
 * 支持发送裸http数据包
 * 支持导出curl命令
 * 等等更多
@@ -75,6 +75,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [benchmarking at a fixed frequency](#benchmark-rate)
 		- [Custom benchmark functions](#Custom-benchmark-functions)
 	- [retry backoff](#retry-backoff)
+		- [Specify the retry conditions, when equal to a certain http code](#retry-conditions-httpcode)
+		- [Specify retry conditions. The default URL cannot be accessed. Use the backup URL](#retry-conditions-backurl)
 	- [import](#import)
 		- [send raw http request](#send-raw-http-request)
 	- [export](#export)
@@ -590,7 +592,7 @@ func main() {
 
 ### json
 #### Serialize json to request body
-更多用法[json example](./_example/01-color-json.go)
+[更多支持数据类型及用法](./_example/01-color-json.go)
 ```go
 package main
 
@@ -1356,7 +1358,7 @@ func main() {
 ```
 
 ## retry-backoff
-retry 功能使用带抖动功能和指数的算法实现[backoff](http://www.awsarchitectureblog.com/2015/03/backoff.html)
+retry 功能使用带抖动功能和指数回退的算法实现[backoff](http://www.awsarchitectureblog.com/2015/03/backoff.html)
 ```go
 package main
 
@@ -1381,6 +1383,67 @@ func main() {
 	}
 }
 
+```
+### retry conditions httpcode
+指定重试条件，这里面的例子是服务端返回的状态码是209进行重试
+[完整代码](_example/19c-retry-httpcode.go)
+``` go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/filter"
+	"time"
+)
+
+func useRetryFuncCode() {
+	s := ""
+	err := gout.GET(":8080/code").Debug(true).BindBody(&s).F().
+		Retry().Attempt(3).WaitTime(time.Millisecond * 10).MaxWaitTime(time.Millisecond * 50).
+		Func(func(c *gout.Context) error {
+			if c.Error != nil || c.Code == 209 {
+				return filter.ErrRetry
+			}
+
+			return nil
+
+		}).Do()
+
+	fmt.Printf("err = %v\n", err)
+}
+```
+
+### retry conditions backupurl
+指定条件进行重试，这里的例子是默认url不能访问，使用backup url进行访问。
+[完整代码](_example/19b-retry-customize-backup.go)
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/filter"
+	"time"
+)
+func useRetryFunc() {
+	// 获取一个没有服务绑定的端口
+	port := core.GetNoPortExists()
+	s := ""
+
+	err := gout.GET(":" + port).Debug(true).BindBody(&s).F().
+		Retry().Attempt(3).WaitTime(time.Millisecond * 10).MaxWaitTime(time.Millisecond * 50).
+		Func(func(c *gout.Context) error {
+			if c.Error != nil {
+				c.SetHost(":1234") //必须是存在的端口
+				return filter.ErrRetry
+			}
+			return nil
+
+		}).Do()
+	fmt.Printf("err = %v\n", err)
+}
 ```
 # import
 ## send raw http request
