@@ -2,6 +2,7 @@ package dataflow
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
@@ -81,6 +82,27 @@ func (df *DataFlow) SetHost(host string) *DataFlow {
 
 	df.Req.g = df.out
 	return df
+}
+
+// GetHost return value->host or host:port
+func (df *DataFlow) GetHost() (string, error) {
+	if df.req != nil {
+		return df.req.URL.Host, nil
+	}
+
+	if len(df.host) > 0 {
+		return df.host, nil
+	}
+
+	if len(df.url) > 0 {
+		url, err := url.Parse(df.url)
+		if err != nil {
+			return "", err
+		}
+		return url.Host, nil
+	}
+
+	return "", errors.New("not url found")
 }
 
 // SetURL set url

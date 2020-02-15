@@ -1312,6 +1312,53 @@ func Test_DataFlow_SetHost(t *testing.T) {
 	assert.Equal(t, body, s)
 }
 
+func Test_DataFlow_GetHost(t *testing.T) {
+	// 测试正确的情况
+	for _, v := range []core.Need{
+		{
+			func() string {
+				req, err := http.NewRequest("GET", "http://test.xx", nil)
+				assert.NoError(t, err)
+				host, err := New().SetRequest(req).GetHost()
+				assert.NoError(t, err)
+				return host
+			}(), "test.xx"},
+		{
+			func() string {
+				host, err := GET("192.168.6.100:3333").GetHost()
+				assert.NoError(t, err)
+				return host
+			}(),
+			"192.168.6.100:3333",
+		},
+		{
+			func() string {
+				host, err := GET("192.168.6.100:3333").SetHost("test.com").GetHost()
+				assert.NoError(t, err)
+				return host
+
+			}(), "test.com",
+		},
+	} {
+		assert.Equal(t, v.Need, v.Got)
+	}
+
+	//测试错误的情况
+
+	for index, e := range []error{
+		func() error {
+			_, err := New().GetHost()
+			return err
+		}(),
+		func() error {
+			_, err := New().SetURL("\x7f:8080").GetHost()
+			return err
+		}(),
+	} {
+		assert.Error(t, e, fmt.Sprintf("case id:%d", index))
+	}
+}
+
 func Test_DataFlow_Bind(t *testing.T) {
 	// 测试错误的情况
 	router := func() *gin.Engine {
