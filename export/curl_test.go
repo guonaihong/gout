@@ -35,10 +35,10 @@ func Test_Curl(t *testing.T) {
 		{testCurlHeader, `curl -X POST -H "H1:hv1" -H "H2:hv2" "http://www.qq.com"`},
 
 		{testCurlHeader | testCurlQuery, `curl -X POST -H "H1:hv1" -H "H2:hv2" "http://www.qq.com?q1=qv1&q2=qv2"`},
-		{testCurlHeader | testCurlQuery | testCurlForm, `curl -X POST -H "H1:hv1" -H "H2:hv2" -F "mode=A" -F "text=good" -F "voice=@./voice" "http://www.qq.com?q1=qv1&q2=qv2"`},
+		{testCurlHeader | testCurlQuery | testCurlForm, `curl -X POST -H "H1:hv1" -H "H2:hv2" -F "mode=A" -F "text=good" -F "voice=@./voice.pcm.0" "http://www.qq.com?q1=qv1&q2=qv2"`},
 		{testCurlHeader | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --url "http://www.qq.com"`},
 		{testCurlHeader | testCurlQuery | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
-		{testCurlHeader | testCurlQuery | testCurlForm | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --form "mode=A" --form "text=good" --form "voice=@./voice" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
+		{testCurlHeader | testCurlQuery | testCurlForm | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --form "mode=A" --form "text=good" --form "voice=@./voice.pcm.0" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
 
 		{testCurlHeader | testJSON, `curl -X POST -H "Content-Type:application/json" -H "H1:hv1" -H "H2:hv2" -d "{\"jk1\":\"jv1\"}" "http://www.qq.com"`},
 		{testCurlHeader | testCurlQuery | testJSON, `curl -X POST -H "Content-Type:application/json" -H "H1:hv1" -H "H2:hv2" -d "{\"jk1\":\"jv1\"}" "http://www.qq.com?q1=qv1&q2=qv2"`},
@@ -84,9 +84,9 @@ func Test_Curl(t *testing.T) {
 		err := c.Do()
 		assert.NoError(t, err)
 
-		os.Remove(fmt.Sprintf("./voice"))
+		os.Remove(fmt.Sprintf("./voice.pcm"))
 		for i := 0; i < 10; i++ {
-			os.Remove(fmt.Sprintf("./voice.%d", i))
+			os.Remove(fmt.Sprintf("./voice.pcm.%d", i))
 		}
 
 		if err != nil {
@@ -128,7 +128,7 @@ func Test_Curl_GenAndSend(t *testing.T) {
 	assert.Equal(t, yes, true)
 	need := fmt.Sprintf(`curl -X POST -H "Content-Type:application/json" -d "{\"a\":\"a\",\"b\":\"b\"}" "%s/test.json"`, ts.URL)
 
-	assert.Equal(t, strings.TrimSpace(out.String()), need)
+	assert.Equal(t, need, strings.TrimSpace(out.String()))
 
 	// ==================================
 	// test fail

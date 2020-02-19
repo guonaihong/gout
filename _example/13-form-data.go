@@ -17,8 +17,8 @@ type testForm struct {
 type testForm2 struct {
 	Mode   string `form:"mode"`
 	Text   string `form:"text"`
-	Voice  string `form:"voice" form-file:"true"` //从文件中读取
-	Voice2 []byte `form:"voice2" form-mem:"true"` //从内存中构造
+	Voice  string `form:"voice" form-file:"file"` //从文件中读取
+	Voice2 []byte `form:"voice2" form-file:"mem"` //从内存中构造
 }
 
 func server() {

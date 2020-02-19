@@ -26,21 +26,24 @@ func Test_Form_FormEncodeNew(t *testing.T) {
 	assert.NotNil(t, f)
 }
 
-func Test_Form_toBytes(t *testing.T) {
+func Test_Form_genFormContext(t *testing.T) {
+	fc := formContent{}
 	f := []formTest{
 		{set: "test string", need: []byte("test string")},
 		{set: []byte("test bytes"), need: []byte("test bytes")},
 		{set: interface{}(1), need: []byte("1")},
 		{set: 1, need: []byte("1")},
 	}
+
 	fail := []formTest{
 		{set: time.Time{}},
-		{set: time.Duration(0)},
+		//{set: time.Duration(0)},
 	}
 
 	// 测试正确的情况
 	for _, v := range f {
-		all, err := toBytes(reflect.ValueOf(v.set))
+		err := genFormContext("", reflect.ValueOf(v.set), emptyField, &fc)
+		all := fc.data
 		assert.NoError(t, err)
 		assert.Equal(t, all, v.need.([]byte))
 
@@ -48,55 +51,12 @@ func Test_Form_toBytes(t *testing.T) {
 
 	// 测试错误的情况
 	for _, v := range fail {
-		_, err := toBytes(reflect.ValueOf(v))
+		err := genFormContext("", reflect.ValueOf(v.set), emptyField, &fc)
 		assert.Error(t, err)
 	}
 }
 
-func Test_Form_FormFileWrite(t *testing.T) {
-
-	f := []formTest{
-		{set: "../testdata/voice.pcm", need: nil, got: nil},
-		{set: []byte("../testdata/voice.pcm"), need: nil, got: nil},
-	}
-
-	// TODO v0.0.3 换更好的测试策略，数据设置进去，再解析出来
-	// checkForm已经实现
-	for _, v := range []bool{true, false} {
-		for _, vv := range f {
-			var out bytes.Buffer
-			form := NewFormEncode(&out)
-			assert.NotNil(t, form)
-
-			err := form.formFileWrite("test form file write", reflect.ValueOf(vv.set), v)
-
-			form.Close()
-			assert.NoError(t, err)
-			assert.NotEqual(t, out.Len(), 0)
-		}
-	}
-
-	fail := []formTest{
-		{set: "non-existent file", need: nil, got: nil, openFile: true},
-		{set: time.Time{} /*不支持的类型*/, need: nil, got: nil, openFile: true},
-		{set: time.Time{} /*不支持的类型*/, need: nil, got: nil, openFile: false},
-	}
-
-	for k, v := range fail {
-		var out bytes.Buffer
-		form := NewFormEncode(&out)
-		assert.NotNil(t, form)
-
-		err := form.formFileWrite("test form file write--fail", reflect.ValueOf(v.set), v.openFile)
-
-		form.Close()
-		assert.Error(t, err, fmt.Sprintf("index = %d", k))
-		//assert.Equal(t, out.Len(), 0, fmt.Sprintf("index = %d:%s", k, out.Bytes()))
-
-	}
-}
-
-func checkForm(t *testing.T, boundary string, out *bytes.Buffer) {
+func checkForm(t *testing.T, boundary string, out *bytes.Buffer, caseID int) {
 	need := map[string]string{
 		"mode":   "A",
 		"text":   "good",
@@ -122,9 +82,12 @@ func checkForm(t *testing.T, boundary string, out *bytes.Buffer) {
 
 		// key
 		key := p.FormName()
+		if key == "voice" || key == "voice2" {
+			assert.NotEqual(t, len(p.FileName()), 0, fmt.Sprintf("filename is empty:%d", caseID))
+		}
 		// slurp is value
 		v := need[key]
-		assert.Equal(t, v, string(slurp))
+		assert.Equal(t, v, string(slurp), fmt.Sprintf("fail test case id:%d", caseID))
 	}
 }
 
@@ -137,7 +100,7 @@ type test_Form struct {
 type test_Form_struct_fail struct {
 	Mode   string `form:"mode"`
 	Text   string `form:"text"`
-	Voice  string `form:"voice" form-mem:"xxx"`
+	Voice  string `form:"voice" form-file:"xxx"`
 	Voice2 string `form:"voice2" form-file:"true"`
 }
 
@@ -145,14 +108,14 @@ type test_Form_struct_fail struct {
 type test_Form_struct_fail2 struct {
 	Mode   string `form:"mode"`
 	Text   string `form:"text"`
-	Voice  string `form:"voice" form-mem:"true"`
+	Voice  string `form:"voice" form-file:"true"`
 	Voice2 string `form:"voice2" form-file:"xxx"`
 }
 
 type test_Form_Second_struct_fail struct {
 	Mode   string        `form:"mode"`
 	Text   string        `form:"text"`
-	Voice  core.FormType `form:"voice" form-mem:"xxx"`
+	Voice  core.FormType `form:"voice" form-file:"xxx"`
 	Voice2 core.FormType `form:"voice2" form-file:"true"`
 }
 
@@ -166,14 +129,14 @@ type test_Form_Second_struct_fail2 struct {
 type test_Form_Second_struct_Type_fail struct {
 	Mode   string        `form:"mode"`
 	Text   string        `form:"text"`
-	Voice  core.FormType `form:"voice" form-mem:"true"`
+	Voice  core.FormType `form:"voice" form-file:"xxx"`
 	Voice2 core.FormType `form:"voice2" form-file:"true"`
 }
 
 type test_Form_Second_struct_Inner_fail struct {
 	Mode          string `form:"mode"`
 	Text          string `form:"text"`
-	core.FormType `form:"voice" form-mem:"xxx"`
+	core.FormType `form:"voice" form-file:"xxx"`
 }
 
 type test_Form_Second_struct_Inner_fail2 struct {
@@ -210,31 +173,31 @@ func Test_Form_Fail(t *testing.T) {
 			Voice:  "pcm1",
 			Voice2: "../testdata/voice.pcm",
 		}},
-		{NewFormEncode(&out), test_Form_struct_fail{
+		{NewFormEncode(&out), test_Form_struct_fail{ // id = 4
 			Mode:   "A",
 			Text:   "good",
 			Voice:  "pcm1",
 			Voice2: "../testdata/voice.pcm",
 		}},
-		{NewFormEncode(&out), test_Form_Second_struct_fail{
+		{NewFormEncode(&out), test_Form_Second_struct_fail{ //id = 5
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
 		}},
-		{NewFormEncode(&out), test_Form_Second_struct_fail2{
+		{NewFormEncode(&out), test_Form_Second_struct_fail2{ //id = 6
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
 		}},
-		{NewFormEncode(&out), test_Form_Second_struct_Type_fail{
+		{NewFormEncode(&out), test_Form_Second_struct_Type_fail{ // id = 7
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: 123},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"},
 		}},
-		{NewFormEncode(&out), test_Form_Second_struct_Type_fail{
+		{NewFormEncode(&out), test_Form_Second_struct_Type_fail{ // id = 8
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
@@ -248,11 +211,15 @@ func Test_Form_Fail(t *testing.T) {
 			"A",
 			"good",
 			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"}}},
+		{NewFormEncode(&out), test_Form_Third_struct2{ // id = 7
+			"A",
+			"good",
+			core.FormType{FileName: "voice.pem", ContentType: "", File: []byte("Non-existent file")}}},
 	}
 
-	for _, v := range tests {
+	for id, v := range tests {
 		err := Encode(v.data, v.f)
-		assert.Error(t, err)
+		assert.Error(t, err, fmt.Sprintf("test case id:%d", id))
 	}
 }
 
@@ -260,23 +227,23 @@ func Test_Form_Fail(t *testing.T) {
 type test_Form_struct struct {
 	Mode   string `form:"mode"`
 	Text   string `form:"text"`
-	Voice  string `form:"voice" form-mem:"true"`
-	Voice2 string `form:"voice2" form-file:"true"`
+	Voice  string `form:"voice" form-file:"mem"`
+	Voice2 string `form:"voice2" form-file:"true"` // true 和file是相同的作用
 }
 
 //第二种测试情况
 type test_Form_Second_struct struct {
 	Mode   string        `form:"mode"`
 	Text   string        `form:"text"`
-	Voice  core.FormType `form:"voice" form-mem:"true"`
-	Voice2 core.FormType `form:"voice2" form-file:"true"`
+	Voice  core.FormType `form:"voice" form-file:"mem"`
+	Voice2 core.FormType `form:"voice2" form-file:"file"`
 }
 
 //第三种测试情况
 type test_Form_Third_struct struct {
 	Mode          string `form:"mode"`
 	Text          string `form:"text"`
-	core.FormType `form:"voice" form-mem:"true"`
+	core.FormType `form:"voice" form-file:"mem"`
 }
 
 type test_Form_Third_struct2 struct {
@@ -308,29 +275,35 @@ func Test_Form(t *testing.T) {
 			Voice:  "pcm1",
 			Voice2: "../testdata/voice.pcm",
 		}},
-		{NewFormEncode(&out), test_Form_Second_struct{
+		{NewFormEncode(&out), test_Form_Second_struct{ // id = 3
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormMem("pcm1")},
-			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")}}},
-		{NewFormEncode(&out), test_Form_Second_struct{
+			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: core.FormFile("../testdata/voice.pcm")},
+		}},
+		{NewFormEncode(&out), test_Form_Second_struct{ // id = 4
 			Mode:   "A",
 			Text:   "good",
 			Voice:  core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"},
 			Voice2: core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"}}},
-		{NewFormEncode(&out), test_Form_Third_struct{
+		{NewFormEncode(&out), test_Form_Third_struct{ // id = 5
 			"A",
 			"good",
 			core.FormType{FileName: "voice.pem", ContentType: "", File: "pcm1"}}},
-		{NewFormEncode(&out), test_Form_Third_struct2{
+		{NewFormEncode(&out), test_Form_Third_struct2{ // id = 6
 			"A",
 			"good",
 			core.FormType{FileName: "voice.pem", ContentType: "", File: "../testdata/voice.pcm"}}},
+		{NewFormEncode(&out), test_Form_Third_struct2{ // id = 7
+			"A",
+			"good",
+			core.FormType{FileName: "voice.pem", ContentType: "", File: []byte("../testdata/voice.pcm")}}},
 	}
 
-	for _, v := range tests {
+	for k, v := range tests {
+
 		err := Encode(v.data, v.f)
-		assert.NoError(t, err)
+		assert.NoError(t, err, fmt.Sprintf("test case id = %d", k))
 
 		if err != nil {
 			continue
@@ -338,7 +311,7 @@ func Test_Form(t *testing.T) {
 		v.f.End()
 
 		boundary := v.f.Writer.Boundary()
-		checkForm(t, boundary, &out)
+		checkForm(t, boundary, &out, k)
 		out.Reset()
 	}
 }
