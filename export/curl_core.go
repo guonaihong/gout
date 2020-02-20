@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path"
 	"sort"
 	"strings"
 )
@@ -85,6 +86,7 @@ func (c *curl) formData(req *http.Request) error {
 		if p.FileName() != "" {
 
 			fileName := getFileName(p.FileName())
+			fileName = path.Base(fileName)
 			fd, err := os.Create(fileName)
 			if err != nil {
 				return err

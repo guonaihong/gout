@@ -8,11 +8,18 @@ import (
 	"mime/multipart"
 	"net/textproto"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/guonaihong/gout/core"
 )
+
+type formContent struct {
+	fileName     string //filename
+	contentType  string //Content-Type:Mime-Type
+	data         []byte
+	isFormFile   bool
+	needOpenFile bool
+}
 
 var _ Adder = (*FormEncode)(nil)
 
@@ -26,12 +33,79 @@ func NewFormEncode(b *bytes.Buffer) *FormEncode {
 	return &FormEncode{Writer: multipart.NewWriter(b)}
 }
 
-func toBytes(val reflect.Value) (all []byte, err error) {
+func genFormContext(key string, val reflect.Value, sf reflect.StructField, fc *formContent) (err error) {
+
+	formFile := sf.Tag.Get("form-file")
+	if len(formFile) > 0 { //说明是结构体
+
+		switch formFile {
+		case "mem", "file", "true":
+		default:
+			return fmt.Errorf("Unsupported form-file value:%s", formFile)
+		}
+		// `form-file:"mem"`  从内存中读取
+		fc.isFormFile = true
+
+		// `form-file:"file"` 从文件中读取 `form-file:"true"` 也是从文件中读取 兼容老接口
+		if formFile != "mem" {
+			fc.needOpenFile = true
+		}
+
+		if err := genFormContextCore(key, val, sf, fc); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return genFormContextCore(key, val, sf, fc)
+}
+
+func genFormContextCore(key string, val reflect.Value, sf reflect.StructField, fc *formContent) (err error) {
+	var all []byte
+
 	switch v := val.Interface().(type) {
+	case core.FormMem:
+		all = []byte(v) //这里是type的类型转换，没有任何内存拷贝
+		fc.isFormFile = true
+	case core.FormFile:
+		all, err = ioutil.ReadFile(string(v))
+		if err != nil {
+			return err
+		}
+		fc.fileName = string(v)
+		fc.isFormFile = true
+
+	case core.FormType:
+		if v.File == nil {
+			return
+		}
+		fc.fileName = v.FileName
+		fc.contentType = v.ContentType
+		if err := genFormContext(key, reflect.ValueOf(v.File), sf, fc); err != nil {
+			return err
+		}
+		return //已经得到data的值，直接返回
 	case string:
-		all = core.StringToBytes(v)
+		if fc.needOpenFile {
+			all, err = ioutil.ReadFile(v)
+			if err != nil {
+				return err
+			}
+			fc.fileName = v
+		} else {
+			all = core.StringToBytes(v)
+		}
 	case []byte:
-		all = v
+		if fc.needOpenFile {
+			all, err = ioutil.ReadFile(core.BytesToString(v))
+			if err != nil {
+				return err
+			}
+			fc.fileName = core.BytesToString(v)
+		} else {
+			all = v
+		}
 	default:
 		if val.Kind() == reflect.Interface {
 			val = reflect.ValueOf(val.Interface())
@@ -43,116 +117,15 @@ func toBytes(val reflect.Value) (all []byte, err error) {
 		case reflect.Float32, reflect.Float64:
 		case reflect.String:
 		default:
-			return nil, fmt.Errorf("unknown type toBytes:%T, kind:%v", v, val.Kind())
+			return fmt.Errorf("unknown type gen form context:%T, kind:%v", v, val.Kind())
 		}
 
 		s := valToStr(val, emptyField)
 		all = core.StringToBytes(s)
 	}
 
-	return all, nil
-}
-
-func (f *FormEncode) formFileWrite(key string, v reflect.Value, openFile bool) (err error) {
-	var all []byte
-	var contentType string
-	var fileRealName = key
-	if openFile {
-		var fileName string
-		switch v := v.Interface().(type) {
-		case string:
-			fileName = v
-		case []byte:
-			fileName = core.BytesToString(v)
-		case core.FormType:
-			s, ok := v.File.(string)
-			if !ok {
-				return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
-			}
-			fileName = s
-			fileRealName = v.FileName
-			contentType = v.ContentType
-		default:
-			return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
-		}
-
-		if all, err = ioutil.ReadFile(fileName); err != nil {
-			return err
-		}
-	} else {
-		switch val := v.Interface().(type) {
-		case core.FormType:
-			content, ok := val.File.([]byte)
-			if !ok {
-				s, okToo := val.File.(string)
-				if !okToo {
-					return fmt.Errorf("unknown type formFileWrite:%T, openFile:%t", v, openFile)
-				}
-				content = core.StringToBytes(s)
-			}
-			all = content
-			contentType = val.ContentType
-			fileRealName = val.FileName
-		default:
-			if all, err = toBytes(v); err != nil {
-				return err
-			}
-		}
-
-	}
-
-	part, err := f.CreateFormFile(key, fileRealName, contentType)
-	if err != nil {
-		return err
-	}
-
-	_, err = part.Write(all)
-	return err
-}
-
-func (f *FormEncode) mapFormFile(key string, v reflect.Value, sf reflect.StructField) (next bool, err error) {
-	var all []byte
-	var fileName = key
-	var contentType string
-
-	switch val := v.Interface().(type) {
-	case core.FormType:
-
-		fileName = val.FileName
-		contentType = val.ContentType
-
-		switch ft := val.File.(type) {
-		case core.FormFile:
-			all, err = ioutil.ReadFile(string(ft))
-			if err != nil {
-				return false, err
-			}
-
-		case core.FormMem:
-			all = []byte(ft)
-		default:
-			return true, nil
-		}
-
-	case core.FormFile:
-		all, err = ioutil.ReadFile(string(val))
-		if err != nil {
-			return false, err
-		}
-
-	case core.FormMem:
-		all = []byte(val)
-	default:
-		return true, nil
-	}
-
-	part, err := f.CreateFormFile(key, fileName, contentType)
-	if err != nil {
-		return false, err
-	}
-
-	_, err = part.Write(all)
-	return false, err
+	fc.data = all
+	return nil
 }
 
 //下方为原函数附带的方法
@@ -179,54 +152,36 @@ func (f *FormEncode) CreateFormFile(fieldName, fileName, contentType string) (io
 
 // Add Encoder core function, used to set each key / value into the http form-data
 func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (err error) {
-	formFile := sf.Tag.Get("form-file")
-	formMem := sf.Tag.Get("form-mem")
-	b := false
+	// 1.提取数据
+	var fc formContent
+	if err := genFormContext(key, v, sf, &fc); err != nil {
+		return err
+	}
+	// 2.生成formdata格式数据
 
-	next, err := f.mapFormFile(key, v, sf)
+	return f.createForm(key, &fc)
+
+}
+
+func (f *FormEncode) createForm(key string, fc *formContent) error {
+	if !fc.isFormFile {
+		part, err := f.CreateFormField(key)
+		if err != nil {
+			return err
+		}
+		_, err = part.Write(fc.data)
+		return err
+	}
+
+	if fc.fileName == "" {
+		fc.fileName = key
+	}
+
+	part, err := f.CreateFormFile(key, fc.fileName, fc.contentType)
 	if err != nil {
 		return err
 	}
-
-	if !next {
-		return nil
-	}
-
-	if len(formFile) > 0 {
-		if b, err = strconv.ParseBool(formFile); err != nil {
-			return err
-		}
-		if !b {
-			return nil
-		}
-
-		return f.formFileWrite(key, v, b)
-
-	}
-
-	if len(formMem) > 0 {
-		if b, err = strconv.ParseBool(formMem); err != nil {
-			return err
-		}
-		if !b {
-			return nil
-		}
-
-		return f.formFileWrite(key, v, false)
-	}
-
-	return f.formFieldWrite(key, v)
-}
-
-func (f *FormEncode) formFieldWrite(key string, v reflect.Value) error {
-	part, err := f.CreateFormField(key)
-	var all []byte
-
-	if all, err = toBytes(v); err != nil {
-		return err
-	}
-
-	_, err = part.Write(all)
+	_, err = part.Write(fc.data)
 	return err
 }
 
