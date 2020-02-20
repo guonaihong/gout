@@ -316,6 +316,24 @@ func Test_Form(t *testing.T) {
 	}
 }
 
+// 测试特殊情况，比如空值
+func Test_Form_empty(t *testing.T) {
+	var out bytes.Buffer
+
+	tests := []test_Form{
+		{NewFormEncode(&out), test_Form_Third_struct2{
+			"A",
+			"good",
+			core.FormType{FileName: "voice.pem", ContentType: ""}}},
+	}
+
+	for k, v := range tests {
+
+		err := Encode(v.data, v.f)
+		assert.NoError(t, err, fmt.Sprintf("test case id = %d", k))
+	}
+}
+
 func Test_Form_Name(t *testing.T) {
 	f := NewFormEncode(&bytes.Buffer{})
 	assert.Equal(t, f.Name(), "form")
