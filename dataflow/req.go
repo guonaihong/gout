@@ -15,6 +15,10 @@ import (
 	"time"
 )
 
+type Do interface {
+	Do(*http.Request) (*http.Response, error)
+}
+
 // Req controls core data structure of http request
 type Req struct {
 	method string
@@ -345,6 +349,15 @@ func (r *Req) Client() *http.Client {
 	return r.g.Client
 }
 
+func (r *Req) getDebugOpt() *DebugOption {
+	return &r.g.opt
+}
+
+func (r *Req) canTrace() bool {
+	opt := r.getDebugOpt()
+	return opt.Debug && opt.Trace
+}
+
 // Do Send function
 func (r *Req) Do() (err error) {
 	if r.Err != nil {
@@ -359,7 +372,10 @@ func (r *Req) Do() (err error) {
 		return err
 	}
 
-	resp, err := r.Client().Do(req)
+	opt := r.getDebugOpt()
+	//resp, err := r.Client().Do(req)
+	//TODO r.Client() 返回Do接口
+	resp, err := opt.startTrace(opt.Write, r.canTrace(), req, r.Client())
 	if err != nil {
 		return err
 	}
