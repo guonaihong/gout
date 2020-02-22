@@ -3,6 +3,7 @@ package dataflow
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/guonaihong/gout/color"
 	"io"
 	"net/http"
 	"net/http/httptrace"
@@ -15,7 +16,6 @@ import (
 func Trace() DebugOpt {
 	return DebugFunc(func(o *DebugOption) {
 		o.Color = true
-		o.Debug = true
 		o.Trace = true
 		o.Write = os.Stdout
 	})
@@ -32,7 +32,8 @@ type TraceInfo struct {
 	w                   io.Writer
 }
 
-func (t *TraceInfo) startTrace(w io.Writer, needTrace bool, req *http.Request, do Do) (*http.Response, error) {
+func (t *TraceInfo) startTrace(opt *DebugOption, needTrace bool, req *http.Request, do Do) (*http.Response, error) {
+	w := opt.Write
 	var dnsStart, connStart, reqStart, tlsStart, waitResponseStart, respStart time.Time
 	var dnsDuration, connDuration, reqDuration, tlsDuration, waitResponeDuration time.Duration
 	var startNow time.Time
@@ -93,12 +94,12 @@ func (t *TraceInfo) startTrace(w io.Writer, needTrace bool, req *http.Request, d
 		t.ResponseDuration = time.Now().Sub(respStart)
 		t.TotalDuration = time.Now().Sub(startNow)
 		t.w = w
-		t.output()
+		t.output(opt)
 	}
 	return resp, err
 }
 
-func (t *TraceInfo) output() {
+func (t *TraceInfo) output(opt *DebugOption) {
 	if t == nil {
 		return
 	}
@@ -119,7 +120,10 @@ func (t *TraceInfo) output() {
 		}
 	}
 
-	fmt.Fprintf(t.w, "Trace Info: \n")
+	cl := color.New(opt.Color)
+	title := strings.Repeat("=", maxLen)
+	space4 := "    "
+	fmt.Fprintf(t.w, "%s %s: %s\n", title, cl.Sbluef("Trace Info(S)"), title)
 	for i := 0; i < v.NumField(); i++ {
 		sf := typ.Field(i)
 		if sf.PkgPath != "" {
@@ -127,8 +131,12 @@ func (t *TraceInfo) output() {
 		}
 
 		name := sf.Name
-		fmt.Fprintf(t.w, "%s%s : %s\n", name, strings.Repeat(" ", maxLen-len(name)), v.Field(i).Interface())
+		//name = cl.Spurplef(name)
+		d := v.Field(i).Interface().(time.Duration).String()
+		//d = cl.Sbluef(d)
+		fmt.Fprintf(t.w, "%s %s%s : %s\n", space4, cl.Spurplef(name), strings.Repeat(" ", maxLen+2-len(name)), cl.Sbluef(d))
 	}
 
+	fmt.Fprintf(t.w, "%s %s: %s\n", title, cl.Sbluef("Trace Info(E)"), title)
 	fmt.Fprintf(t.w, "\n")
 }

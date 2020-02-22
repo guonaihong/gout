@@ -355,7 +355,7 @@ func (r *Req) getDebugOpt() *DebugOption {
 
 func (r *Req) canTrace() bool {
 	opt := r.getDebugOpt()
-	return opt.Debug && opt.Trace
+	return opt.Trace
 }
 
 // Do Send function
@@ -375,7 +375,7 @@ func (r *Req) Do() (err error) {
 	opt := r.getDebugOpt()
 	//resp, err := r.Client().Do(req)
 	//TODO r.Client() 返回Do接口
-	resp, err := opt.startTrace(opt.Write, r.canTrace(), req, r.Client())
+	resp, err := opt.startTrace(opt, r.canTrace(), req, r.Client())
 	if err != nil {
 		return err
 	}
