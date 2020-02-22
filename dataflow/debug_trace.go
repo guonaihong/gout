@@ -131,9 +131,7 @@ func (t *TraceInfo) output(opt *DebugOption) {
 		}
 
 		name := sf.Name
-		//name = cl.Spurplef(name)
 		d := v.Field(i).Interface().(time.Duration).String()
-		//d = cl.Sbluef(d)
 		fmt.Fprintf(t.w, "%s %s%s : %s\n", space4, cl.Spurplef(name), strings.Repeat(" ", maxLen+2-len(name)), cl.Sbluef(d))
 	}
 
