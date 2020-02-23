@@ -100,10 +100,6 @@ func (t *TraceInfo) startTrace(opt *DebugOption, needTrace bool, req *http.Reque
 }
 
 func (t *TraceInfo) output(opt *DebugOption) {
-	if t == nil {
-		return
-	}
-
 	v := reflect.ValueOf(t)
 	v = v.Elem()
 
