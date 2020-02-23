@@ -69,6 +69,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [Turn on debug mode](#Turn-on-debug-mode)
         - [Turn off color highlighting in debug mode](#Turn-off-color-highlighting-in-debug-mode)
 		- [Custom debug mode](#Custom-debug-mode)
+		- [trace info](#trace-info)
 	- [benchmark](#benchmark)
 		- [benchmarking a certain number of times](#benchmark-number)
 		- [benchmarking for a certain time](#benchmark-duration)
@@ -808,7 +809,7 @@ type testForm struct {
     Mode string `form:"mode"`
     Text string `form:"text"`
     Voice string `form:"voice" form-file:"true"` //从文件中读取 
-    Voice2 []byte `form:"voice2" form-mem:"true"`  //从内存中构造
+    Voice2 []byte `form:"voice2" form-file:"mem"`  //从内存中构造
 }
 
 type rsp struct{
@@ -1221,6 +1222,45 @@ func main() {
 }
 
 // env IOS_DEBUG=true go run customize.go
+```
+### trace info
+gout.Trace()可输出http各个阶段的耗时，比如dns lookup时间，tcp连接时间等等。可以很方便的做些性能调优。
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+)
+
+func openDebugTrace() {
+    err := gout.POST(":8080/colorjson").
+        Debug(gout.Trace()).
+        SetJSON(gout.H{"str": "foo",
+            "num":   100,
+            "bool":  false,
+            "null":  nil,
+            "array": gout.A{"foo", "bar", "baz"},
+            "obj":   gout.H{"a": 1, "b": 2},
+        }).Do()
+
+    if err != nil {
+        fmt.Printf("err = %v\n", err)
+    }
+}
+
+```
+* output
+```console
+=================== Trace Info(S): ===================
+     DnsDuration           : 0s
+     ConnDuration          : 868.623µs
+     TLSDuration           : 0s
+     RequestDuration       : 376.712µs
+     WaitResponeDuration   : 717.008µs
+     ResponseDuration      : 76.158µs
+     TotalDuration         : 2.13921ms
+=================== Trace Info(E): ===================
 ```
 ## benchmark
 ### benckmark number
