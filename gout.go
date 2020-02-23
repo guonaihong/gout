@@ -5,7 +5,6 @@ import (
 	_ "github.com/guonaihong/gout/export"
 	_ "github.com/guonaihong/gout/filter"
 	"net/http"
-	"os"
 )
 
 // debug
@@ -14,11 +13,11 @@ type DebugOpt = dataflow.DebugOpt
 type DebugFunc = dataflow.DebugFunc
 
 func NoColor() DebugOpt {
-	return DebugFunc(func(o *DebugOption) {
-		o.Color = false
-		o.Debug = true
-		o.Write = os.Stdout
-	})
+	return dataflow.NoColor()
+}
+
+func Trace() DebugOpt {
+	return dataflow.Trace()
 }
 
 type Context = dataflow.Context

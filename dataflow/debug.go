@@ -31,8 +31,10 @@ type DebugOption struct {
 	Write       io.Writer
 	Debug       bool
 	Color       bool
+	Trace       bool
 	ReqBodyType string
 	RspBodyType string
+	TraceInfo
 }
 
 // DebugOpt is an interface for operating DebugOption
@@ -59,6 +61,7 @@ func NoColor() DebugOpt {
 	return DebugFunc(func(o *DebugOption) {
 		o.Color = false
 		o.Debug = true
+		o.Trace = true
 		o.Write = os.Stdout
 	})
 }
