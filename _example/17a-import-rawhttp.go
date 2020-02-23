@@ -7,15 +7,6 @@ import (
 	"time"
 )
 
-func server() {
-	router := gin.New()
-	router.POST("/colorjson", func(c *gin.Context) {
-		c.JSON(200, gin.H{"str2": "str2 val", "int2": 2})
-	})
-
-	router.Run(":1234")
-}
-
 func rawhttp() {
 	s := `POST /colorjson HTTP/1.1
 Host: 127.0.0.1:8080
@@ -37,4 +28,13 @@ func main() {
 	go server()
 	time.Sleep(time.Millisecond * 200)
 	rawhttp()
+}
+
+func server() {
+	router := gin.New()
+	router.POST("/colorjson", func(c *gin.Context) {
+		c.JSON(200, gin.H{"str2": "str2 val", "int2": 2})
+	})
+
+	router.Run(":1234")
 }

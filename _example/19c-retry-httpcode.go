@@ -10,22 +10,6 @@ import (
 
 var first bool
 
-// mock 服务端函数
-func server() {
-	router := gin.New()
-
-	router.GET("/code", func(c *gin.Context) {
-		if first {
-			c.JSON(209, gout.H{"resutl": "1.return 209"})
-			first = false
-		} else {
-			c.JSON(200, gout.H{"resut": "2.return 200"})
-		}
-	})
-
-	router.Run()
-}
-
 func useRetryFuncCode() {
 	s := ""
 	err := gout.GET(":8080/code").Debug(true).BindBody(&s).F().
@@ -47,4 +31,20 @@ func main() {
 	go server()
 	time.Sleep(time.Millisecond * 200)
 	useRetryFuncCode()
+}
+
+// mock 服务端函数
+func server() {
+	router := gin.New()
+
+	router.GET("/code", func(c *gin.Context) {
+		if first {
+			c.JSON(209, gout.H{"resutl": "1.return 209"})
+			first = false
+		} else {
+			c.JSON(200, gout.H{"resut": "2.return 200"})
+		}
+	})
+
+	router.Run()
 }

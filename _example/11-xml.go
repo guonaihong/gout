@@ -12,22 +12,6 @@ type data struct {
 	Data string `json:"data xml:"data""`
 }
 
-func server() {
-	router := gin.Default()
-
-	router.POST("/test.xml", func(c *gin.Context) {
-		var d3 data
-		err := c.BindXML(&d3)
-		if err != nil {
-			fmt.Printf("%s\n", err)
-			return
-		}
-		c.XML(200, d3)
-	})
-
-	router.Run()
-}
-
 func useStruct() {
 	var rsp data
 	code := 200
@@ -83,4 +67,20 @@ func main() {
 	useStruct()
 	useString()
 	useBytes()
+}
+
+func server() {
+	router := gin.Default()
+
+	router.POST("/test.xml", func(c *gin.Context) {
+		var d3 data
+		err := c.BindXML(&d3)
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			return
+		}
+		c.XML(200, d3)
+	})
+
+	router.Run()
 }

@@ -21,9 +21,7 @@ type testForm2 struct {
 	Voice2 []byte `form:"voice2" form-file:"mem"` //从内存中构造
 }
 
-func main() {
-	go server()
-	time.Sleep(time.Millisecond * 500) //sleep下等服务端真正起好
+func mapExample() {
 
 	// 1.使用gout.H
 	fmt.Printf("\n\n====1. use gout.H==============\n\n")
@@ -42,10 +40,13 @@ func main() {
 		fmt.Printf("%s:code = %d\n", err, code)
 		return
 	}
+}
 
+func structExample() {
+	code := 0
 	// 2.使用结构体里面的数据
 	fmt.Printf("\n\n====2. use struct==============\n\n")
-	err = gout.
+	err := gout.
 		POST(":8080/test.form").
 		Debug(true).
 		SetForm(testForm2{
@@ -57,6 +58,14 @@ func main() {
 	if err != nil || code != 200 {
 
 	}
+}
+
+func main() {
+	go server()
+	time.Sleep(time.Millisecond * 500) //sleep下等服务端真正起好
+
+	mapExample()
+	structExample()
 }
 
 func server() {
