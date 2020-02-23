@@ -21,21 +21,6 @@ type testForm2 struct {
 	Voice2 []byte `form:"voice2" form-file:"mem"` //从内存中构造
 }
 
-func server() {
-	router := gin.New()
-	router.POST("/test.form", func(c *gin.Context) {
-
-		t2 := testForm{}
-		err := c.Bind(&t2)
-		if err != nil {
-			fmt.Printf("err = %s\n", err)
-			return
-		}
-	})
-
-	router.Run()
-}
-
 func main() {
 	go server()
 	time.Sleep(time.Millisecond * 500) //sleep下等服务端真正起好
@@ -72,4 +57,19 @@ func main() {
 	if err != nil || code != 200 {
 
 	}
+}
+
+func server() {
+	router := gin.New()
+	router.POST("/test.form", func(c *gin.Context) {
+
+		t2 := testForm{}
+		err := c.Bind(&t2)
+		if err != nil {
+			fmt.Printf("err = %s\n", err)
+			return
+		}
+	})
+
+	router.Run()
 }
