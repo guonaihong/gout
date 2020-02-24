@@ -8,7 +8,7 @@
 ### [设置和解析yaml](./12-yaml.go)
 使用```SetYAML```写入yaml格式数据，使用```BindYAML```读取
 ### [设置formdata](./13-form-data.go)
-使用```SetForm```接口接入form-data格式，该接口支持多种数据类型。
+使用```SetForm```接口接入form-data格式数据，该接口支持多种数据类型。
 ### [upload file](./14-upload-file.go)
 这里使用的是```SetBody```进行上传文件
 
