@@ -4,9 +4,9 @@
 ```SetJSON```接口，写入json至http.body里
 
 ### [设置和解析xml](./11-xml.go)
-使用```SetXML```写入，使用```BindXML```读取
+使用```SetXML```写入xml格式数据，使用```BindXML```读取
 ### [设置和解析yaml](./12-yaml.go)
-使用```SetYAML```写入，使用```BindYAML```读取
+使用```SetYAML```写入yaml格式数据，使用```BindYAML```读取
 ### [设置formdata](./13-form-data.go)
 使用```SetForm```接口接入form-data格式，该接口支持多种数据类型。
 ### [upload file](./14-upload-file.go)
