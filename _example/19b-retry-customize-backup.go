@@ -9,15 +9,6 @@ import (
 	"time"
 )
 
-func server() {
-	router := gin.New()
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{"result": "test ok"})
-	})
-
-	router.Run(":1234")
-}
-
 func useRetryFunc() {
 	// 获取一个没有服务绑定的端口
 	port := core.GetNoPortExists()
@@ -40,4 +31,13 @@ func main() {
 	go server()
 	time.Sleep(time.Millisecond * 200)
 	useRetryFunc()
+}
+
+func server() {
+	router := gin.New()
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{"result": "test ok"})
+	})
+
+	router.Run(":1234")
 }

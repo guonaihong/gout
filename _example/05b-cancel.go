@@ -8,6 +8,25 @@ import (
 	"time"
 )
 
+func cancelExample() {
+	// 给http请求 设置超时
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+
+	cancel() //取消
+
+	err := gout.GET(":8080/cancel").
+		WithContext(ctx).
+		Do()
+
+	fmt.Printf("err = %s\n", err)
+}
+
+func main() {
+	go server()
+	time.Sleep(time.Millisecond)
+	cancelExample()
+}
+
 func server() {
 	router := gin.New()
 	router.GET("/cancel", func(c *gin.Context) {
@@ -19,20 +38,4 @@ func server() {
 	})
 
 	router.Run()
-}
-
-func main() {
-	go server()
-	time.Sleep(time.Millisecond)
-
-	// 给http请求 设置超时
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
-
-	cancel() //取消
-
-	err := gout.GET(":8080/cancel").
-		WithContext(ctx).
-		Do()
-
-	fmt.Printf("err = %s\n", err)
 }

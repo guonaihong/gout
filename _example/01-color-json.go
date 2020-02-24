@@ -7,16 +7,12 @@ import (
 	"time"
 )
 
-func server() {
-	router := gin.New()
-	router.POST("/colorjson", func(c *gin.Context) {
-		c.JSON(200, gin.H{"str2": "str2 val", "int2": 2})
-	})
+// ================SetJSON=接口用法===============
+// gout使用SetJSON函数发送json请求至服务端
+// 亮点有SetJSON函数支持多种数据类型，map/struct/array/string/bytes
+// 下面的xxxExample对应该类型的用法
 
-	router.Run()
-}
-
-func useMap() {
+func mapExample() {
 	fmt.Printf("\n\n1.=============color json======map example=====\n\n")
 	err := gout.POST(":8080/colorjson").
 		Debug(true).
@@ -33,7 +29,7 @@ func useMap() {
 	}
 }
 
-func useStruct() {
+func structExample() {
 
 	type req struct {
 		Str  string `json:"str"`
@@ -85,7 +81,7 @@ var query = `
 }
 `
 
-func useString() {
+func stringExample() {
 	fmt.Printf("\n\n3.=============color json======string example=====\n\n")
 	err := gout.POST(":8080/colorjson").
 		Debug(true).
@@ -96,7 +92,7 @@ func useString() {
 	}
 }
 
-func useBytes() {
+func bytesExample() {
 	fmt.Printf("\n\n4.=============color json======bytes example=====\n\n")
 	err := gout.POST(":8080/colorjson").
 		Debug(true).
@@ -112,8 +108,17 @@ func main() {
 
 	time.Sleep(time.Millisecond * 200)
 
-	useMap()
-	useStruct()
-	useString()
-	useBytes()
+	mapExample()
+	structExample()
+	stringExample()
+	bytesExample()
+}
+
+func server() {
+	router := gin.New()
+	router.POST("/colorjson", func(c *gin.Context) {
+		c.JSON(200, gin.H{"str2": "str2 val", "int2": 2})
+	})
+
+	router.Run()
 }

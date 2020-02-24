@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+// ============== gout 设置http header example============
+// 使用SetHeader接口 设置http header
+// SetHeader支持的数据类型有map/array/struct
 type testHeader struct {
 	H1 string    `header:"h1"`
 	H2 int       `header:"h2"`
@@ -17,24 +20,7 @@ type testHeader struct {
 	H7 time.Time `header:"h7" time_format:"2006-01-02"`
 }
 
-func server() {
-	router := gin.New()
-	router.GET("/test.header", func(c *gin.Context) {
-		h2 := testHeader{}
-		err := c.BindHeader(&h2)
-		if err != nil {
-			c.String(500, "fail")
-			return
-		}
-	})
-
-	router.Run()
-}
-
-func main() {
-	go server()
-
-	time.Sleep(time.Millisecond)
+func mapExample() {
 	// 1.使用gout.H
 	fmt.Printf("======1. SetHeader======use gout.H=====\n")
 	err := gout.GET(":8080/test.header").
@@ -51,10 +37,12 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
+}
 
+func arrayExample() {
 	// 2.使用数组变量
 	fmt.Printf("======2. SetHeader======use array=====\n")
-	err = gout.GET(":8080/test.header").
+	err := gout.GET(":8080/test.header").
 		Debug(true).
 		SetHeader(gout.A{"h1", "v1",
 			"h2", 2,
@@ -68,11 +56,13 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
+}
 
+func structExample() {
 	// 3.使用结构体
 	// 使用结构体需要设置"header" tag
 	fmt.Printf("======3. SetHeader======use struct=====\n")
-	err = gout.GET(":8080/test.header").
+	err := gout.GET(":8080/test.header").
 		Debug(true).
 		SetHeader(testHeader{H1: "v1",
 			H2: 2,
@@ -86,5 +76,27 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
+}
 
+func main() {
+	go server()
+
+	time.Sleep(time.Millisecond)
+	mapExample()
+	arrayExample()
+	structExample()
+}
+
+func server() {
+	router := gin.New()
+	router.GET("/test.header", func(c *gin.Context) {
+		h2 := testHeader{}
+		err := c.BindHeader(&h2)
+		if err != nil {
+			c.String(500, "fail")
+			return
+		}
+	})
+
+	router.Run()
 }
