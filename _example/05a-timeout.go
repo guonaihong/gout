@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout"
@@ -10,10 +9,9 @@ import (
 
 func setTimeoutExample() {
 	// 给http请求 设置超时
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
 
 	err := gout.GET(":8080/timeout").
-		WithContext(ctx).
+		SetTimeout(2 * time.Second).
 		Do()
 
 	fmt.Printf("err = %s\n", err)

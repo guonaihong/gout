@@ -12,7 +12,7 @@ import (
 // 其中SetQuery支持多种数据类型 map/struct/string/array
 
 type testQuery struct {
-	// struct里面的form tag是gin用来绑定数据用的
+	// struct里面的form tag是gin用来绑定数据用的，query才是gout需要的tag
 	Q1 string    `query:"q1" form:"q1"`
 	Q2 int       `query:"q2" form:"q2"`
 	Q3 float32   `query:"q3" form:"q3"`
