@@ -92,10 +92,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
 go get github.com/guonaihong/gout
 ```
 
-## Migrate documents
-主要方便下面的用户迁移到gout
-* [httplib](./to-gout-doc/beego-httplib.md)
-* [resty](./to-gout-doc/resty-doc.md)
 # example
  [examples](./_example) 目录下面的例子，都是可以直接跑的。如果觉得运行例子还是不明白用法，可以把你迷惑的地方写出来，然后提[issue](https://github.com/guonaihong/gout/issues/new)
  ### 运行命令如下
