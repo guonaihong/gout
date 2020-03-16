@@ -286,7 +286,9 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 
 	if r.bodyDecoder != nil {
 		if err := r.bodyDecoder.Decode(resp.Body); err != nil {
-			return err
+			if err != io.EOF {
+				return err
+			}
 		}
 	}
 

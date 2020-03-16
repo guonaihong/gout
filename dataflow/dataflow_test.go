@@ -41,7 +41,7 @@ type BindTest struct {
 func TestBindXML(t *testing.T) {
 	var d, d2 data
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 
 		router.POST("/test.xml", func(c *gin.Context) {
 			var d3 data
@@ -72,7 +72,7 @@ func TestBindXML(t *testing.T) {
 func TestBindYAML(t *testing.T) {
 	var d, d2 data
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 
 		router.POST("/test.yaml", func(c *gin.Context) {
 			var d3 data
@@ -103,7 +103,7 @@ func TestBindYAML(t *testing.T) {
 func TestBindJSON(t *testing.T) {
 	var d3 data
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 
 		router.POST("/test.json", func(c *gin.Context) {
 			c.BindJSON(&d3)
@@ -151,7 +151,7 @@ func TestBindJSON(t *testing.T) {
 
 func TestBindHeader(t *testing.T) {
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 
 		router.GET("/test.header", func(c *gin.Context) {
 			c.Writer.Header().Add("sid", "sid-ok")
@@ -196,7 +196,7 @@ type testForm struct {
 }
 
 func setupForm(t *testing.T, reqTestForm testForm) *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
 	router.POST("/test.form", func(c *gin.Context) {
 
 		t2 := testForm{}
@@ -226,7 +226,7 @@ type testForm2 struct {
 }
 
 func setupForm2(t *testing.T, reqTestForm testForm2) *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
 	router.POST("/test.form", func(c *gin.Context) {
 
 		t2 := testForm2{}
@@ -370,7 +370,7 @@ func TestSetHeaderStruct(t *testing.T) {
 	}
 
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 		router.GET("/test.header", func(c *gin.Context) {
 			h2 := testHeader{}
 			err := c.BindHeader(&h2)
@@ -431,7 +431,7 @@ func queryDefault() *testQuery {
 func TestSetQueryStruct(t *testing.T) {
 	q := queryDefault()
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 		router.GET("/test.query", func(c *gin.Context) {
 			q2 := testQuery{}
 			err := c.BindQuery(&q2)
@@ -484,7 +484,7 @@ func testQueryEqual(t *testing.T, q1, q2 testQuery) {
 func testQueryStringCore(t *testing.T, qStr string, isPtr bool) {
 	q := queryDefault()
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 		router.GET("/test.query", func(c *gin.Context) {
 			q2 := testQuery{}
 			err := c.BindQuery(&q2)
@@ -519,7 +519,7 @@ func testQueryStringCore(t *testing.T, qStr string, isPtr bool) {
 
 func setupQuery(t *testing.T, q *testQuery) func() *gin.Engine {
 	return func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 		router.GET("/test.query", func(c *gin.Context) {
 			q2 := testQuery{}
 			err := c.BindQuery(&q2)
@@ -611,7 +611,7 @@ type testBodyReq struct {
 
 func TestBindBody(t *testing.T) {
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 
 		bodyBind := testBodyBind{}
 
@@ -691,7 +691,7 @@ func TestBindBody(t *testing.T) {
 func TestSetBody(t *testing.T) {
 
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 		router.POST("/", func(c *gin.Context) {
 
 			testBody := testBodyNeed{}
@@ -811,7 +811,7 @@ func TestSetBody(t *testing.T) {
 }
 
 func setupProxy(t *testing.T) *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
 
 	r.GET("/:a", func(c *gin.Context) {
 		all, err := ioutil.ReadAll(c.Request.Body)
@@ -861,7 +861,7 @@ func TestSetSOCKS5(t *testing.T) {
 
 func setupCookie(t *testing.T, total *int32) *gin.Engine {
 
-	router := gin.Default()
+	router := gin.New()
 
 	router.GET("/cookie", func(c *gin.Context) {
 
@@ -971,7 +971,7 @@ func TestWithContext(t *testing.T) {
 }
 
 func setupUnixSocket(t *testing.T, path string) *http.Server {
-	router := gin.Default()
+	router := gin.New()
 	type testHeader struct {
 		H1 string `header:"h1"`
 		H2 string `header:"h2"`
@@ -1419,7 +1419,7 @@ func Test_DataFlow_Fileter_Export(t *testing.T) {
 func Test_DataFlow_SetRequest(t *testing.T) {
 	var d3 data
 	router := func() *gin.Engine {
-		router := gin.Default()
+		router := gin.New()
 
 		router.POST("/test.json", func(c *gin.Context) {
 			c.BindJSON(&d3)
@@ -1439,4 +1439,55 @@ func Test_DataFlow_SetRequest(t *testing.T) {
 	err = New().SetRequest(req).BindJSON(&gotData).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, gotData, needData)
+}
+
+// 测试io.EOF情况
+func Test_DataFlow_ioEof(t *testing.T) {
+	router := func() *gin.Engine {
+		router := gin.New()
+
+		router.POST("/test/io/EOF", func(c *gin.Context) {
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	for id, err := range []error{
+		func() error {
+			s := ""
+			return New().POST(ts.URL + "/test/io/EOF").BindBody(&s).Do()
+		}(),
+		func() error {
+			var d data
+			return New().POST(ts.URL + "/test/io/EOF").BindXML(&d).Do()
+		}(),
+		func() error {
+			var d data
+			return New().POST(ts.URL + "/test/io/EOF").BindYAML(&d).Do()
+		}(),
+		func() error {
+			var m map[string]interface{}
+			return New().POST(ts.URL + "/test/io/EOF").BindJSON(&m).Do()
+		}(),
+		func() error {
+			s := ""
+			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindBody(&s).Do()
+		}(),
+		func() error {
+			var d data
+			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindXML(&d).Do()
+		}(),
+		func() error {
+			var d data
+			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindYAML(&d).Do()
+		}(),
+		func() error {
+			var m map[string]interface{}
+			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindJSON(&m).Do()
+		}(),
+	} {
+		assert.NoError(t, err, fmt.Sprintf("fail id:%d", id))
+	}
 }
