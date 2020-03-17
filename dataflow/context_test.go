@@ -2,6 +2,7 @@ package dataflow
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -231,22 +232,25 @@ func TestContext_fail(t *testing.T) {
 	s := testServrBodyJSON(t)
 	ts := httptest.NewServer(http.HandlerFunc(s.ServeHTTP))
 
-	var j, j2 testContextJSON
+	//var j, j2 testContextJSON
+	var j testContextJSON
 
-	// BindJSON和Callback只能选一个
 	errs := []error{
 
-		GET(ts.URL + "/200").BindJSON(&j).Callback(func(c *Context) error {
-			c.BindJSON(&j2)
-			return nil
-		}).Do(),
+		/*
+			 //BindJSON和Callback只能选一个
+					GET(ts.URL + "/200").BindJSON(&j).Callback(func(c *Context) error {
+						c.BindJSON(&j2)
+						return nil
+					}).Do(),
+		*/
 
 		GET(ts.URL + "/200").BindJSON(&j).Callback(func(c *Context) error {
 			return errors.New("fail")
 		}).Do(),
 	}
 
-	for _, e := range errs {
-		assert.Error(t, e)
+	for id, e := range errs {
+		assert.Error(t, e, fmt.Sprintf("test id:%d\n", id))
 	}
 }
