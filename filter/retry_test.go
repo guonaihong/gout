@@ -247,3 +247,36 @@ func Test_Retry_Func(t *testing.T) {
 		assert.Error(t, err)
 	}
 }
+
+// 测试忽略io.EOF情况
+func Test_Filter_Retry_ioEOF(t *testing.T) {
+	router := func() *gin.Engine {
+		router := gin.New()
+
+		router.POST("/test/io/EOF", func(c *gin.Context) {
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	for id, err := range []error{
+		func() error {
+			var s string
+			return dataflow.New().POST(":" + core.GetNoPortExists()).BindJSON(&s).F().Retry().
+				Attempt(3).
+				WaitTime(200 * time.Millisecond).
+				MaxWaitTime(500 * time.Millisecond).
+				Func(func(c *dataflow.Context) error {
+					if c.Error != nil {
+						c.SetURL(ts.URL + "/test/io/EOF")
+						return ErrRetry
+					}
+					return nil
+				}).Do()
+		}(),
+	} {
+		assert.NoError(t, err, fmt.Sprintf("fail id:%d", id))
+	}
+}

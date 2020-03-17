@@ -1441,7 +1441,7 @@ func Test_DataFlow_SetRequest(t *testing.T) {
 	assert.Equal(t, gotData, needData)
 }
 
-// 测试io.EOF情况
+// 测试忽略io.EOF
 func Test_DataFlow_ioEof(t *testing.T) {
 	router := func() *gin.Engine {
 		router := gin.New()
@@ -1490,4 +1490,33 @@ func Test_DataFlow_ioEof(t *testing.T) {
 	} {
 		assert.NoError(t, err, fmt.Sprintf("fail id:%d", id))
 	}
+}
+
+func createGeneral() *httptest.Server {
+	router := func() *gin.Engine {
+		router := gin.New()
+
+		router.POST("/", func(c *gin.Context) {
+		})
+
+		return router
+	}()
+
+	return httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+}
+
+func Test_SetHost(t *testing.T) {
+	g := New().GET("qqqq")
+	g.Err = errors.New("fail")
+	err := g.SetHost("www.xx.com").Do()
+
+	assert.Error(t, err)
+}
+
+func Test_SetURL(t *testing.T) {
+	g := New().GET("qqqq")
+	g.Err = errors.New("fail")
+	err := g.SetURL("www.xx.com/a/b").Do()
+
+	assert.Error(t, err)
 }
