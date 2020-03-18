@@ -1492,11 +1492,14 @@ func Test_DataFlow_ioEof(t *testing.T) {
 	}
 }
 
-func createGeneral() *httptest.Server {
+func createGeneral(data string) *httptest.Server {
 	router := func() *gin.Engine {
 		router := gin.New()
 
 		router.POST("/", func(c *gin.Context) {
+			if len(data) > 0 {
+				c.String(200, data)
+			}
 		})
 
 		return router
@@ -1505,7 +1508,7 @@ func createGeneral() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 }
 
-func Test_SetHost(t *testing.T) {
+func Test_SetHost_fail(t *testing.T) {
 	g := New().GET("qqqq")
 	g.Err = errors.New("fail")
 	err := g.SetHost("www.xx.com").Do()
@@ -1513,10 +1516,39 @@ func Test_SetHost(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func Test_SetURL(t *testing.T) {
+func Test_SetURL_fail(t *testing.T) {
 	g := New().GET("qqqq")
 	g.Err = errors.New("fail")
 	err := g.SetURL("www.xx.com/a/b").Do()
 
 	assert.Error(t, err)
+}
+
+func Test_SetMethod_fail(t *testing.T) {
+	g := New()
+	g.Err = errors.New("fail")
+	err := g.SetMethod("GET").Do()
+
+	assert.Error(t, err)
+}
+
+func Test_SetMethod_success(t *testing.T) {
+	ts := createGeneral(`{"key":"val"}`)
+
+	type testData struct {
+		Key string `json:"key"`
+	}
+
+	td := testData{}
+	for index, err := range []error{
+		New().SetMethod("POST").SetURL(ts.URL).Debug(true).BindJSON(&td).Do(),
+		New().SetMethod("POST").SetHost(ts.URL).Debug(true).BindJSON(&td).Do(),
+	} {
+		assert.NoError(t, err, fmt.Sprintf("test index:%d\n", index))
+		assert.Equal(t, td, testData{Key: "val"})
+		if err != nil {
+			break
+		}
+	}
+
 }
