@@ -30,6 +30,7 @@ func TestDebug(t *testing.T) {
 	test := []func() DebugOpt{
 		// 没有颜色输出
 		NoColor,
+		Trace,
 	}
 
 	s := ""

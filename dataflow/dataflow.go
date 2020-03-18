@@ -105,13 +105,24 @@ func (df *DataFlow) GetHost() (string, error) {
 	return "", errors.New("not url found")
 }
 
+// SetMethod set method
+func (df *DataFlow) SetMethod(method string) *DataFlow {
+	if df.Err != nil {
+		return df
+	}
+
+	df.Req.method = method
+	df.Req.g = df.out
+	return df
+}
+
 // SetURL set url
 func (df *DataFlow) SetURL(url string) *DataFlow {
 	if df.Err != nil {
 		return df
 	}
 
-	if df.Req.url == "" && df.Req.req == nil {
+	if df.Req.url == "" && df.Req.req == nil && df.Req.method == "" {
 		df.Req = reqDef("", joinPaths("", url), df.out)
 		return df
 	}
