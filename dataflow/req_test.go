@@ -23,15 +23,16 @@ type urlTest struct {
 	need interface{}
 }
 
-func TestReq_isString(t *testing.T) {
+func TestReq_isAndGetString(t *testing.T) {
 	test := []urlTest{
 		{set: "?a=b&c=d", need: "a=b&c=d"},
 		{set: "c=d&e=f", need: "c=d&e=f"},
+		{set: []byte("c=d&e=f"), need: "c=d&e=f"},
 		{set: time.Time{}, need: ""},
 	}
 
 	for _, v := range test {
-		rv, _ := isString(v.set)
+		rv, _ := isAndGetString(v.set)
 		assert.Equal(t, v.need, rv)
 	}
 }

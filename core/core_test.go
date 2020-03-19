@@ -116,3 +116,21 @@ func Test_Core_GetBytes(t *testing.T) {
 		assert.Equal(t, test.need, v)
 	}
 }
+
+func Test_Core_GetString(t *testing.T) {
+	type getBytes struct {
+		need string
+		set  interface{}
+	}
+
+	tests := []getBytes{
+		{"ok", "ok"},
+		{"ok", []byte("ok")},
+		{"", new(int)},
+	}
+
+	for _, test := range tests {
+		v, _ := GetString(test.set)
+		assert.Equal(t, test.need, v)
+	}
+}

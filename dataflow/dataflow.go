@@ -156,7 +156,7 @@ func (df *DataFlow) SetWWWForm(obj interface{}) *DataFlow {
 	return df
 }
 
-// SetQuery send URL query string
+// SetQuery send URL query string, Support string/[]byte/struct/map types
 func (df *DataFlow) SetQuery(obj interface{}) *DataFlow {
 	df.Req.queryEncode = obj
 	return df
