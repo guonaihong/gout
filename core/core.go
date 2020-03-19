@@ -90,3 +90,13 @@ func GetBytes(v interface{}) (b []byte, ok bool) {
 	}
 	return nil, false
 }
+
+func GetString(v interface{}) (s string, ok bool) {
+	switch s := v.(type) {
+	case []byte:
+		return BytesToString(s), true
+	case string:
+		return s, true
+	}
+	return "", false
+}

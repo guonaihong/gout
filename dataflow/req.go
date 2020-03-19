@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	"io"
@@ -80,15 +81,14 @@ func (r *Req) Reset() {
 	r.req = nil
 }
 
-func isString(x interface{}) (string, bool) {
+func isAndGetString(x interface{}) (string, bool) {
 	p := reflect.ValueOf(x)
 
 	for p.Kind() == reflect.Ptr {
 		p = p.Elem()
 	}
 
-	if p.Kind() == reflect.String {
-		s := p.Interface().(string)
+	if s, ok := core.GetString(p.Interface()); ok {
 		if strings.HasPrefix(s, "?") {
 			s = s[1:]
 		}
@@ -189,7 +189,7 @@ func (r *Req) Request() (req *http.Request, err error) {
 	// set query header
 	if r.queryEncode != nil {
 		var query string
-		if q, ok := isString(r.queryEncode); ok {
+		if q, ok := isAndGetString(r.queryEncode); ok {
 			query = q
 		} else {
 			q := encode.NewQueryEncode(nil)

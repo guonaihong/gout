@@ -455,33 +455,10 @@ func TestSetQueryStruct(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestQueryString(t *testing.T) {
+func TestQueryRaw(t *testing.T) {
 	s := "q1=v1&q2=2&q3=3.14&q4=3.1415&q5=1564295760&q6=1564295760000001000&q7=2019-07-28&q8=8"
-	testQueryStringCore(t, s, false)
-	testQueryStringCore(t, s, true)
-}
+	b := []byte(s)
 
-func testQueryEqual(t *testing.T, q1, q2 testQuery) {
-	//不用assert.Equal(t, q1, q2)
-	//assert.Equal 有个bug
-
-	assert.Equal(t, q1.Q1, q2.Q1)
-	assert.Equal(t, q1.Q2, q2.Q2)
-	assert.Equal(t, q1.Q3, q2.Q3)
-	assert.Equal(t, q1.Q4, q2.Q4)
-	assert.Equal(t, q1.Q8, q2.Q8)
-	if !q1.Q5.Equal(q2.Q5) {
-		t.Errorf("want(%s) got(%s)\n", q1.Q5, q2.Q5)
-	}
-	if !q1.Q6.Equal(q2.Q6) {
-		t.Errorf("want(%s) got(%s)\n", q1.Q6, q2.Q6)
-	}
-	if !q1.Q7.Equal(q2.Q7) {
-		t.Errorf("want(%s) got(%s)\n", q1.Q7, q2.Q7)
-	}
-}
-
-func testQueryStringCore(t *testing.T, qStr string, isPtr bool) {
 	q := queryDefault()
 	router := func() *gin.Engine {
 		router := gin.New()
@@ -503,18 +480,40 @@ func testQueryStringCore(t *testing.T, qStr string, isPtr bool) {
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 	defer ts.Close()
 
-	g := New(nil)
 	code := 0
 
-	var err error
-	if isPtr {
-		err = g.GET(ts.URL + "/test.query").SetQuery(&qStr).Code(&code).Do()
-	} else {
-		err = g.GET(ts.URL + "/test.query").SetQuery(qStr).Code(&code).Do()
+	for _, data := range []interface{}{
+		s,
+		&s,
+		b,
+		&b,
+	} {
+
+		err := GET(ts.URL + "/test.query").SetQuery(data).Code(&code).Do()
+		assert.NoError(t, err)
+		assert.Equal(t, code, 200)
 	}
 
-	assert.NoError(t, err)
-	assert.Equal(t, code, 200)
+}
+
+func testQueryEqual(t *testing.T, q1, q2 testQuery) {
+	//不用assert.Equal(t, q1, q2)
+	//assert.Equal 有个bug
+
+	assert.Equal(t, q1.Q1, q2.Q1)
+	assert.Equal(t, q1.Q2, q2.Q2)
+	assert.Equal(t, q1.Q3, q2.Q3)
+	assert.Equal(t, q1.Q4, q2.Q4)
+	assert.Equal(t, q1.Q8, q2.Q8)
+	if !q1.Q5.Equal(q2.Q5) {
+		t.Errorf("want(%s) got(%s)\n", q1.Q5, q2.Q5)
+	}
+	if !q1.Q6.Equal(q2.Q6) {
+		t.Errorf("want(%s) got(%s)\n", q1.Q6, q2.Q6)
+	}
+	if !q1.Q7.Equal(q2.Q7) {
+		t.Errorf("want(%s) got(%s)\n", q1.Q7, q2.Q7)
+	}
 }
 
 func setupQuery(t *testing.T, q *testQuery) func() *gin.Engine {
