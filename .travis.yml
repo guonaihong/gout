@@ -9,7 +9,6 @@ matrix:
   - go: master
 
 script:
-- go test -v ./...
 - make test
 
 after_success:
