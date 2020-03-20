@@ -53,7 +53,8 @@ func Test_Debug_Trace(t *testing.T) {
 	}()
 	errs := []error{
 		func() error {
-			return New().GET("https://baidu.com").Debug(Trace()).Do()
+			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+			return New().GET(ts.URL).Debug(Trace()).Do()
 		}(),
 		func() error {
 			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
