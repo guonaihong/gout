@@ -93,6 +93,18 @@ func stringExample() {
 	}
 }
 
+func bytesExample() {
+	// 4.使用string
+	fmt.Printf("======4. SetQuery======use bytes=====\n")
+	err := gout.GET(":8080/test.query").
+		Debug(true).
+		SetQuery([]byte("q1=v1&q2=2&q3=3.14&q4=3.1415&q5=1564295760&q6=1564295760000001000&q7=2019-07-28")).
+		Do()
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+}
 func main() {
 	go server()
 
@@ -101,6 +113,7 @@ func main() {
 	structExample()
 	arrayExample()
 	stringExample()
+	bytesExample()
 }
 
 func server() {

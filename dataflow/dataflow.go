@@ -156,7 +156,7 @@ func (df *DataFlow) SetWWWForm(obj interface{}) *DataFlow {
 	return df
 }
 
-// SetQuery send URL query string, Support string/[]byte/struct/map types
+// SetQuery send URL query string, Support string/[]byte/struct/map/slice types
 func (df *DataFlow) SetQuery(obj interface{}) *DataFlow {
 	df.Req.queryEncode = obj
 	return df
@@ -270,6 +270,7 @@ func (df *DataFlow) SetCookies(c ...*http.Cookie) *DataFlow {
 
 // BindHeader parse http header to obj variable.
 // obj must be a pointer variable
+// Support string/int/float/slice ... types
 func (df *DataFlow) BindHeader(obj interface{}) *DataFlow {
 	df.Req.headerDecode = obj
 	return df
