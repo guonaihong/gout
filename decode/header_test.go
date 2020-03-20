@@ -7,10 +7,13 @@ import (
 )
 
 type rspHeader struct {
-	Date          string `header:"date"`
-	Connection    string `header:"connection"`
-	ContentLength string `header:"Content-Length"`
-	ContentType   string `header:"Content-Type"`
+	Date          string   `header:"date"`
+	Connection    string   `header:"connection"`
+	ContentLength string   `header:"Content-Length"`
+	ContentType   string   `header:"Content-Type"`
+	SID           []string `header:"sid"`
+	Max           int      `header:"max"`
+	Rate          float64  `header:"rate"`
 }
 
 type headerTest struct {
@@ -29,6 +32,9 @@ func Test_Header_Decode(t *testing.T) {
 					"Connection":     []string{"close"},
 					"Content-Length": []string{"1234"},
 					"Content-Type":   []string{"text"},
+					"Sid":            []string{"sid1", "sid2"},
+					"Max":            []string{"1000"},
+					"Rate":           []string{"16000"},
 				},
 			},
 			need: &rspHeader{
@@ -36,6 +42,9 @@ func Test_Header_Decode(t *testing.T) {
 				Connection:    "close",
 				ContentLength: "1234",
 				ContentType:   "text",
+				SID:           []string{"sid1", "sid2"},
+				Max:           1000,
+				Rate:          16000,
 			},
 			got: &rspHeader{},
 		},
