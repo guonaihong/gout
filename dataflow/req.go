@@ -177,6 +177,10 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 
 // Request Get the http.Request object
 func (r *Req) Request() (req *http.Request, err error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
 	body := &bytes.Buffer{}
 
 	// set http body
