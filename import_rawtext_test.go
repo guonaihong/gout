@@ -148,7 +148,7 @@ func Test_RawText_URL(t *testing.T) {
 }
 
 // 测试错误情况
-func Test_RawText_fail(t *testing.T) {
+func Test_RawText_FAILED(t *testing.T) {
 
 	router := setup_router(t)
 
@@ -162,6 +162,12 @@ func Test_RawText_fail(t *testing.T) {
 	for _, v := range []interface{}{new(int), "xxxx"} {
 		err := NewImport().RawText(v).Debug(true).SetHost(ts.URL).Code(&code).Do()
 		assert.Error(t, err)
+	}
+
+	for _, v := range []interface{}{new(int), ""} {
+		req, err := NewImport().RawText(v).Debug(true).SetURL(ts.URL).Request()
+		assert.Error(t, err)
+		assert.Nil(t, req)
 	}
 }
 

@@ -1415,6 +1415,29 @@ func Test_DataFlow_Fileter_Export(t *testing.T) {
 	}
 }
 
+func Test_DataFlow_Request_FAILED(t *testing.T) {
+	type testReq struct {
+		r *http.Request
+		e error
+	}
+
+	for id, req := range []testReq{
+		func() testReq {
+			req, err := New().POST("url").SetJSON("hello world").Request()
+			return testReq{req, err}
+		}(),
+		func() testReq {
+			g := New().POST("url")
+			g.Err = errors.New("fail")
+			req, err := g.Request()
+			return testReq{req, err}
+		}(),
+	} {
+		assert.Nil(t, req.r)
+		assert.Error(t, req.e, fmt.Sprintf("fail id:%d", id))
+	}
+}
+
 func Test_DataFlow_SetRequest(t *testing.T) {
 	var d3 data
 	router := func() *gin.Engine {
