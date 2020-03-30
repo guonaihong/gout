@@ -1465,10 +1465,16 @@ func Test_DataFlow_SetRequest(t *testing.T) {
 
 // 测试忽略io.EOF
 func Test_DataFlow_ioEof(t *testing.T) {
+	type testData struct {
+		err  error
+		code int
+	}
+
 	router := func() *gin.Engine {
 		router := gin.New()
 
 		router.POST("/test/io/EOF", func(c *gin.Context) {
+			c.String(200, "")
 		})
 
 		return router
@@ -1476,41 +1482,69 @@ func Test_DataFlow_ioEof(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
-	for id, err := range []error{
-		func() error {
+	for id, td := range []testData{
+		func() testData {
 			s := ""
-			return New().POST(ts.URL + "/test/io/EOF").BindBody(&s).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").BindBody(&s).Code(&code).Do()
+			return testData{err: err, code: code}
 		}(),
-		func() error {
+		func() testData {
 			var d data
-			return New().POST(ts.URL + "/test/io/EOF").BindXML(&d).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").BindXML(&d).Code(&code).Do()
+			return testData{err: err, code: code}
 		}(),
-		func() error {
+		func() testData {
 			var d data
-			return New().POST(ts.URL + "/test/io/EOF").BindYAML(&d).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").BindYAML(&d).Code(&code).Do()
+			return testData{err: err, code: code}
 		}(),
-		func() error {
+		func() testData {
 			var m map[string]interface{}
-			return New().POST(ts.URL + "/test/io/EOF").BindJSON(&m).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").BindJSON(&m).Code(&code).Do()
+			return testData{err: err, code: code}
 		}(),
-		func() error {
+		func() testData {
 			s := ""
-			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindBody(&s).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").Debug(true).BindBody(&s).Code(&code).Do()
+			return testData{err: err, code: code}
 		}(),
-		func() error {
+		func() testData {
 			var d data
-			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindXML(&d).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").Debug(true).BindXML(&d).Code(&code).Do()
+			return testData{err: err, code: code}
 		}(),
-		func() error {
+		func() testData {
 			var d data
-			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindYAML(&d).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").Debug(true).BindYAML(&d).Code(&code).Do()
+			return testData{err: err, code: code}
 		}(),
-		func() error {
+		func() testData {
 			var m map[string]interface{}
-			return New().POST(ts.URL + "/test/io/EOF").Debug(true).BindJSON(&m).Do()
+			code := 0
+			err := New().POST(ts.URL + "/test/io/EOF").Debug(true).BindJSON(&m).Code(&code).Do()
+			return testData{err: err, code: code}
+		}(),
+		func() testData {
+			code := 0
+			r := ""
+			err := New().POST(ts.URL + "/test/io/EOF").
+				Debug(true).
+				SetHeader(core.H{"session-id": "hello"}).
+				SetForm([]interface{}{"text", "花瓶儿", "mode", "C", "voice", core.FormMem("hello voice")}).
+				Code(&code).BindBody(&r).Do()
+
+			return testData{err: err, code: code}
 		}(),
 	} {
-		assert.NoError(t, err, fmt.Sprintf("fail id:%d", id))
+		assert.NoError(t, td.err, fmt.Sprintf("fail id:%d", id))
+		assert.Equal(t, 200, td.code)
 	}
 }
 

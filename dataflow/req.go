@@ -272,6 +272,16 @@ func (r *Req) GetContext() context.Context {
 }
 
 func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (err error) {
+	defer func() {
+		if err == io.EOF {
+			err = nil
+		}
+	}()
+
+	if r.httpCode != nil {
+		*r.httpCode = resp.StatusCode
+	}
+
 	if r.headerDecode != nil {
 		err = decode.Header.Decode(resp, r.headerDecode)
 		if err != nil {
@@ -283,22 +293,17 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 		// This is code(output debug info) be placed here
 		// all, err := ioutil.ReadAll(resp.Body)
 		// respBody  = bytes.NewReader(all)
-		if err := r.g.opt.resetBodyAndPrint(req, resp); err != nil {
+		if err = r.g.opt.resetBodyAndPrint(req, resp); err != nil {
 			return err
 		}
 	}
 
 	if r.bodyDecoder != nil {
-		if err := r.bodyDecoder.Decode(resp.Body); err != nil {
-			if err != io.EOF {
-				return err
-			}
+		if err = r.bodyDecoder.Decode(resp.Body); err != nil {
+			return err
 		}
 	}
 
-	if r.httpCode != nil {
-		*r.httpCode = resp.StatusCode
-	}
 	return nil
 }
 
