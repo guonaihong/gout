@@ -1,7 +1,6 @@
 # gout
 gout 是go写的http 客户端，为提高工作效率而开发
 
-[![Build Status](https://travis-ci.org/guonaihong/gout.png)](https://travis-ci.org/guonaihong/gout)
 ![Go](https://github.com/guonaihong/gout/workflows/Go/badge.svg)
 [![codecov](https://codecov.io/gh/guonaihong/gout/branch/master/graph/badge.svg)](https://codecov.io/gh/guonaihong/gout)
 [![Go Report Card](https://goreportcard.com/badge/github.com/guonaihong/gout)](https://goreportcard.com/report/github.com/guonaihong/gout)
