@@ -149,33 +149,6 @@ func TestBindJSON(t *testing.T) {
 	}
 }
 
-func TestBindHeader(t *testing.T) {
-	router := func() *gin.Engine {
-		router := gin.New()
-
-		router.GET("/test.header", func(c *gin.Context) {
-			c.Writer.Header().Add("sid", "sid-ok")
-		})
-
-		return router
-	}()
-
-	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-
-	g := New(nil)
-
-	type testHeader struct {
-		Sid  string `header:"sid"`
-		Code int
-	}
-
-	var tHeader testHeader
-	err := g.GET(ts.URL + "/test.header").BindHeader(&tHeader).Code(&tHeader.Code).Do()
-	assert.NoError(t, err)
-	assert.Equal(t, tHeader.Code, 200)
-	assert.Equal(t, tHeader.Sid, "sid-ok")
-}
-
 type testForm struct {
 	Mode    string  `form:"mode"`
 	Text    string  `form:"text"`
@@ -333,62 +306,6 @@ func TestSetFormStruct(t *testing.T) {
 		SetForm(&reqTestForm).
 		Code(&code).
 		Do()
-
-	assert.NoError(t, err)
-}
-
-func TestSetHeaderMap(t *testing.T) {
-}
-
-func TestSetHeaderStruct(t *testing.T) {
-	type testHeader2 struct {
-		Q8 uint8 `header:"h8"`
-	}
-
-	type testHeader struct {
-		Q1 string    `header:"h1"`
-		Q2 int       `header:"h2"`
-		Q3 float32   `header:"h3"`
-		Q4 float64   `header:"h4"`
-		Q5 time.Time `header:"h5" time_format:"unix"`
-		Q6 time.Time `header:"h6" time_format:"unixNano"`
-		Q7 time.Time `header:"h7" time_format:"2006-01-02"`
-		testHeader2
-	}
-
-	h := testHeader{
-		Q1: "v1",
-		Q2: 2,
-		Q3: 3.14,
-		Q4: 3.1415,
-		Q5: time.Date(2019, 7, 28, 14, 36, 0, 0, time.Local),
-		Q6: time.Date(2019, 7, 28, 14, 36, 0, 1000, time.Local),
-		Q7: time.Date(2019, 7, 28, 0, 0, 0, 0, time.Local),
-		testHeader2: testHeader2{
-			Q8: 8,
-		},
-	}
-
-	router := func() *gin.Engine {
-		router := gin.New()
-		router.GET("/test.header", func(c *gin.Context) {
-			h2 := testHeader{}
-			err := c.BindHeader(&h2)
-			assert.NoError(t, err)
-
-			assert.Equal(t, h, h2)
-		})
-
-		return router
-	}()
-
-	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-	defer ts.Close()
-
-	g := New(nil)
-	code := 0
-
-	err := g.GET(ts.URL + "/test.header").SetHeader(h).Code(&code).Do()
 
 	assert.NoError(t, err)
 }

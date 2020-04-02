@@ -33,7 +33,7 @@ type Req struct {
 	bodyDecoder decode.Decoder
 
 	// http header
-	headerEncode interface{}
+	headerEncode []interface{}
 	headerDecode interface{}
 
 	// query
@@ -247,7 +247,7 @@ func (r *Req) Request() (req *http.Request, err error) {
 
 	// set http header
 	if r.headerEncode != nil {
-		err = encode.Encode(r.headerEncode, encode.NewHeaderEncode(req))
+		err = r.encodeHeader(req)
 		if err != nil {
 			return nil, err
 		}
@@ -256,6 +256,21 @@ func (r *Req) Request() (req *http.Request, err error) {
 	r.addDefDebug()
 	r.addContextType(req)
 	return req, nil
+}
+
+func (r *Req) encodeHeader(req *http.Request) (err error) {
+	for _, h := range r.headerEncode {
+		if h == nil {
+			continue
+		}
+
+		err = encode.Encode(h, encode.NewHeaderEncode(req))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func clearHeader(header http.Header) {

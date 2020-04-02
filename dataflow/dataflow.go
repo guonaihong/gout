@@ -163,8 +163,8 @@ func (df *DataFlow) SetQuery(obj interface{}) *DataFlow {
 }
 
 // SetHeader send http header
-func (df *DataFlow) SetHeader(obj interface{}) *DataFlow {
-	df.Req.headerEncode = obj
+func (df *DataFlow) SetHeader(obj ...interface{}) *DataFlow {
+	df.Req.headerEncode = append([]interface{}{}, obj...)
 	return df
 }
 
