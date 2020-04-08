@@ -54,7 +54,11 @@ func Encode(in interface{}, a Adder) error {
 		return nil
 
 	case reflect.Slice, reflect.Array:
-		if !(v.Len() > 0 && v.Len()%2 == 0) {
+		if v.Len() == 0 {
+			return nil
+		}
+
+		if v.Len()%2 != 0 {
 			return fmt.Errorf("The %T length of the code must be even", v.Kind())
 		}
 
@@ -64,6 +68,7 @@ func Encode(in interface{}, a Adder) error {
 				return err
 			}
 		}
+
 		return nil
 	}
 

@@ -133,7 +133,33 @@ func Test_BindHeader(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
-	g := New(nil)
+	type testHeader2 struct {
+		Sid  string `header:"sid"`
+		Code int
+	}
+
+	var tHeader testHeader2
+	err := New().GET(ts.URL + "/test.header").BindHeader(&tHeader).Code(&tHeader.Code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, tHeader.Code, 200)
+	assert.Equal(t, tHeader.Sid, "sid-ok")
+}
+
+// 测试设置空header
+func Test_BindHeader_empty(t *testing.T) {
+	router := func() *gin.Engine {
+		router := gin.New()
+
+		router.GET("/test.header", func(c *gin.Context) {
+			c.Writer.Header().Add("sid", "sid-ok")
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	g := New()
 
 	type testHeader2 struct {
 		Sid  string `header:"sid"`
@@ -141,8 +167,13 @@ func Test_BindHeader(t *testing.T) {
 	}
 
 	var tHeader testHeader2
-	err := g.GET(ts.URL + "/test.header").BindHeader(&tHeader).Code(&tHeader.Code).Do()
-	assert.NoError(t, err)
-	assert.Equal(t, tHeader.Code, 200)
-	assert.Equal(t, tHeader.Sid, "sid-ok")
+	for _, v := range []interface{}{
+		core.A{},
+		core.H{},
+	} {
+		err := g.GET(ts.URL + "/test.header").SetHeader(v).BindHeader(&tHeader).Code(&tHeader.Code).Do()
+		assert.NoError(t, err)
+		assert.Equal(t, tHeader.Code, 200)
+		assert.Equal(t, tHeader.Sid, "sid-ok")
+	}
 }

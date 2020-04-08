@@ -122,7 +122,7 @@ func TestBindJSON(t *testing.T) {
 	}
 
 	for k := range tests {
-		t.Logf("outbody type:%T:%p\n", tests[k].OutBody, &tests[k].OutBody)
+		//t.Logf("outbody type:%T:%p\n", tests[k].OutBody, &tests[k].OutBody)
 
 		err := POST(ts.URL + "/test.json").
 			SetJSON(&tests[k].InBody).
@@ -1021,7 +1021,7 @@ func TestDebug(t *testing.T) {
 		// 测试打开日志输出
 		func() DebugOpt {
 			return DebugFunc(func(o *DebugOption) {
-				t.Logf("--->1.DebugOption address = %p\n", o)
+				//t.Logf("--->1.DebugOption address = %p\n", o)
 				o.Debug = true
 			})
 		},
@@ -1029,7 +1029,7 @@ func TestDebug(t *testing.T) {
 		// 测试修改输出源
 		func() DebugOpt {
 			return DebugFunc(func(o *DebugOption) {
-				t.Logf("--->2.DebugOption address = %p\n", o)
+				//t.Logf("--->2.DebugOption address = %p\n", o)
 				buf.Reset()
 				o.Debug = true
 				o.Write = buf
