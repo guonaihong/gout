@@ -16,7 +16,8 @@ type encodeTest struct {
 	need interface{}
 }
 
-func testEncodeCore_Encode_Ptr(t *testing.T) {
+// 测试正确的情况
+func testEncodeCore_Encode(t *testing.T) {
 	v := struct{ I int }{}
 	p := &v
 	pp := &p
@@ -26,6 +27,7 @@ func testEncodeCore_Encode_Ptr(t *testing.T) {
 		{set: p, need: ""},
 		{set: pp, need: ""},
 		{set: ppp, need: ""},
+		{set: core.A{}, need: ""},
 	}
 
 	req, err := http.NewRequest("GET", "127.0.0.1", nil)
@@ -75,7 +77,7 @@ func testEncodeCore_Encode_Fail(t *testing.T) {
 }
 
 func TestEncodeCore_Encode(t *testing.T) {
-	testEncodeCore_Encode_Ptr(t)
+	testEncodeCore_Encode(t)
 	testEncodeCore_Encode_Fail(t)
 }
 
