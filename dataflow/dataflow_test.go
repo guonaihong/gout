@@ -55,14 +55,12 @@ func TestBindXML(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 	defer ts.Close()
 
-	g := New(nil)
-
 	d.ID = 3
 	d.Data = "test data"
 
 	code := 200
 
-	err := g.POST(ts.URL + "/test.xml").SetXML(&d).BindXML(&d2).Code(&code).Do()
+	err := New().POST(ts.URL + "/test.xml").SetXML(&d).BindXML(&d2).Code(&code).Do()
 
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)

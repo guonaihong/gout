@@ -101,3 +101,96 @@ func TestDebug_ToBodyType(t *testing.T) {
 		assert.Equal(t, test.need, got)
 	}
 }
+
+// 测试Debug接口在各个数据类型下面是否可以打印request和response消息
+func TestDebug_Debug(t *testing.T) {
+
+	rspVal := "hello world"
+	ts := createGeneral(rspVal)
+	defer ts.Close()
+
+	var buf bytes.Buffer
+
+	dbug := func() DebugOpt {
+		return DebugFunc(func(o *DebugOption) {
+			o.Debug = true
+			o.Color = true
+			o.Write = &buf
+		})
+	}()
+
+	for index, err := range []error{
+		// formdata
+		func() error {
+			buf.Reset()
+			key := "testFormdata"
+			val := "testFormdataValue"
+			err := New().POST(ts.URL).Debug(dbug).SetForm(core.H{key: val}).Do()
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(key)), -1, core.BytesToString(buf.Bytes()))
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(val)), -1)
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
+			return err
+		}(),
+		// json
+		func() error {
+			buf.Reset()
+			key := "testkeyjson"
+			val := "testvaluejson"
+			err := New().POST(ts.URL).SetJSON(core.H{key: val}).Debug(dbug).Do()
+
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(key)), -1, core.BytesToString(buf.Bytes()))
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(val)), -1)
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
+			return err
+		}(),
+		// body
+		func() error {
+			buf.Reset()
+			key := "testFormdata"
+			err := New().POST(ts.URL).Debug(dbug).SetBody(key).Do()
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(key)), -1, core.BytesToString(buf.Bytes()))
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
+			return err
+		}(),
+		// yaml
+		func() error {
+			buf.Reset()
+			key := "testkeyyaml"
+			val := "testvalueyaml"
+			err := New().POST(ts.URL).Debug(dbug).SetYAML(core.H{key: val}).Do()
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(key)), -1, core.BytesToString(buf.Bytes()))
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(val)), -1)
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
+			return err
+		}(),
+		// xml
+		func() error {
+			val := "testXMLValue"
+
+			var d data
+			d.Data = val
+			err := New().POST(ts.URL).Debug(dbug).SetXML(d).Do()
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(val)), -1, core.BytesToString(buf.Bytes()))
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
+			buf.Reset()
+			return err
+		}(),
+		// x-www-form-urlencoded
+		func() error {
+			buf.Reset()
+			key := "testwwwform"
+			val := "testwwwformvalue"
+			err := New().POST(ts.URL).Debug(dbug).SetWWWForm(core.H{key: val}).Do()
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(key)), -1, core.BytesToString(buf.Bytes()))
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(val)), -1)
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
+			return err
+		}(),
+	} {
+		assert.NoError(t, err, fmt.Sprintf("test index :%d", index))
+		if err != nil {
+			break
+		}
+
+	}
+}
