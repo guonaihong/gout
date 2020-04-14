@@ -36,7 +36,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
 
 ## 内容
 - [Installation](#Installation)
-- [Migrate documents](#Migrate-documents)
 - [example](#example)
 - [quick start](#quick-start)
 - [API Examples](#api-examples)
@@ -71,7 +70,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [Custom debug mode](#Custom-debug-mode)
 		- [trace info](#trace-info)
 	- [benchmark](#benchmark)
-		- [benchmarking a certain number of times](#benchmark-number)
+		- [benchmarking a certain number of times](#benchmarking-a-certain-number-of-times)
 		- [benchmarking for a certain time](#benchmark-duration)
 		- [benchmarking at a fixed frequency](#benchmark-rate)
 		- [Custom benchmark functions](#Custom-benchmark-functions)
@@ -1259,7 +1258,7 @@ func openDebugTrace() {
 =================== Trace Info(E): ===================
 ```
 ## benchmark
-### benckmark number
+### benchmarking a certain number of times
 下面的例子，起了20并发。对:8080端口的服务，发送3000次请求进行压测，内容为json结构
 ```go
 package main
