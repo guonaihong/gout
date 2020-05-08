@@ -37,7 +37,7 @@ type Req struct {
 	headerDecode interface{}
 
 	// query
-	queryEncode interface{}
+	queryEncode []interface{}
 
 	httpCode *int
 	g        *Gout
@@ -175,6 +175,40 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 	return
 }
 
+func (r *Req) encodeQuery() error {
+	var query string
+	q := encode.NewQueryEncode(nil)
+
+	for _, queryEncode := range r.queryEncode {
+		if qStr, ok := isAndGetString(queryEncode); ok {
+			joiner := "&"
+			if len(query) == 0 {
+				joiner = ""
+			}
+
+			query += joiner + qStr
+			continue
+		}
+
+		if err := encode.Encode(queryEncode, q); err != nil {
+			return err
+		}
+
+	}
+
+	joiner := "&"
+	if len(query) == 0 {
+		joiner = ""
+	}
+
+	query += joiner + q.End()
+	if len(query) > 0 {
+		r.url += "?" + query
+	}
+
+	return nil
+}
+
 // Request Get the http.Request object
 func (r *Req) Request() (req *http.Request, err error) {
 	if r.Err != nil {
@@ -192,20 +226,8 @@ func (r *Req) Request() (req *http.Request, err error) {
 
 	// set query header
 	if r.queryEncode != nil {
-		var query string
-		if q, ok := isAndGetString(r.queryEncode); ok {
-			query = q
-		} else {
-			q := encode.NewQueryEncode(nil)
-			if err := encode.Encode(r.queryEncode, q); err != nil {
-				return nil, err
-			}
-
-			query = q.End()
-		}
-
-		if len(query) > 0 {
-			r.url += "?" + query
+		if err := r.encodeQuery(); err != nil {
+			return nil, err
 		}
 	}
 

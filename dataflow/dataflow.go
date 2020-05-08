@@ -150,25 +150,25 @@ func (df *DataFlow) SetForm(obj interface{}) *DataFlow {
 	return df
 }
 
-// SetWWWForm send x-www-form-urlencoded to the http body
+// SetWWWForm send x-www-form-urlencoded to the http body, Support struct/map/slice types
 func (df *DataFlow) SetWWWForm(obj interface{}) *DataFlow {
 	df.Req.bodyEncoder = encode.NewWWWFormEncode(obj)
 	return df
 }
 
 // SetQuery send URL query string, Support string/[]byte/struct/map/slice types
-func (df *DataFlow) SetQuery(obj interface{}) *DataFlow {
-	df.Req.queryEncode = obj
+func (df *DataFlow) SetQuery(obj ...interface{}) *DataFlow {
+	df.Req.queryEncode = append([]interface{}{}, obj...)
 	return df
 }
 
-// SetHeader send http header
+// SetHeader send http header, Support struct/map/slice types
 func (df *DataFlow) SetHeader(obj ...interface{}) *DataFlow {
 	df.Req.headerEncode = append([]interface{}{}, obj...)
 	return df
 }
 
-// SetJSON send json to the http body
+// SetJSON send json to the http body, Support raw json(string, []byte)/struct/map types
 func (df *DataFlow) SetJSON(obj interface{}) *DataFlow {
 	df.out.opt.ReqBodyType = "json"
 	df.Req.bodyEncoder = encode.NewJSONEncode(obj)
@@ -182,7 +182,7 @@ func (df *DataFlow) SetXML(obj interface{}) *DataFlow {
 	return df
 }
 
-// SetYAML send yaml to the http body
+// SetYAML send yaml to the http body, Support struct,map types
 func (df *DataFlow) SetYAML(obj interface{}) *DataFlow {
 	df.out.opt.ReqBodyType = "yaml"
 	df.Req.bodyEncoder = encode.NewYAMLEncode(obj)

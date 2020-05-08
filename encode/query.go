@@ -21,7 +21,11 @@ func NewQueryEncode(req *http.Request) *QueryEncode {
 
 // Add Encoder core function, used to set each key / value into the http URL query
 func (q *QueryEncode) Add(key string, v reflect.Value, sf reflect.StructField) error {
-	q.values.Add(key, valToStr(v, sf))
+	val := valToStr(v, sf)
+	if len(val) == 0 {
+		return nil
+	}
+	q.values.Add(key, val)
 	return nil
 }
 
