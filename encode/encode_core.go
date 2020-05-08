@@ -83,6 +83,10 @@ func parseTag(tag string) (string, tagOptions) {
 func timeToStr(v reflect.Value, sf reflect.StructField) string {
 
 	t := v.Interface().(time.Time)
+	if t.IsZero() {
+		return ""
+	}
+
 	timeFormat := sf.Tag.Get("time_format")
 	if timeFormat == "" {
 		timeFormat = time.RFC3339
@@ -114,6 +118,10 @@ func valToStr(v reflect.Value, sf reflect.StructField) string {
 
 	if v.Type() == timeType {
 		return timeToStr(v, sf)
+	}
+
+	if v.IsZero() {
+		return ""
 	}
 
 	if b, ok := v.Interface().([]byte); ok {

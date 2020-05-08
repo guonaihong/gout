@@ -87,9 +87,9 @@ func TestEncodeCore_valToStr(t *testing.T) {
 		//测试空指针
 		{set: (*int)(nil), need: ""},
 		//测试指针
-		{set: new(int), need: "0"},
+		{set: new(int), need: ""},
 		//测试双重指针
-		{set: &p, need: "0"},
+		{set: &p, need: ""},
 	}
 
 	for _, v := range test {
