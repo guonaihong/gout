@@ -26,7 +26,7 @@ type Req struct {
 	url    string
 	host   string
 
-	formEncode interface{}
+	formEncode []interface{}
 
 	// http body
 	bodyEncoder encode.Encoder
@@ -209,6 +209,16 @@ func (r *Req) encodeQuery() error {
 	return nil
 }
 
+func (r *Req) encodeForm(body *bytes.Buffer, f *encode.FormEncode) error {
+	for _, body := range r.formEncode {
+		if err := encode.Encode(body, f); err != nil {
+			return err
+		}
+
+	}
+	return f.End()
+}
+
 // Request Get the http.Request object
 func (r *Req) Request() (req *http.Request, err error) {
 	if r.Err != nil {
@@ -237,12 +247,11 @@ func (r *Req) Request() (req *http.Request, err error) {
 	// 可以考虑和 bodyEncoder合并,
 	// 头疼的是f.FormDataContentType如何合并，每个encoder都实现这个方法???
 	if r.formEncode != nil {
+
 		f = encode.NewFormEncode(body)
-		if err := encode.Encode(r.formEncode, f); err != nil {
+		if err := r.encodeForm(body, f); err != nil {
 			return nil, err
 		}
-
-		f.End()
 	}
 
 	req, err = r.selectRequest(body)

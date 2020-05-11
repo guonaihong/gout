@@ -144,13 +144,13 @@ func (df *DataFlow) SetBody(obj interface{}) *DataFlow {
 	return df
 }
 
-// SetForm send form data to the http body
-func (df *DataFlow) SetForm(obj interface{}) *DataFlow {
-	df.Req.formEncode = obj
+// SetForm send form data to the http body, Support struct/map/array/slice
+func (df *DataFlow) SetForm(obj ...interface{}) *DataFlow {
+	df.Req.formEncode = append([]interface{}{}, obj...)
 	return df
 }
 
-// SetWWWForm send x-www-form-urlencoded to the http body, Support struct/map/slice types
+// SetWWWForm send x-www-form-urlencoded to the http body, Support struct/map/array/slice types
 func (df *DataFlow) SetWWWForm(obj interface{}) *DataFlow {
 	df.Req.bodyEncoder = encode.NewWWWFormEncode(obj)
 	return df
