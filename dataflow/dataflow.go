@@ -145,8 +145,8 @@ func (df *DataFlow) SetBody(obj interface{}) *DataFlow {
 }
 
 // SetForm send form data to the http body
-func (df *DataFlow) SetForm(obj interface{}) *DataFlow {
-	df.Req.formEncode = obj
+func (df *DataFlow) SetForm(obj ...interface{}) *DataFlow {
+	df.Req.formEncode = append([]interface{}{}, obj...)
 	return df
 }
 

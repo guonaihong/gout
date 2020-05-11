@@ -49,7 +49,7 @@ func TestReq_request_fail(t *testing.T) {
 		func() *Req {
 			r := Req{}
 			s := "hello"
-			r.formEncode = s
+			r.formEncode = []interface{}{s}
 			return &r
 		},
 	}

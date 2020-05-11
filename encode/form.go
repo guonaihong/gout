@@ -164,6 +164,10 @@ func (f *FormEncode) Add(key string, v reflect.Value, sf reflect.StructField) (e
 }
 
 func (f *FormEncode) createForm(key string, fc *formContent) error {
+	if len(fc.data) == 0 {
+		return nil
+	}
+
 	if !fc.isFormFile {
 		part, err := f.CreateFormField(key)
 		if err != nil {
