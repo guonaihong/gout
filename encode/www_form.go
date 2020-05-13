@@ -11,26 +11,18 @@ var _ Adder = (*WWWFormEncode)(nil)
 
 // WWWFormEncode x-www-form-urlencoded encoder structure
 type WWWFormEncode struct {
-	obj    interface{}
 	values url.Values
 }
 
 // NewWWWFormEncode create a new x-www-form-urlencoded encoder
-func NewWWWFormEncode(obj interface{}) *WWWFormEncode {
-	if obj == nil {
-		return nil
-	}
+func NewWWWFormEncode() *WWWFormEncode {
 
-	return &WWWFormEncode{obj: obj, values: make(url.Values)}
+	return &WWWFormEncode{values: make(url.Values)}
 }
 
 // Encode x-www-form-urlencoded encoder
-func (we *WWWFormEncode) Encode(w io.Writer) (err error) {
-	if err = Encode(we.obj, we); err != nil {
-		return err
-	}
-	_, err = w.Write(core.StringToBytes(we.values.Encode()))
-	return
+func (we *WWWFormEncode) Encode(obj interface{}) (err error) {
+	return Encode(obj, we)
 }
 
 // Add Encoder core function, used to set each key / value into the http x-www-form-urlencoded
@@ -38,8 +30,17 @@ func (we *WWWFormEncode) Encode(w io.Writer) (err error) {
 // reflect.Value把value转成字符串
 // reflect.StructField主要是可以在Add函数里面获取tag相关信息
 func (we *WWWFormEncode) Add(key string, v reflect.Value, sf reflect.StructField) error {
-	we.values.Add(key, valToStr(v, sf))
+	val := valToStr(v, sf)
+	if len(val) == 0 {
+		return nil
+	}
+	we.values.Add(key, val)
 	return nil
+}
+
+func (we *WWWFormEncode) End(w io.Writer) error {
+	_, err := w.Write(core.StringToBytes(we.values.Encode()))
+	return err
 }
 
 // Name x-www-form-urlencoded Encoder name
