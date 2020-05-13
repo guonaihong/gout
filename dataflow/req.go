@@ -26,7 +26,8 @@ type Req struct {
 	url    string
 	host   string
 
-	formEncode []interface{}
+	form    []interface{}
+	wwwForm []interface{}
 
 	// http body
 	bodyEncoder encode.Encoder
@@ -70,7 +71,8 @@ func (r *Req) Reset() {
 	r.index = 0
 	r.Err = nil
 	r.cookies = nil
-	r.formEncode = nil
+	r.form = nil
+	r.wwwForm = nil
 	r.bodyEncoder = nil
 	r.bodyDecoder = nil
 	r.httpCode = nil
@@ -112,6 +114,10 @@ func (r *Req) addDefDebug() {
 }
 
 func (r *Req) addContextType(req *http.Request) {
+	if r.wwwForm != nil {
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	}
+
 	if r.bodyEncoder != nil {
 		switch bodyType := r.bodyEncoder.(encode.Encoder); bodyType.Name() {
 		case "json":
@@ -120,8 +126,6 @@ func (r *Req) addContextType(req *http.Request) {
 			req.Header.Add("Content-Type", "application/xml")
 		case "yaml":
 			req.Header.Add("Content-Type", "application/x-yaml")
-		case "www-form":
-			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		}
 	}
 
@@ -210,13 +214,24 @@ func (r *Req) encodeQuery() error {
 }
 
 func (r *Req) encodeForm(body *bytes.Buffer, f *encode.FormEncode) error {
-	for _, body := range r.formEncode {
+	for _, body := range r.form {
 		if err := encode.Encode(body, f); err != nil {
 			return err
 		}
 
 	}
 	return f.End()
+}
+
+func (r *Req) encodeWWWForm(body *bytes.Buffer) error {
+	enc := encode.NewWWWFormEncode()
+	for _, formData := range r.wwwForm {
+		if err := enc.Encode(formData); err != nil {
+			return err
+		}
+	}
+
+	return enc.End(body)
 }
 
 // Request Get the http.Request object
@@ -227,8 +242,16 @@ func (r *Req) Request() (req *http.Request, err error) {
 
 	body := &bytes.Buffer{}
 
+	// 如果同时传递调用SetWWWForm和SetJSON函数，默认json优先级别比较高
+	if r.wwwForm != nil {
+		if err := r.encodeWWWForm(body); err != nil {
+			return nil, err
+		}
+	}
+
 	// set http body
 	if r.bodyEncoder != nil {
+		body.Reset()
 		if err := r.bodyEncoder.Encode(body); err != nil {
 			return nil, err
 		}
@@ -246,7 +269,7 @@ func (r *Req) Request() (req *http.Request, err error) {
 	// TODO
 	// 可以考虑和 bodyEncoder合并,
 	// 头疼的是f.FormDataContentType如何合并，每个encoder都实现这个方法???
-	if r.formEncode != nil {
+	if r.form != nil {
 
 		f = encode.NewFormEncode(body)
 		if err := r.encodeForm(body, f); err != nil {
@@ -272,7 +295,7 @@ func (r *Req) Request() (req *http.Request, err error) {
 		req.AddCookie(c)
 	}
 
-	if r.formEncode != nil {
+	if r.form != nil {
 		req.Header.Add("Content-Type", f.FormDataContentType())
 	}
 

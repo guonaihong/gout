@@ -821,42 +821,6 @@ func TestDebug(t *testing.T) {
 	assert.Equal(t, s, "false test debug")
 }
 
-type testWWWForm struct {
-	Int     int     `form:"int" www-form:"int"`
-	Float64 float64 `form:"float64" www-form:"float64"`
-	String  string  `form:"string" www-form:"string"`
-}
-
-func setupWWWForm(t *testing.T, need testWWWForm) *gin.Engine {
-	r := gin.New()
-
-	r.POST("/", func(c *gin.Context) {
-		wf := testWWWForm{}
-
-		err := c.ShouldBind(&wf)
-
-		assert.NoError(t, err)
-		//err := c.ShouldBind(&wf)
-		assert.Equal(t, need, wf)
-	})
-
-	return r
-}
-
-func TestWWWForm(t *testing.T) {
-	need := testWWWForm{
-		Int:     3,
-		Float64: 3.14,
-		String:  "test-www-Form",
-	}
-
-	router := setupWWWForm(t, need)
-	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-
-	err := POST(ts.URL).Debug(true).SetWWWForm(need).Do()
-	assert.NoError(t, err)
-}
-
 func setupDataFlow(t *testing.T) *gin.Engine {
 	router := gin.New()
 
