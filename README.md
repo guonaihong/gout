@@ -26,6 +26,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持retry-backoff，可以指定重试条件
 * 支持发送裸http数据包
 * 支持导出curl命令
+* 传入自定义*http.Client
 * 等等更多
 
 ## 演示
@@ -81,6 +82,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [send raw http request](#send-raw-http-request)
 	- [export](#export)
 		- [generate curl command](#generate-curl-command)
+	- [Incoming custom * http.Client](#Incoming-custom-*http.Client)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
@@ -1534,6 +1536,33 @@ func main() {
     // curl -X GET -H "Content-Type:application/json" -d "{\"key1\":\"val1\",\"key2\":\"val2\"}" "http://127.0.0.1:1234"
 
     fmt.Printf("%v\n", err)
+}
+
+```
+# Incoming custom *http.Client
+使用New接口即可使用自己的http.Client对象
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+
+	c := &http.Client{} //http.Client里面有fd连接池，如果对这块优化不是太了解，只使用一个实例就行
+	err := gout.New(c). // New接口可传入http.Client对象
+				GET("www.qq.com").
+				Debug(true).
+				Do()
+
+	if err != nil {
+		fmt.Printf("err = %s\n", err)
+		return
+	}
 }
 
 ```
