@@ -92,6 +92,7 @@ func Test_Bench_Rate(t *testing.T) {
 
 	assert.NoError(t, err)
 
+	assert.Equal(t, int32(number), total)
 	assert.LessOrEqual(t, int64(take), int64(time.Duration(time.Duration(number/rate)*time.Second+100*time.Millisecond)))
 	assert.GreaterOrEqual(t, int64(take), int64(time.Duration(number/rate)*time.Second-time.Second))
 }
