@@ -118,6 +118,7 @@ func (t *Task) run(sub SubTasker) {
 
 					//select里面包含default:会产生一个bug，试问t.Rate如果是很大的值, time.Sleep这句相当于没有
 					//决定消费者可以消费多少条是消费者自己决定，消费有多块，就可以产生多少令牌给消费者使用
+					//这和一开始的设计初衷相悖，消费者消费多少条需由t.Number或 t.Duration决定
 					//注释可以让t.Number 或 t.Duration更准确
 				}
 
