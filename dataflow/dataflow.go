@@ -139,6 +139,9 @@ func (df *DataFlow) SetRequest(req *http.Request) *DataFlow {
 
 // SetBody set the data to the http body, Support string/bytes/io.Reader
 func (df *DataFlow) SetBody(obj interface{}) *DataFlow {
+	if obj == nil {
+		df.Err = errors.New("SetBody:the parameter is a nil pointer")
+	}
 
 	df.Req.bodyEncoder = encode.NewBodyEncode(obj)
 	return df
@@ -279,6 +282,10 @@ func (df *DataFlow) BindHeader(obj interface{}) *DataFlow {
 // BindBody parse the variables in http body to obj.
 // obj must be a pointer variable
 func (df *DataFlow) BindBody(obj interface{}) *DataFlow {
+	if obj == nil {
+		df.Err = errors.New("BindBody:the parameter is a nil pointer")
+	}
+
 	df.Req.bodyDecoder = decode.NewBodyDecode(obj)
 	return df
 }
