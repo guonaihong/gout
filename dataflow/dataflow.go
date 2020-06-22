@@ -342,6 +342,11 @@ func (df *DataFlow) WithContext(c context.Context) *DataFlow {
 	return df
 }
 
+// Request middleware
+func (df *DataFlow) RequestUse() *DataFlow {
+	return df
+}
+
 // Debug start debug mode
 func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 	for _, v := range d {
