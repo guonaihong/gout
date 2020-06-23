@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	api "github.com/guonaihong/gout/interface"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -339,6 +340,14 @@ func (df *DataFlow) WithContext(c context.Context) *DataFlow {
 	df.Req.index++
 	df.Req.ctxIndex = df.Req.index
 	df.Req.c = c
+	return df
+}
+
+// Request middleware
+func (df *DataFlow) RequestUse(reqModify ...api.RequestMiddler) *DataFlow {
+	if len(reqModify) > 0 {
+		df.reqModify = append(df.reqModify, reqModify...)
+	}
 	return df
 }
 

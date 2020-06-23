@@ -7,6 +7,7 @@ import (
 	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	api "github.com/guonaihong/gout/interface"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -59,7 +60,8 @@ type Req struct {
 	c   context.Context
 	Err error
 
-	req *http.Request
+	reqModify []api.RequestMiddler
+	req       *http.Request
 }
 
 // Reset 重置 Req结构体
@@ -79,6 +81,7 @@ func (r *Req) Reset() {
 	r.headerDecode = nil
 	r.headerEncode = nil
 	r.queryEncode = nil
+	r.reqModify = nil
 	r.c = nil
 	r.req = nil
 }
@@ -453,6 +456,12 @@ func (r *Req) Do() (err error) {
 	}
 
 	opt := r.getDebugOpt()
+	for _, reqModify := range r.reqModify {
+		if err = reqModify.ModifyRequest(req); err != nil {
+			return err
+		}
+	}
+
 	//resp, err := r.Client().Do(req)
 	//TODO r.Client() 返回Do接口
 	resp, err := opt.startTrace(opt, r.canTrace(), req, r.Client())
