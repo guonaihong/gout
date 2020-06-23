@@ -312,6 +312,13 @@ func (r *Req) Request() (req *http.Request, err error) {
 
 	r.addDefDebug()
 	r.addContextType(req)
+	//运行请求中间件
+	for _, reqModify := range r.reqModify {
+		if err = reqModify.ModifyRequest(req); err != nil {
+			return nil, err
+		}
+	}
+
 	return req, nil
 }
 
