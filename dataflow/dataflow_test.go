@@ -5,10 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/guonaihong/gout/color"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net"
@@ -19,7 +16,26 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/color"
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
+
+func createGeneralEcho() *httptest.Server {
+	router := func() *gin.Engine {
+		router := gin.New()
+
+		router.POST("/", func(c *gin.Context) {
+			io.Copy(c.Writer, c.Request.Body)
+		})
+
+		return router
+	}()
+
+	return httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+}
 
 type testDataFlow struct {
 	send  bool
