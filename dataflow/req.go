@@ -312,6 +312,13 @@ func (r *Req) Request() (req *http.Request, err error) {
 
 	r.addDefDebug()
 	r.addContextType(req)
+	//运行请求中间件
+	for _, reqModify := range r.reqModify {
+		if err = reqModify.ModifyRequest(req); err != nil {
+			return nil, err
+		}
+	}
+
 	return req, nil
 }
 
@@ -456,12 +463,6 @@ func (r *Req) Do() (err error) {
 	}
 
 	opt := r.getDebugOpt()
-	for _, reqModify := range r.reqModify {
-		if err = reqModify.ModifyRequest(req); err != nil {
-			return err
-		}
-	}
-
 	//resp, err := r.Client().Do(req)
 	//TODO r.Client() 返回Do接口
 	resp, err := opt.startTrace(opt, r.canTrace(), req, r.Client())
