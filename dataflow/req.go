@@ -463,11 +463,6 @@ func (r *Req) Do() (err error) {
 	}
 
 	opt := r.getDebugOpt()
-	for _, reqModify := range r.reqModify {
-		if err = reqModify.ModifyRequest(req); err != nil {
-			return err
-		}
-	}
 
 	//resp, err := r.Client().Do(req)
 	//TODO r.Client() 返回Do接口
