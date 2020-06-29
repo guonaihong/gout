@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/guonaihong/gout/color"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/guonaihong/gout/color"
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 // 测试resetBodyAndPrint出错
@@ -120,6 +121,15 @@ func TestDebug_Debug(t *testing.T) {
 	}()
 
 	for index, err := range []error{
+		// 测试http header里面带%的情况
+		func() error {
+			buf.Reset()
+			err := New().POST(ts.URL).SetHeader(core.H{`h%`: "hello%", "Cookie": `username=admin; token=b7ea3ec643e4ea4871dfe515c559d28bc0d23b6d9d6b22daf206f1de9aff13e51591323199; addinfo=%7B%22chkadmin%22%3A1%2C%22chkarticle%22%3A1%2C%22levelname%22%3A%22%5Cu7ba1%5Cu7406%5Cu5458%22%2C%22userid%22%3A%221%22%2C%22useralias%22%3A%22admin%22%7D; Hm_lvt_12d9f8f1740b76bb88c6691ea1672d8b=1589265192,1589341266,1589717172,1589769747; timezone=8`}).Debug(dbug).Do()
+			assert.NoError(t, err)
+			//io.Copy(os.Stdout, &buf)
+			assert.Equal(t, bytes.Index(buf.Bytes(), []byte("NOVERB")), -1)
+			return err
+		}(),
 		// formdata
 		func() error {
 			buf.Reset()

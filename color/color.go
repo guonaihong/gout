@@ -100,7 +100,13 @@ func (c *Color) Sbluef(format string, a ...interface{}) string {
 	return c.colorf(format, a...)
 }
 
-// Spurplef 紫色函数
+// Sblue 蓝色函数
+func (c *Color) Sblue(a ...interface{}) string {
+	c.attr = Blue
+	return c.color(a...)
+}
+
+// Spurplef 紫色函数, TODO删除该函数
 func (c *Color) Spurplef(format string, a ...interface{}) string {
 	c.attr = Purple
 	return c.colorf(format, a...)
