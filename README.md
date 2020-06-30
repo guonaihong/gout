@@ -27,6 +27,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持发送裸http数据包
 * 支持导出curl命令
 * 传入自定义*http.Client
+* 支持请求中间件(https://github.com/antlabs/gout-middleware)
 * 等等更多
 
 ## 演示
