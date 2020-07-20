@@ -245,7 +245,7 @@ func (r *Report) startReport() {
 		begin := time.Now()
 		interval := r.Duration / 10
 
-		if interval == 0 || int(interval) > int(3*time.Second) {
+		if interval == 0 || int64(interval) > int64(3*time.Second) {
 			interval = 3 * time.Second
 		}
 
