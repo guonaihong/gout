@@ -73,7 +73,9 @@ func genFormContextCore(key string, val reflect.Value, sf reflect.StructField, f
 		if err != nil {
 			return err
 		}
-		fc.fileName = string(v)
+		if len(fc.fileName) == 0 {
+			fc.fileName = string(v)
+		}
 		fc.isFormFile = true
 
 	case core.FormType:
@@ -92,7 +94,9 @@ func genFormContextCore(key string, val reflect.Value, sf reflect.StructField, f
 			if err != nil {
 				return err
 			}
-			fc.fileName = v
+			if len(fc.fileName) == 0 {
+				fc.fileName = v
+			}
 		} else {
 			all = core.StringToBytes(v)
 		}
@@ -102,7 +106,9 @@ func genFormContextCore(key string, val reflect.Value, sf reflect.StructField, f
 			if err != nil {
 				return err
 			}
-			fc.fileName = core.BytesToString(v)
+			if len(fc.fileName) == 0 {
+				fc.fileName = core.BytesToString(v)
+			}
 		} else {
 			all = v
 		}
@@ -177,7 +183,7 @@ func (f *FormEncode) createForm(key string, fc *formContent) error {
 		return err
 	}
 
-	if fc.fileName == "" {
+	if len(fc.fileName) == 0 {
 		fc.fileName = key
 	}
 
