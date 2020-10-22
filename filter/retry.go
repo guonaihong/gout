@@ -82,7 +82,7 @@ func (r *Retry) init() {
 }
 
 // Does not pollute the namespace
-func (r *Retry) min(a, b time.Duration) time.Duration {
+func (r *Retry) min(a, b uint64) uint64 {
 	if a > b {
 		return b
 	}
@@ -90,13 +90,18 @@ func (r *Retry) min(a, b time.Duration) time.Duration {
 }
 
 func (r *Retry) getSleep() time.Duration {
-	temp := r.waitTime * time.Duration(math.Exp2(float64(r.currAttempt)))
+	temp := uint64(r.waitTime * time.Duration(math.Exp2(float64(r.currAttempt))))
 	if temp <= 0 {
-		temp = r.waitTime
+		temp = uint64(r.waitTime)
 	}
-	temp = r.min(r.maxWaitTime, temp)
+	temp = r.min(uint64(r.maxWaitTime), uint64(temp))
+	//对int64边界处理, 后面使用rand.Int63n所以,最大值只能是int64的最大值防止溢出
+	if temp > math.MaxInt64 {
+		temp = math.MaxInt64
+	}
+
 	temp /= 2
-	return temp + time.Duration(rand.Intn(int(temp)))
+	return time.Duration(temp) + time.Duration(rand.Int63n(int64(temp)))
 }
 
 func (r *Retry) genContext(resp *http.Response, err error) *dataflow.Context {

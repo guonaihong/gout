@@ -52,20 +52,26 @@ func Test_Retry_min(t *testing.T) {
 
 	r := Retry{}
 	for _, v := range test {
-		assert.Equal(t, r.min(time.Duration(v.a), time.Duration(v.b)), time.Duration(v.need))
+		assert.Equal(t, r.min(uint64(v.a), uint64(v.b)), uint64(v.need))
 	}
 }
 
 func Test_Retry_sleep(t *testing.T) {
-	r := Retry{attempt: 100}
+	r := Retry{attempt: 100, maxWaitTime: 10 * time.Second, waitTime: time.Second}
 	r.init()
 
 	// 方便画出曲线图
 	for i := 0; i < r.attempt; i++ {
-		sleep := r.getSleep()
-		fmt.Printf("%d\n", sleep)
-		//fmt.Printf("%d,%v\n", sleep, sleep)
-		r.currAttempt++
+		cb := func() {
+			sleep := r.getSleep()
+			fmt.Printf("%d\n", sleep)
+			//fmt.Printf("%d,%v\n", sleep, sleep)
+			r.currAttempt++
+		}
+		b := assert.NotPanics(t, cb)
+		if !b {
+			break
+		}
 	}
 }
 

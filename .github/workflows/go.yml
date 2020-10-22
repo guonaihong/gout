@@ -30,8 +30,13 @@ jobs:
     - name: Build
       run: go build -v .
 
-    - name: Test
-      run: go test -v -coverprofile='coverage.out' -covermode=count ./...
+    - name: Test-386
+      run: env GOARCH=386 go test -test.run=Test_Retry_sleep -v 
+      #run: env GOARCH=386 go test -v -coverprofile='coverage.out' -covermode=count ./...
+      
+    - name: Test-amd64
+      run: env GOARCH=amd64 go test -v -coverprofile='coverage.out' -covermode=count ./...
+
 
     - name: Upload Coverage report
       uses: codecov/codecov-action@v1

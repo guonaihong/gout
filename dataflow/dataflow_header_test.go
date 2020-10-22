@@ -16,7 +16,7 @@ type testHeader2 struct {
 
 type testSetHeader struct {
 	H1 string    `header:"h1"`
-	H2 int       `header:"h2"`
+	H2 int64     `header:"h2"`
 	H3 float32   `header:"h3"`
 	H4 float64   `header:"h4"`
 	H5 time.Time `header:"h5" time_format:"unix"`
