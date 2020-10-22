@@ -84,7 +84,7 @@ func TestHeaderDecode(t *testing.T) {
 	assert.Equal(t, float32(32.1), theader.F32)
 	assert.Equal(t, int64(1562400033000000123), theader.CreateTime.UnixNano())
 	assert.Equal(t, int64(1562400033), theader.UnixTime.Unix())
-	assert.Equal(t, int(time.Hour)+int(time.Second), int(theader.Duration))
+	assert.Equal(t, int64(time.Hour)+int64(time.Second), int64(theader.Duration))
 	assert.Equal(t, true, theader.Bool)
 
 	assert.Equal(t, Tstruct{X: 3, Y: 4}, theader.Tstruct)

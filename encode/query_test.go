@@ -52,5 +52,5 @@ func TestQueryStruct(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	assert.Equal(t, q.End(), "q1=v1&q2=v2&q3=v3&q4="+strconv.Itoa(int(unixTime.Unix()))+"&q5="+strconv.Itoa(int(unixNano.UnixNano())))
+	assert.Equal(t, q.End(), "q1=v1&q2=v2&q3=v3&q4="+strconv.FormatInt(unixTime.Unix(), 10)+"&q5="+strconv.FormatInt(unixNano.UnixNano(), 10))
 }
