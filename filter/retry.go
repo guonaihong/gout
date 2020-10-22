@@ -95,7 +95,7 @@ func (r *Retry) getSleep() time.Duration {
 		temp = uint64(r.waitTime)
 	}
 	temp = r.min(uint64(r.maxWaitTime), uint64(temp))
-	//对int64边界处理, 后面使用rand.Int32n所以,最大值只能是int64的最大值防止溢出
+	//对int64边界处理, 后面使用rand.Int63n所以,最大值只能是int64的最大值防止溢出
 	if temp > math.MaxInt64 {
 		temp = math.MaxInt64
 	}
