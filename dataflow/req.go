@@ -60,8 +60,9 @@ type Req struct {
 	c   context.Context
 	Err error
 
-	reqModify []api.RequestMiddler
-	req       *http.Request
+	reqModify         []api.RequestMiddler
+	req               *http.Request
+	noAutoContentType bool
 }
 
 // Reset 重置 Req结构体
@@ -71,6 +72,7 @@ type Req struct {
 // 有没有必要，归一化成一种??? TODO:
 func (r *Req) Reset() {
 	r.index = 0
+	r.noAutoContentType = false
 	r.Err = nil
 	r.cookies = nil
 	r.form = nil
@@ -311,7 +313,9 @@ func (r *Req) Request() (req *http.Request, err error) {
 	}
 
 	r.addDefDebug()
-	r.addContextType(req)
+	if !r.noAutoContentType {
+		r.addContextType(req)
+	}
 	//运行请求中间件
 	for _, reqModify := range r.reqModify {
 		if err = reqModify.ModifyRequest(req); err != nil {
