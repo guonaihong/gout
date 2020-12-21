@@ -367,6 +367,17 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 	return df
 }
 
+// https://github.com/guonaihong/gout/issues/264
+// When calling SetWWWForm(), the Content-Type header will be added automatically,
+// and calling NoAutoContentType() will not add an HTTP header
+//
+// SetWWWForm "Content-Type", "application/x-www-form-urlencoded"
+// SetJSON "Content-Type", "application/json"
+func (df *DataFlow) NoAutoContentType() *DataFlow {
+	df.Req.noAutoContentType = true
+	return df
+}
+
 func (df *DataFlow) IsDebug() bool {
 	return df.out.opt.Debug
 }

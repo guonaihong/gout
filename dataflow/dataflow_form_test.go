@@ -1,6 +1,7 @@
 package dataflow
 
 import (
+	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -106,4 +107,70 @@ func TestSetFormStruct(t *testing.T) {
 		assert.Equal(t, code, 200)
 
 	}
+}
+
+func TestSetForm_NoAutoContentType(t *testing.T) {
+	needValue := "x-www-form-urlencoded; charset=UTF-8"
+	needValueDefault := "x-www-form-urlencoded"
+	router := func() *gin.Engine {
+		router := gin.New()
+		router.POST("/test.form", func(c *gin.Context) {
+
+			type testFormHeader struct {
+				ContentType string `header:"content-Type"`
+			}
+
+			var header testFormHeader
+			c.ShouldBindHeader(&header)
+			if header.ContentType == needValue {
+				c.String(200, "ok")
+			} else {
+				c.String(500, "fail")
+			}
+		})
+		router.POST("/test.form/default", func(c *gin.Context) {
+
+			type testFormHeader struct {
+				ContentType string `header:"content-Type"`
+			}
+
+			var header testFormHeader
+			c.ShouldBindHeader(&header)
+			if header.ContentType == needValueDefault {
+				c.String(200, "ok")
+			} else {
+				c.String(500, "fail")
+			}
+		})
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	code := 0
+	err := New().POST(ts.URL + "/test.form").
+		NoAutoContentType().
+		SetHeader(core.A{"content-type", needValue}).
+		SetWWWForm(
+			core.A{
+				"elapsed_time", 0,
+				"user_choice_index", -1,
+				"ts", 1608191572029,
+			},
+		).Code(&code).Do()
+
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
+
+	code = 0
+	err = New().POST(ts.URL + "/test.form/default").
+		SetHeader(core.A{"content-type", needValue}).
+		SetWWWForm(
+			core.A{
+				"elapsed_time", 0,
+				"user_choice_index", -1,
+				"ts", 1608191572029,
+			},
+		).Code(&code).Do()
 }

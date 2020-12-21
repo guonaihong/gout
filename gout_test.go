@@ -46,6 +46,7 @@ func TestDebug(t *testing.T) {
 		assert.Equal(t, fmt.Sprintf("%d test debug.", k), s)
 	}
 }
+
 func TestNew(t *testing.T) {
 	c := &http.Client{}
 	tests := []*dataflow.Gout{
