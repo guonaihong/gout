@@ -8,6 +8,7 @@ import (
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	api "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/setting"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -60,9 +61,9 @@ type Req struct {
 	c   context.Context
 	Err error
 
-	reqModify         []api.RequestMiddler
-	req               *http.Request
-	noAutoContentType bool
+	reqModify []api.RequestMiddler
+	req       *http.Request
+	setting.Setting
 }
 
 // Reset 重置 Req结构体
@@ -72,7 +73,7 @@ type Req struct {
 // 有没有必要，归一化成一种??? TODO:
 func (r *Req) Reset() {
 	r.index = 0
-	r.noAutoContentType = false
+	r.NoAutoContentType = false
 	r.Err = nil
 	r.cookies = nil
 	r.form = nil
@@ -186,7 +187,7 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 
 func (r *Req) encodeQuery() error {
 	var query string
-	q := encode.NewQueryEncode(nil)
+	q := encode.NewQueryEncode(nil, r.Setting)
 
 	for _, queryEncode := range r.queryEncode {
 		if qStr, ok := isAndGetString(queryEncode); ok {
@@ -229,7 +230,7 @@ func (r *Req) encodeForm(body *bytes.Buffer, f *encode.FormEncode) error {
 }
 
 func (r *Req) encodeWWWForm(body *bytes.Buffer) error {
-	enc := encode.NewWWWFormEncode()
+	enc := encode.NewWWWFormEncode(r.Setting)
 	for _, formData := range r.wwwForm {
 		if err := enc.Encode(formData); err != nil {
 			return err
@@ -313,7 +314,7 @@ func (r *Req) Request() (req *http.Request, err error) {
 	}
 
 	r.addDefDebug()
-	if !r.noAutoContentType {
+	if !r.NoAutoContentType {
 		r.addContextType(req)
 	}
 	//运行请求中间件
@@ -497,5 +498,5 @@ func modifyURL(url string) string {
 }
 
 func reqDef(method string, url string, g *Gout) Req {
-	return Req{method: method, url: modifyURL(url), g: g}
+	return Req{method: method, url: modifyURL(url), g: g, Setting: GlobalSetting}
 }

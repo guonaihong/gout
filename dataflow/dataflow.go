@@ -374,7 +374,7 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 // SetWWWForm "Content-Type", "application/x-www-form-urlencoded"
 // SetJSON "Content-Type", "application/json"
 func (df *DataFlow) NoAutoContentType() *DataFlow {
-	df.Req.noAutoContentType = true
+	df.Req.NoAutoContentType = true
 	return df
 }
 
