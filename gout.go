@@ -61,3 +61,13 @@ func HEAD(url string) *dataflow.DataFlow {
 func OPTIONS(url string) *dataflow.DataFlow {
 	return dataflow.OPTIONS(url)
 }
+
+// 设置不忽略空值
+func NotIgnoreEmpty() {
+	dataflow.GlobalSetting.NotIgnoreEmpty = true
+}
+
+// 设置忽略空值
+func IgnoreEmpty() {
+	dataflow.GlobalSetting.NotIgnoreEmpty = false
+}

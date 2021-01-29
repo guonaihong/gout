@@ -1,6 +1,7 @@
 package encode
 
 import (
+	"github.com/guonaihong/gout/setting"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 func TestQueryStringSlice(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 
-	q := NewQueryEncode(req)
+	q := NewQueryEncode(req, setting.Setting{})
 
 	err := Encode([]string{"q1", "v1", "q2", "v2", "q3", "v3"}, q)
 
@@ -23,7 +24,7 @@ func TestQueryStringSlice(t *testing.T) {
 func TestQueryMap(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 
-	q := NewQueryEncode(req)
+	q := NewQueryEncode(req, setting.Setting{})
 
 	err := Encode(testH{"q1": "v1", "q2": "v2", "q3": "v3"}, q)
 
@@ -43,7 +44,7 @@ type testQuery struct {
 func TestQueryStruct(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 
-	q := NewQueryEncode(req)
+	q := NewQueryEncode(req, setting.Setting{})
 
 	unixTime := time.Date(2019, 07, 27, 20, 42, 53, 0, time.Local)
 	unixNano := time.Date(2019, 07, 27, 20, 42, 53, 1000, time.Local)

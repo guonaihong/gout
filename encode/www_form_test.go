@@ -3,6 +3,7 @@ package encode
 import (
 	"bytes"
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/setting"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -17,8 +18,8 @@ func Test_WWWForm_Encode(t *testing.T) {
 	var out bytes.Buffer
 
 	tests := []testWWWForm{
-		{NewWWWFormEncode(), core.A{"k1", "v1", "k2", 2, "k3", 3.14}, "k1=v1&k2=2&k3=3.14"},
-		{NewWWWFormEncode(), core.H{"k1": "v1", "k2": 2, "k3": 3.14}, "k1=v1&k2=2&k3=3.14"},
+		{NewWWWFormEncode(setting.Setting{}), core.A{"k1", "v1", "k2", 2, "k3", 3.14}, "k1=v1&k2=2&k3=3.14"},
+		{NewWWWFormEncode(setting.Setting{}), core.H{"k1": "v1", "k2": 2, "k3": 3.14}, "k1=v1&k2=2&k3=3.14"},
 	}
 
 	for _, v := range tests {
@@ -31,5 +32,5 @@ func Test_WWWForm_Encode(t *testing.T) {
 }
 
 func Test_WWWForm_Name(t *testing.T) {
-	assert.Equal(t, NewWWWFormEncode().Name(), "www-form")
+	assert.Equal(t, NewWWWFormEncode(setting.Setting{}).Name(), "www-form")
 }
