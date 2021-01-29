@@ -35,7 +35,7 @@ func TestQuery_NotIgnoreEmpty(t *testing.T) {
 		"imageUType": "",
 		"btype":      "",
 		"authid":     "",
-		"_":          1611822443760,
+		"_":          int64(1611822443760),
 	}
 
 	var out bytes.Buffer
