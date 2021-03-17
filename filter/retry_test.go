@@ -254,6 +254,31 @@ func Test_Retry_Func(t *testing.T) {
 	}
 }
 
+// 测试retry返回error的情况
+func Test_Filter_Retry_ReturnError(t *testing.T) {
+
+	func() {
+		var s string
+		err := dataflow.New().POST(":" + core.GetNoPortExists()).BindJSON(&s).F().Retry().
+			Attempt(-1).
+			WaitTime(200 * time.Millisecond).
+			MaxWaitTime(500 * time.Millisecond).Do()
+
+		assert.Equal(t, err, ErrRetryFail)
+		assert.True(t, errors.Is(err, ErrRetryFail))
+	}()
+	func() {
+		var s string
+		err := dataflow.New().POST(":" + core.GetNoPortExists()).BindJSON(&s).F().Retry().
+			Attempt(3).
+			WaitTime(200 * time.Millisecond).
+			MaxWaitTime(500 * time.Millisecond).Do()
+
+		assert.NotEqual(t, err, ErrRetryFail)
+		assert.True(t, errors.Is(err, ErrRetryFail))
+	}()
+}
+
 // 测试忽略io.EOF情况
 func Test_Filter_Retry_ioEOF(t *testing.T) {
 	router := func() *gin.Engine {
