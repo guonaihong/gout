@@ -297,6 +297,7 @@ func (df *DataFlow) BindJSON(obj interface{}) *DataFlow {
 	df.out.opt.RspBodyType = "json"
 	df.Req.bodyDecoder = decode.NewJSONDecode(obj)
 	return df
+
 }
 
 // BindYAML parse the yaml string in http body to obj.
@@ -329,16 +330,14 @@ func (df *DataFlow) Callback(cb func(*Context) error) *DataFlow {
 
 // SetTimeout set timeout, and WithContext are mutually exclusive functions
 func (df *DataFlow) SetTimeout(d time.Duration) *DataFlow {
-	df.Req.index++
-	df.Req.timeoutIndex = df.Req.index
-	df.Req.timeout = d
+	df.Req.SetTimeout(d)
 	return df
 }
 
 // WithContext set context, and SetTimeout are mutually exclusive functions
 func (df *DataFlow) WithContext(c context.Context) *DataFlow {
-	df.Req.index++
-	df.Req.ctxIndex = df.Req.index
+	df.Req.Index++
+	df.Req.ctxIndex = df.Req.Index
 	df.Req.c = c
 	return df
 }

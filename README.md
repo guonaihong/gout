@@ -86,6 +86,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 	- [Incoming custom * http.Client](#Incoming-custom-*http.Client)
 	- [Global configuration](#Global-configuration)
 		- [Null values are also serialized](#Null-values-are-also-serialized)
+		- [Global set timeout](#global-set-timeout)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
@@ -1604,6 +1605,27 @@ gout.GET(url).Debug(true).SetQuery(query).SetHeader(header).BindBody(&body).Do()
 ```
 默认会删除，```authid```等空值，使用gout.NotIgnoreEmpty()接口，空value不会删除
 
+## global set timeout
+
+设置全局超时时间。可以简化一些代码。在使用全局配置默认你已经了解它会带来的一些弊端.
+```go
+
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+	"time"
+)
+
+func main() {
+	gout.SetTimeout(time.Second * 1)
+	err := gout.GET("www.baidu.com").Do()
+	if err != nil {
+		fmt.Printf("err is:%v\n")
+	}
+}
+```
 
 # Unique features
 ## forward gin data
