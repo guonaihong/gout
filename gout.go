@@ -1,10 +1,12 @@
 package gout
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/guonaihong/gout/dataflow"
 	_ "github.com/guonaihong/gout/export"
 	_ "github.com/guonaihong/gout/filter"
-	"net/http"
 )
 
 // debug
@@ -70,4 +72,11 @@ func NotIgnoreEmpty() {
 // 设置忽略空值
 func IgnoreEmpty() {
 	dataflow.GlobalSetting.NotIgnoreEmpty = false
+}
+
+// 设置超时时间,
+// d > 0, 设置timeout
+// d == 0，取消全局变量
+func SetTimeout(d time.Duration) {
+	dataflow.GlobalSetting.SetTimeout(d)
 }

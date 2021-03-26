@@ -4,18 +4,18 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/guonaihong/gout/core"
-	"github.com/guonaihong/gout/decode"
-	"github.com/guonaihong/gout/encode"
-	api "github.com/guonaihong/gout/interface"
-	"github.com/guonaihong/gout/setting"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
-	"time"
+
+	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/decode"
+	"github.com/guonaihong/gout/encode"
+	api "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/setting"
 )
 
 type Do interface {
@@ -50,19 +50,15 @@ type Req struct {
 	//cookie
 	cookies []*http.Cookie
 
-	timeout time.Duration
-
-	//自增id，主要给互斥API定优先级
-	//对于互斥api，后面的会覆盖前面的
-	index        int
-	timeoutIndex int
-	ctxIndex     int
+	ctxIndex int
 
 	c   context.Context
 	Err error
 
 	reqModify []api.RequestMiddler
 	req       *http.Request
+
+	// 内嵌字段
 	setting.Setting
 }
 
@@ -72,8 +68,7 @@ type Req struct {
 // headerDecode只有一个可能，就定义为具体类型。这里他们的decode实现也不一样
 // 有没有必要，归一化成一种??? TODO:
 func (r *Req) Reset() {
-	r.index = 0
-	r.NoAutoContentType = false
+	r.Setting.Reset()
 	r.Err = nil
 	r.cookies = nil
 	r.form = nil
@@ -348,9 +343,10 @@ func clearHeader(header http.Header) {
 	}
 }
 
+// retry模块需要context.Context，所以这里也返回context.Context
 func (r *Req) GetContext() context.Context {
-	if r.timeout > 0 && r.timeoutIndex > r.ctxIndex {
-		r.c, _ = context.WithTimeout(context.Background(), r.timeout)
+	if r.Timeout > 0 && r.TimeoutIndex > r.ctxIndex {
+		r.c, _ = context.WithTimeout(context.Background(), r.Timeout)
 	}
 	return r.c
 }
