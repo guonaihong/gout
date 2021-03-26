@@ -47,8 +47,8 @@ func Test_Global_Timeout(t *testing.T) {
 
 	// 使用互斥api的原则，后面的覆盖前面的
 	// 这里是WithContext生效, 超时时间400ms
-	ctx, _ = context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
-	s = time.Now()
+	ctx, _ := context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
+	s := time.Now()
 	SetTimeout(shortTimeout * time.Millisecond) // 设置全局超时时间
 	err = GET(ts.URL + "/timeout").
 		WithContext(ctx).
