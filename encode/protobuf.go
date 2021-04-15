@@ -3,13 +3,12 @@ package encode
 import (
 	"errors"
 	"io"
-	"reflect"
 
 	"github.com/guonaihong/gout/core"
 	"google.golang.org/protobuf/proto"
 )
 
-var ErrNotProtobuf = errors.New("Not protobuf data")
+var ErrNotImplMessage = errors.New("The proto.Message interface is not implemented")
 
 type ProtoBufEncode struct {
 	obj interface{}
@@ -29,19 +28,10 @@ func (p *ProtoBufEncode) Encode(w io.Writer) (err error) {
 	var m proto.Message
 	var ok bool
 
-	for i := 0; i < 1; i++ {
-		m, ok = p.obj.(proto.Message)
-		if !ok {
-			objVal := reflect.ValueOf(p.obj)
-			if !objVal.CanAddr() {
-				return ErrNotProtobuf
-			}
-
-			objVal.Addr().Interface()
-
-			continue
-		}
-		break
+	m, ok = p.obj.(proto.Message)
+	if !ok {
+		// 这里如果能把普通结构体转成指针类型结构体就
+		return ErrNotImplMessage
 	}
 
 	all, err := proto.Marshal(m)

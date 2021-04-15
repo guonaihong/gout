@@ -14,14 +14,25 @@ func TestProtoBuf_Name(t *testing.T) {
 	assert.Equal(t, NewProtoBufEncode("").Name(), "protobuf")
 }
 
+func TestProtoBuf_Fail(t *testing.T) {
+
+	out := bytes.Buffer{}
+	for _, v := range []interface{}{testdata.Req{}} {
+		p := NewProtoBufEncode(v)
+		out.Reset()
+
+		err := p.Encode(&out)
+		assert.Error(t, err)
+	}
+
+}
+
 func TestProtoBuf_Encode(t *testing.T) {
 	data1, err1 := proto.Marshal(&testdata.Req{Seq: 1, Res: "fk"})
 	assert.NoError(t, err1)
 
 	data2 := &testdata.Req{Seq: 1, Res: "fk"}
-	data3 := testdata.Req{Seq: 1, Res: "fk"}
-	data := []interface{}{data1, data2, &data3, string(data1)}
-	//data := []interface{}{data1, data2, data3, string(data1)}
+	data := []interface{}{data1, data2, string(data1)}
 
 	out := bytes.Buffer{}
 

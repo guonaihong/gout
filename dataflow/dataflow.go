@@ -194,9 +194,10 @@ func (df *DataFlow) SetYAML(obj interface{}) *DataFlow {
 }
 
 // SetProtoBuf send yaml to the http body, Support struct types
+// obj必须是结构体指针或者[]byte类型
 func (df *DataFlow) SetProtoBuf(obj interface{}) *DataFlow {
 	df.out.opt.ReqBodyType = "protobuf"
-	df.Req.bodyEncoder = encode.NewYAMLEncode(obj)
+	df.Req.bodyEncoder = encode.NewProtoBufEncode(obj)
 	return df
 }
 
