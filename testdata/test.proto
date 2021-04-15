@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "github.com/guonaihong/gout/testdata";
+
+package testdata;
+
+message req {
+	int32 seq = 1;
+	string res = 2;
+}

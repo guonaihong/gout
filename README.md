@@ -57,6 +57,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [xml](#xml)
         - [form-data](#form-data)
         - [x-www-form-urlencoded](#x-www-form-urlencoded)
+		- [protobuf](#protobuf)
         - [callback](#callback)
 	- [Set request timeout](#Set-request-timeout)
     - [proxy](#proxy)
@@ -878,7 +879,23 @@ float64=3.14&int=3&string=test-www-Form
 */
 
 ```
+### protobuf
+SetProtoBuf支持，protobuf序列化后的[]byte，或者生成的protobuf结构体指针
+```go
+package main
 
+import (
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	httpCode := 0
+	err := GET(":8080/echo").
+		SetProtoBuf( /* protobuf 生成的结构体，必须传指针类型*/ ).
+		Code(&httpCode).
+		Do()
+}
+```
 ### callback
 callback主要用在，服务端会返回多种格式body的场景, 比如404返回的是html, 200返回json。
 这时候要用Callback挂载多种处理函数，处理不同的数据结构
