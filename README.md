@@ -104,7 +104,7 @@ go get github.com/guonaihong/gout
  ```bash
  cd _example
  # GOPROXY 是打开go module代理，可以更快下载模块
- # 第一次运行需要加GOPROXY下载模块，模块已的直接 go run 01-color-json.go 即可
+ # 第一次运行需要加GOPROXY下载模块，模块已安装的直接 go run 01-color-json.go 即可
  env GOPROXY=https://goproxy.cn go run 01-color-json.go
  ```
 
