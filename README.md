@@ -166,7 +166,7 @@ func main() {
 		// 结束函数
 		Do()
 
-		// 判度错误
+		// 判断错误
 	if err != nil {
 		fmt.Printf("send fail:%s\n", err)
 	}
