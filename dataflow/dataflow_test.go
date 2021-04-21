@@ -374,6 +374,7 @@ func TestCookie(t *testing.T) {
 	assert.NoError(t, err)
 	err = GET(ts.URL + "/cookie/one").SetCookies(&http.Cookie{Name: "test3", Value: "test3"}).Do()
 
+	assert.NoError(t, err)
 	assert.Equal(t, total, int32(2))
 }
 
