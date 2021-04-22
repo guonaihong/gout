@@ -1,11 +1,12 @@
 package dataflow
 
 import (
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
@@ -173,4 +174,7 @@ func TestSetForm_NoAutoContentType(t *testing.T) {
 				"ts", 1608191572029,
 			},
 		).Code(&code).Do()
+
+	assert.NoError(t, err)
+	assert.Equal(t, code, 500)
 }

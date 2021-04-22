@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -13,6 +11,9 @@ import (
 	"strings"
 	"testing"
 	"text/template"
+
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Export_Curl_newTemplate(t *testing.T) {
@@ -86,6 +87,7 @@ func Test_Export_formdata(t *testing.T) {
 			switch v := data[i+1].(type) {
 			case string:
 				part, err := w.CreateFormField(key)
+				assert.NoError(t, err)
 				_, err = part.Write([]byte(v))
 				assert.NoError(t, err)
 				if err != nil {

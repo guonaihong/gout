@@ -158,6 +158,10 @@ func (r *Report) Process(work chan struct{}) {
 		r.addCode(resp.StatusCode)
 
 		bodySize, err := io.Copy(ioutil.Discard, resp.Body)
+		if err != nil {
+			r.addErrAndFailed(err)
+			continue
+		}
 
 		r.calBody(resp, uint64(bodySize))
 

@@ -147,6 +147,8 @@ func TestSetBody(t *testing.T) {
 	assert.Equal(t, code, 200)
 
 	err = New(nil).POST(ts.URL).SetQuery(core.H{"float64": true}).SetBody(float64(12)).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 200)
 
 	err = New(nil).POST(ts.URL).SetQuery(core.H{"string": true}).SetBody("test string").Code(&code).Do()
 	assert.NoError(t, err)
