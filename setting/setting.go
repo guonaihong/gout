@@ -20,6 +20,13 @@ type Setting struct {
 
 	//当前time 的index
 	TimeoutIndex int
+
+	UseChunked bool
+}
+
+// 使用chunked数据
+func (s *Setting) Chunked() {
+	s.UseChunked = true
 }
 
 func (s *Setting) SetTimeout(d time.Duration) {

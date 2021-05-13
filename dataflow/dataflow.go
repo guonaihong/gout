@@ -336,6 +336,12 @@ func (df *DataFlow) Callback(cb func(*Context) error) *DataFlow {
 	return df
 }
 
+// Chunked
+func (df *DataFlow) Chunked() *DataFlow {
+	df.Req.Chunked()
+	return df
+}
+
 // SetTimeout set timeout, and WithContext are mutually exclusive functions
 func (df *DataFlow) SetTimeout(d time.Duration) *DataFlow {
 	df.Req.SetTimeout(d)
