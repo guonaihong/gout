@@ -449,6 +449,13 @@ func (r *Req) canTrace() bool {
 	return opt.Trace
 }
 
+// 使用chunked方式
+func (r *Req) maybeUseChunked(req *http.Request) {
+	if r.UseChunked {
+		req.ContentLength = -1
+	}
+}
+
 // Do Send function
 func (r *Req) Do() (err error) {
 	if r.Err != nil {
@@ -464,6 +471,9 @@ func (r *Req) Do() (err error) {
 	}
 
 	opt := r.getDebugOpt()
+
+	// 如果调用Chunked()接口, 就使用chunked的数据包
+	r.maybeUseChunked(req)
 
 	//resp, err := r.Client().Do(req)
 	//TODO r.Client() 返回Do接口

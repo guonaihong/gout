@@ -28,6 +28,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持导出curl命令
 * 传入自定义*http.Client
 * 支持请求中间件(https://github.com/antlabs/gout-middleware)
+* 支持设置chunked数据格式发送
 * 等等更多
 
 ## 演示
@@ -85,6 +86,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 	- [export](#export)
 		- [generate curl command](#generate-curl-command)
 	- [Incoming custom * http.Client](#Incoming-custom-*http.Client)
+	- [Using chunked data format](#Using-chunked-data-format)
 	- [Global configuration](#Global-configuration)
 		- [Null values are also serialized](#Null-values-are-also-serialized)
 		- [Global set timeout](#global-set-timeout)
@@ -1587,6 +1589,30 @@ func main() {
 }
 
 ```
+# Using chunked data format
+使用Chunked接口, 设置为"Transfer-Encoding: chunked"的数据编码方式
+``` go
+package main
+
+import (
+        "time"
+
+        "github.com/guonaihong/gout"
+)
+
+func main() {
+        err := gout.POST(":8080").
+                Chunked().
+                SetBody("11111111111").
+                Do()
+        if err != nil {
+                fmt.Printf("err :%v\n", err)
+        }   
+}
+// 使用nc 起一个tcp服务, 使用上面的代码发起数据观察下结果
+// nc -l 8080
+```
+
 # Global configuration
 ## Null values are also serialized
 ```go
