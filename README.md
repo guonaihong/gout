@@ -1595,7 +1595,7 @@ func main() {
 package main
 
 import (
-        "time"
+        "fmt"
 
         "github.com/guonaihong/gout"
 )
