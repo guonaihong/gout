@@ -30,3 +30,13 @@ func WithInsecureSkipVerify() Option {
 	b := true
 	return insecureSkipVerifyOption(b)
 }
+
+type client http.Client
+
+func (c *client) apply(opts *options) {
+	opts.hc = (*http.Client)(c)
+}
+
+func WithClient(c *http.Client) Option {
+	return (*client)(c)
+}

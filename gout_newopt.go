@@ -7,24 +7,26 @@ import (
 )
 
 type Client struct {
-	hc http.Client
+	hc *http.Client
 	*dataflow.DataFlow
 }
 
 func NewWithOpt(opts ...Option) *Client {
 	c := &Client{}
 
-	g := dataflow.New(&c.hc)
-
-	c.DataFlow = &g.DataFlow
-
-	options := options{
-		hc: &c.hc,
-	}
+	options := options{}
 
 	for _, o := range opts {
 		o.apply(&options)
 	}
+
+	c.hc = options.hc
+	if c.hc == nil {
+		c.hc = &http.Client{}
+	}
+
+	g := dataflow.New(c.hc)
+	c.DataFlow = &g.DataFlow
 	return c
 
 }
