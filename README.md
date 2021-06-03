@@ -88,6 +88,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 	- [Incoming custom * http.Client](#Incoming-custom-*http.Client)
 	- [Using chunked data format](#Using-chunked-data-format)
 	- [Global configuration](#Global-configuration)
+		- [Insecure skip verify](#insecure-skip-verify)
 		- [Null values are also serialized](#Null-values-are-also-serialized)
 		- [Global set timeout](#global-set-timeout)
  - [Unique features](#Unique-features)
@@ -1614,6 +1615,25 @@ func main() {
 ```
 
 # Global configuration
+这里记录全局配置的方法, 后面所有的全局配置都推荐使用```gout.NewWithOpt```接口的实现
+## insecure skip verify
+忽略ssl验证, 使用```gout.WithInsecureSkipVerify()```接口配置该功能, 传入```gout.NewWithOpt```接口即可生效.
+```go
+import (
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	// globalWithOpt里面包含连接池, 这是一个全局可复用的对象
+	globalWithOpt := gout.NewWithOpt(gout.WithInsecureSkipVerify())
+	err := globalWithOpt.GET("url").Do()
+	if err != nil {
+		fmt.Printf("err = %v\n" ,err)
+		return
+	}
+}
+```
+
 ## Null values are also serialized
 ```go
 	query := gout.H{
