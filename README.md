@@ -89,8 +89,9 @@ gout 是go写的http 客户端，为提高工作效率而开发
 	- [Using chunked data format](#Using-chunked-data-format)
 	- [Global configuration](#Global-configuration)
 		- [Insecure skip verify](#insecure-skip-verify)
+		- [Turn off 3xx status code automatic jump](#Turn-off-3xx-status-code-automatic-jump)
 		- [Null values are also serialized](#Null-values-are-also-serialized)
-		- [Global set timeout](#global-set-timeout)
+		- [set timeout](#set-timeout)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
@@ -1633,6 +1634,23 @@ func main() {
 	}
 }
 ```
+## Turn off 3xx status code automatic jump
+golang client库默认遇到301的状态码会自动跳转重新发起新请求, 你希望关闭这种默认形为, 那就使用下面的功能
+```go
+import (
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	// globalWithOpt里面包含连接池, 这是一个全局可复用的对象, 一个进程里面可能只需创建1个
+	globalWithOpt := gout.NewWithOpt(gout.WithClose3xxJump())
+	err := globalWithOpt.GET("url").Do()
+	if err != nil {
+		fmt.Printf("err = %v\n" ,err)
+		return
+	}
+}
+```
 
 ## Null values are also serialized
 ```go
@@ -1668,7 +1686,7 @@ gout.GET(url).Debug(true).SetQuery(query).SetHeader(header).BindBody(&body).Do()
 ```
 默认会删除，```authid```等空值，使用gout.NotIgnoreEmpty()接口，空value不会删除
 
-## global set timeout
+##  set timeout
 
 设置全局超时时间。可以简化一些代码。在使用全局配置默认你已经了解它会带来的一些弊端.
 ```go
