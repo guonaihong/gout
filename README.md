@@ -1080,6 +1080,7 @@ func main() {
 
 ```
 ## basic auth
+使用```SetBasicAuth```接口
 ```go
 func main() {
 	
