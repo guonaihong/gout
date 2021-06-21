@@ -1,4 +1,4 @@
 package gout
 
 // Version show version
-const Version = "v0.1.12"
+const Version = "v0.2.0"
