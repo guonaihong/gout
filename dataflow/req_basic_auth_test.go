@@ -34,7 +34,7 @@ func testServerBasicAuth(t *testing.T, userName, password string) *gin.Engine {
 
 		}
 
-		c.String(200, "")
+		c.String(200, "ok")
 	})
 	return r
 }
@@ -49,7 +49,7 @@ func Test_BasicAuth(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(s.ServeHTTP))
 
 	code := 0
-	err := New().GET(ts.URL).SetBasicAuth(userName, password).Code(&code).Do()
+	err := New().GET(ts.URL+"/basicauth").SetBasicAuth(userName, password).Code(&code).Do()
 	assert.NoError(t, err)
-	assert.NotEqual(t, 200, code)
+	assert.Equal(t, 200, code)
 }
