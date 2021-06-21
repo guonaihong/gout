@@ -24,9 +24,11 @@ type Do interface {
 
 // Req controls core data structure of http request
 type Req struct {
-	method string
-	url    string
-	host   string
+	method   string
+	url      string
+	host     string
+	userName *string
+	password *string
 
 	form    []interface{}
 	wwwForm []interface{}
@@ -60,6 +62,8 @@ type Req struct {
 
 	// 内嵌字段
 	setting.Setting
+
+	opt DebugOption
 }
 
 // Reset 重置 Req结构体
@@ -104,11 +108,11 @@ func (r *Req) addDefDebug() {
 	if r.bodyEncoder != nil {
 		switch bodyType := r.bodyEncoder.(encode.Encoder); bodyType.Name() {
 		case "json":
-			r.g.opt.ReqBodyType = "json"
+			r.opt.ReqBodyType = "json"
 		case "xml":
-			r.g.opt.ReqBodyType = "xml"
+			r.opt.ReqBodyType = "xml"
 		case "yaml":
-			r.g.opt.ReqBodyType = "yaml"
+			r.opt.ReqBodyType = "yaml"
 		}
 	}
 
@@ -312,6 +316,10 @@ func (r *Req) Request() (req *http.Request, err error) {
 	if !r.NoAutoContentType {
 		r.addContextType(req)
 	}
+
+	if r.userName != nil && r.password != nil {
+		req.SetBasicAuth(*r.userName, *r.password)
+	}
 	//运行请求中间件
 	for _, reqModify := range r.reqModify {
 		if err = reqModify.ModifyRequest(req); err != nil {
@@ -373,7 +381,7 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 		// This is code(output debug info) be placed here
 		// all, err := ioutil.ReadAll(resp.Body)
 		// respBody  = bytes.NewReader(all)
-		if err = r.g.opt.resetBodyAndPrint(req, resp); err != nil {
+		if err = r.opt.resetBodyAndPrint(req, resp); err != nil {
 			return err
 		}
 	}
@@ -441,7 +449,7 @@ func (r *Req) Client() *http.Client {
 }
 
 func (r *Req) getDebugOpt() *DebugOption {
-	return &r.g.opt
+	return &r.opt
 }
 
 func (r *Req) canTrace() bool {

@@ -356,6 +356,13 @@ func (df *DataFlow) WithContext(c context.Context) *DataFlow {
 	return df
 }
 
+// SetBasicAuth
+func (df *DataFlow) SetBasicAuth(username, password string) *DataFlow {
+	df.Req.userName = &username
+	df.Req.password = &password
+	return df
+}
+
 // Request middleware
 func (df *DataFlow) RequestUse(reqModify ...api.RequestMiddler) *DataFlow {
 	if len(reqModify) > 0 {
