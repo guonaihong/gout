@@ -8,8 +8,6 @@ import (
 type Gout struct {
 	*http.Client
 	DataFlow // TODO 优化
-
-	opt DebugOption
 }
 
 var (

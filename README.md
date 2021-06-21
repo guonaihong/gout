@@ -64,6 +64,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [proxy](#proxy)
 	- [socks5](#socks5)
     - [cookie](#cookie)
+	- [basic auth](#basic-auth)
     - [context](#context)
         - [Cancel a sending request](#Cancel-a-sending-request)
     - [unix socket](#unix-socket)
@@ -1077,6 +1078,25 @@ func main() {
 
 }
 
+```
+## basic auth
+```go
+func main() {
+	
+	err := gout.POST(":8080/colorjson").
+		SetBasicAuth("userName", "password").
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
 ```
 
 ## context
