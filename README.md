@@ -90,7 +90,6 @@ gout 是go写的http 客户端，为提高工作效率而开发
 	- [Global configuration](#Global-configuration)
 		- [Insecure skip verify](#insecure-skip-verify)
 		- [Turn off 3xx status code automatic jump](#Turn-off-3xx-status-code-automatic-jump)
-		- [Null values are also serialized](#Null-values-are-also-serialized)
 		- [set timeout](#set-timeout)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
@@ -1652,39 +1651,7 @@ func main() {
 }
 ```
 
-## Null values are also serialized
-```go
-	query := gout.H{
-		"t":          1296,
-		"callback":   "searchresult",
-		"q":          "美食",
-		"stype":      1,
-		"pagesize":   100,
-		"pagenum":    1,
-		"imageType":  2,
-		"imageColor": "",
-		"brand":      "",
-		"imageSType": "",
-		"fr":         1,
-		"sortFlag":   1,
-		"imageUType": "",
-		"btype":      "",
-		"authid":     "",
-		"_":          1611822443760,
-	}
-```
 
-
-调用代码如下：
-```go
-gout.GET(url).Debug(true).SetQuery(query).SetHeader(header).BindBody(&body).Do()
-```
-
-控制台请求信息如下：
-```console
-> GET xxxx?_=1611822443760&callback=searchresult&fr=1&imageType=2&pagenum=1&pagesize=100&q=%E7%BE%8E%E9%A3%9F&sortFlag=1&stype=1&t=1296 HTTP/1.1
-```
-默认会删除，```authid```等空值，使用gout.NotIgnoreEmpty()接口，空value不会删除
 
 ##  set timeout
 
