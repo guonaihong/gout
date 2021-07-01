@@ -5,4 +5,6 @@ import (
 )
 
 // 存放全局配置选项
-var GlobalSetting setting.Setting
+var GlobalSetting = setting.Setting{
+	NotIgnoreEmpty: true,
+}

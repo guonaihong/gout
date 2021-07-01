@@ -12,17 +12,17 @@ import (
 )
 
 type testQuery2 struct {
-	Q8 uint8 `query:"q8" form:"q8"`
+	Q8 uint8 `query:"q8,omitempty" form:"q8"`
 }
 
 type testQuery struct {
-	Q1 string    `query:"q1" form:"q1"`
-	Q2 int       `query:"q2" form:"q2"`
-	Q3 float32   `query:"q3" form:"q3"`
-	Q4 float64   `query:"q4" form:"q4"`
-	Q5 time.Time `query:"q5" form:"q5" time_format:"unix" time_location:"Asia/Shanghai"`
-	Q6 time.Time `query:"q6" form:"q6" time_format:"unixNano" time_location:"Asia/Shanghai"`
-	Q7 time.Time `query:"q7" form:"q7" time_format:"2006-01-02" time_location:"Asia/Shanghai"`
+	Q1 string    `query:"q1,omitempty" form:"q1"`
+	Q2 int       `query:"q2,omitempty" form:"q2"`
+	Q3 float32   `query:"q3,omitempty" form:"q3"`
+	Q4 float64   `query:"q4,omitempty" form:"q4"`
+	Q5 time.Time `query:"q5,omitempty" form:"q5" time_format:"unix" time_location:"Asia/Shanghai"`
+	Q6 time.Time `query:"q6,omitempty" form:"q6" time_format:"unixNano" time_location:"Asia/Shanghai"`
+	Q7 time.Time `query:"q7,omitempty" form:"q7" time_format:"2006-01-02" time_location:"Asia/Shanghai"`
 	testQuery2
 }
 

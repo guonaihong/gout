@@ -46,20 +46,21 @@ func TestQuery_NotIgnoreEmpty(t *testing.T) {
 		})
 	}
 
-	// 默认忽略空值
+	// 默认不忽略空值
 	err := GET(ts.URL).Debug(SaveDebug()).SetQuery(query).Do()
-	assert.NoError(t, err)
-	// 没有authid字段
-	assert.Equal(t, bytes.Index(out.Bytes(), []byte("authid")), -1)
-
-	// 重置bytes.Buffer
-	out.Reset()
-	NotIgnoreEmpty()
-
-	err = GET(ts.URL).Debug(SaveDebug()).SetQuery(query).Do()
 	assert.NoError(t, err)
 	// 有authid字段
 	assert.NotEqual(t, bytes.Index(out.Bytes(), []byte("authid")), -1)
 
+	// 重置bytes.Buffer
+	out.Reset()
+	// 忽略空值
 	IgnoreEmpty()
+	// 默认不忽略空值
+	err = GET(ts.URL).Debug(SaveDebug()).SetQuery(query).Do()
+	assert.NoError(t, err)
+	// 没有authid字段
+	assert.Equal(t, bytes.Index(out.Bytes(), []byte("authid")), -1)
+
+	NotIgnoreEmpty()
 }
