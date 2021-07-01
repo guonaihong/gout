@@ -11,9 +11,9 @@ import (
 )
 
 type testWWWForm struct {
-	Int     int     `form:"int" www-form:"int"`
-	Float64 float64 `form:"float64" www-form:"float64"`
-	String  string  `form:"string" www-form:"string"`
+	Int     int     `form:"int" www-form:"int,omitempty"`
+	Float64 float64 `form:"float64" www-form:"float64,omitempty"`
+	String  string  `form:"string" www-form:"string,omitempty"`
 }
 
 func setupWWWForm(t *testing.T, need testWWWForm) *gin.Engine {
