@@ -7,6 +7,7 @@ import (
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	api "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/setting"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
@@ -70,6 +71,12 @@ func (df *DataFlow) HEAD(url string) *DataFlow {
 // OPTIONS send HTTP OPTIONS method
 func (df *DataFlow) OPTIONS(url string) *DataFlow {
 	df.Req = reqDef(options, joinPaths("", url), df.out)
+	return df
+}
+
+// SetSetting
+func (df *DataFlow) SetSetting(s setting.Setting) *DataFlow {
+	df.Req.Setting = s
 	return df
 }
 

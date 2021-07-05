@@ -3,10 +3,14 @@ package gout
 import (
 	"crypto/tls"
 	"net/http"
+	"time"
+
+	"github.com/guonaihong/gout/setting"
 )
 
 type options struct {
 	hc *http.Client
+	setting.Setting
 }
 
 type Option interface {
@@ -56,4 +60,15 @@ func (c close3xx) apply(opts *options) {
 // 3.关闭3xx自动跳转
 func WithClose3xxJump() Option {
 	return close3xx{}
+}
+
+// 4.timeout
+type timeout time.Duration
+
+func WithTimeout(t time.Duration) Option {
+	return (*timeout)(&t)
+}
+
+func (t *timeout) apply(opts *options) {
+	opts.SetTimeout(time.Duration(*t))
 }

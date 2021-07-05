@@ -512,5 +512,13 @@ func modifyURL(url string) string {
 }
 
 func reqDef(method string, url string, g *Gout) Req {
-	return Req{method: method, url: modifyURL(url), g: g, Setting: GlobalSetting}
+	r := Req{method: method, url: modifyURL(url), g: g}
+	//后面收敛GlobalSetting, 计划删除这个变量
+	//先这么写, 控制影响的范围
+	r.Setting.NotIgnoreEmpty = GlobalSetting.NotIgnoreEmpty
+	r.Setting.Timeout = GlobalSetting.Timeout
+	r.Setting.Index = GlobalSetting.Index
+	r.TimeoutIndex = GlobalSetting.TimeoutIndex
+
+	return r
 }

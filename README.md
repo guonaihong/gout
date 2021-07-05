@@ -16,6 +16,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持设置 json 编码到请求 body 里面(可传struct, map, string, []byte 等类型)
 * 支持设置 xml 编码到请求 body 里面(可传struct, string, []byte 等类型)
 * 支持设置 yaml 编码到请求 body 里面(可传struct, map, string, []byte 等类型)
+* 支持设置 protobuf 编码到请求 body里面(可传struct)
 * 支持设置 form-data(可传 struct, map, array, slice 等类型)
 * 支持设置 x-www-form-urlencoded(可传 struct,map,array,slice 等类型) 
 * 支持设置 io.Reader，uint/uint8/uint16...int/int8...string...[]byte...float32,float64 至请求 body 里面
@@ -88,9 +89,11 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [generate curl command](#generate-curl-command)
 	- [Incoming custom * http.Client](#Incoming-custom-*http.Client)
 	- [Using chunked data format](#Using-chunked-data-format)
-	- [Global configuration](#Global-configuration)
+	- [NewWithOpt](#NewWithOpt)
 		- [Insecure skip verify](#insecure-skip-verify)
 		- [Turn off 3xx status code automatic jump](#Turn-off-3xx-status-code-automatic-jump)
+		- [NewWithOpt set timeout](#NewWithOpt-set-timeout)
+	- [Global configuration](#Global-configuration)
 		- [set timeout](#set-timeout)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
@@ -1635,7 +1638,7 @@ func main() {
 // nc -l 8080
 ```
 
-# Global configuration
+# NewWithOpt
 这里记录全局配置的方法, 后面所有的全局配置都推荐使用```gout.NewWithOpt```接口的实现
 ## insecure skip verify
 忽略ssl验证, 使用```gout.WithInsecureSkipVerify()```接口配置该功能, 传入```gout.NewWithOpt```接口即可生效.
@@ -1671,9 +1674,25 @@ func main() {
 	}
 }
 ```
+## NewWithOpt set timeout
+```gout.WithTimeout``` 为了让大家少用```gout.SetTimeout```而设计
+```go
+import (
+	"github.com/guonaihong/gout"
+)
 
+func main() {
+	// globalWithOpt里面包含连接池, 这是一个全局可复用的对象, 一个进程里面可能只需创建1个
+	globalWithOpt := gout.NewWithOpt(gout.WithTimeout())
+	err := globalWithOpt.GET("url").Do()
+	if err != nil {
+		fmt.Printf("err = %v\n" ,err)
+		return
+	}
+}
+```
 
-
+# Global configuration
 ##  set timeout
 
 设置全局超时时间。可以简化一些代码。在使用全局配置默认你已经了解它会带来的一些弊端.

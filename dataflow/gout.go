@@ -36,6 +36,7 @@ func New(c ...*http.Client) *Gout {
 	return out
 }
 
+// TODO 这一层可以直接删除
 // GET send HTTP GET method
 func GET(url string) *DataFlow {
 	return New().GET(url)
