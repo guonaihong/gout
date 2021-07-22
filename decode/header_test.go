@@ -22,6 +22,11 @@ type headerTest struct {
 	got  interface{}
 }
 
+func Test_Header_Decode_Err(t *testing.T) {
+	err := (&headerDecode{}).Decode(nil, nil)
+	assert.Error(t, err)
+}
+
 func Test_Header_Decode(t *testing.T) {
 
 	tests := []headerTest{
@@ -47,6 +52,52 @@ func Test_Header_Decode(t *testing.T) {
 				Rate:          16000,
 			},
 			got: &rspHeader{},
+		},
+		{
+			in: &http.Response{
+				Header: http.Header{
+					"Date":           []string{"1234"},
+					"Connection":     []string{"close"},
+					"Content-Length": []string{"1234"},
+					"Content-Type":   []string{"text"},
+					"Sid":            []string{"sid1", "sid2"},
+					"Max":            []string{"1000"},
+					"Rate":           []string{"16000"},
+				},
+			},
+			need: http.Header{
+				"Date":           []string{"1234"},
+				"Connection":     []string{"close"},
+				"Content-Length": []string{"1234"},
+				"Content-Type":   []string{"text"},
+				"Sid":            []string{"sid1", "sid2"},
+				"Max":            []string{"1000"},
+				"Rate":           []string{"16000"},
+			},
+			got: http.Header{},
+		},
+		{
+			in: &http.Response{
+				Header: http.Header{
+					"Date":           []string{"1234"},
+					"Connection":     []string{"close"},
+					"Content-Length": []string{"1234"},
+					"Content-Type":   []string{"text"},
+					"Sid":            []string{"sid1", "sid2"},
+					"Max":            []string{"1000"},
+					"Rate":           []string{"16000"},
+				},
+			},
+			need: &http.Header{
+				"Date":           []string{"1234"},
+				"Connection":     []string{"close"},
+				"Content-Length": []string{"1234"},
+				"Content-Type":   []string{"text"},
+				"Sid":            []string{"sid1", "sid2"},
+				"Max":            []string{"1000"},
+				"Rate":           []string{"16000"},
+			},
+			got: &http.Header{},
 		},
 	}
 

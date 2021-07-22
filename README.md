@@ -48,6 +48,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [http header](#http-header)
 		- [Set request header](#Set-request-header)
 		- [Parsing the response header](#Parsing-the-response-header)
+		- [get all header](#get-all-header)
     - [http body](#http-body)
         - [body](#body)
             - [Set the data to the http request body](#Set-the-data-to-the-http-request-body)
@@ -558,6 +559,35 @@ send string
 */
 
 ```
+#### get all header
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	header := make(http.Header)
+	err := gout.
+		// 设置POST方法和url
+		POST(":8080/req/body").
+		//打开debug模式
+		Debug(true).
+		// 获取所有的响应http header
+		BindHeader(&header).
+		//结束函数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+
+}
+```
+
 #### Parse the response body into a variable
 ```go
 // BindBody bind body到string, []byte等类型变量里面
