@@ -1,7 +1,7 @@
 module github.com/guonaihong/gout
 
 require (
-	github.com/gin-gonic/gin v1.6.0
+	github.com/gin-gonic/gin v1.7.0
 	github.com/google/uuid v1.1.1
 	github.com/mattn/go-isatty v0.0.12
 	github.com/pkg/errors v0.9.1
