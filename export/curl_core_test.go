@@ -39,7 +39,7 @@ func Test_Export_Curl_GenCurl(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	GenCurl(req, true, os.Stdout)
+	assert.NoError(t, GenCurl(req, true, os.Stdout))
 }
 
 func Test_Export_isExists(t *testing.T) {
@@ -103,7 +103,8 @@ func Test_Export_formdata(t *testing.T) {
 				if err != nil {
 					return nil, err
 				}
-				part.Write(all)
+				_, err = part.Write(all)
+				assert.NoError(t, err)
 
 			default:
 				return nil, errors.New("fail")

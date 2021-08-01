@@ -113,7 +113,7 @@ func Test_Curl_GenAndSend(t *testing.T) {
 
 		router.POST("/test.json", func(c *gin.Context) {
 			test := testData{}
-			c.BindJSON(&test)
+			assert.NoError(t, c.BindJSON(&test))
 			*b = true
 			c.JSON(200, gin.H{"1": "1"})
 		})

@@ -1,10 +1,11 @@
 package bench
 
 import (
-	"github.com/stretchr/testify/assert"
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type testTask struct {
@@ -48,7 +49,7 @@ func Test_Bench_Task_duration(t *testing.T) {
 	testTask := &testTask{}
 	task.Run(testTask)
 
-	e := time.Now().Sub(s)
+	e := time.Since(s)
 
 	assert.LessOrEqual(t, int64(e), int64(task.Duration+100*time.Millisecond))
 	assert.GreaterOrEqual(t, int64(e), int64(200*time.Millisecond))

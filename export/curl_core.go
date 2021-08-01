@@ -100,7 +100,9 @@ func (c *curl) formData(req *http.Request) error {
 				return err
 			}
 		} else {
-			io.Copy(&buf, p)
+			if _, err = io.Copy(&buf, p); err != nil {
+				return err
+			}
 		}
 
 		c.FormData = append(c.FormData, fmt.Sprintf("%q", buf.String()))
@@ -146,7 +148,10 @@ func GenCurl(req *http.Request, long bool, w io.Writer) error {
 	if len(all) > 0 {
 		c.Data = fmt.Sprintf(`%q`, core.BytesToString(all))
 	}
-	c.formData(req)
+	if err = c.formData(req); err != nil {
+		return err
+	}
+
 	c.header(req)
 	tp := newTemplate(long)
 	return tp.Execute(w, c)

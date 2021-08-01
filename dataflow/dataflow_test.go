@@ -480,7 +480,7 @@ func TestUnixSocket(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := setupUnixSocket(t, path)
 	defer func() {
-		srv.Shutdown(ctx)
+		assert.NoError(t, srv.Shutdown(ctx))
 		cancel()
 	}()
 
@@ -876,7 +876,7 @@ func Test_DataFlow_SetRequest(t *testing.T) {
 		router := gin.New()
 
 		router.POST("/test.json", func(c *gin.Context) {
-			c.BindJSON(&d3)
+			assert.NoError(t, c.BindJSON(&d3))
 			c.JSON(200, d3)
 		})
 
