@@ -59,7 +59,6 @@ type Req struct {
 
 	reqModify []api.RequestMiddler
 	req       *http.Request
-	rsp       *http.Response
 
 	// 内嵌字段
 	setting.Setting
@@ -86,7 +85,6 @@ func (r *Req) Reset() {
 	r.queryEncode = nil
 	r.reqModify = nil
 	r.c = nil
-	r.rsp = nil
 	r.req = nil
 }
 
@@ -466,18 +464,15 @@ func (r *Req) maybeUseChunked(req *http.Request) {
 	}
 }
 
-// Do Send function
-func (r *Req) Do() (err error) {
+// getReqAndRsp 内部函数获取req和resp
+func (r *Req) getReqAndRsp() (req *http.Request, rsp *http.Response, err error) {
 	if r.Err != nil {
-		return r.Err
+		return nil, nil, r.Err
 	}
 
-	// reset  Req
-	defer r.Reset()
-
-	req, err := r.Request()
+	req, err = r.Request()
 	if err != nil {
-		return err
+		return
 	}
 
 	opt := r.getDebugOpt()
@@ -487,12 +482,31 @@ func (r *Req) Do() (err error) {
 
 	//resp, err := r.Client().Do(req)
 	//TODO r.Client() 返回Do接口
-	resp, err := opt.startTrace(opt, r.canTrace(), req, r.Client())
+	rsp, err = opt.startTrace(opt, r.canTrace(), req, r.Client())
+	return
+
+}
+
+// Response 获取原始http.Response数据结构
+func (r *Req) Response() (rsp *http.Response, err error) {
+	_, rsp, err = r.getReqAndRsp()
+	defer r.Reset()
+	return
+}
+
+// Do Send function
+func (r *Req) Do() (err error) {
+
+	req, resp, err := r.getReqAndRsp()
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	// reset  Req
+	defer r.Reset()
+
 	if err != nil {
 		return err
 	}
-
-	defer resp.Body.Close()
 
 	return r.Bind(req, resp)
 }

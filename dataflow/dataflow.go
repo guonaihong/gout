@@ -332,12 +332,6 @@ func (df *DataFlow) BindXML(obj interface{}) *DataFlow {
 	return df
 }
 
-// The BindResponse interface returns data of type http.response
-func (df *DataFlow) BindResponse(rsp *http.Response) *DataFlow {
-	df.Req.rsp = rsp
-	return df
-}
-
 // Code parse the http code into the variable httpCode
 func (df *DataFlow) Code(httpCode *int) *DataFlow {
 	df.Req.httpCode = httpCode
