@@ -2,8 +2,9 @@ package decode
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewXMLDecode(t *testing.T) {
@@ -31,9 +32,9 @@ func testDecodeXML(t *testing.T, funcName string) {
 	for _, v := range tests {
 		if funcName == "TestDecode" {
 			x := NewXMLDecode(v.got)
-			x.Decode(v.r)
+			assert.NoError(t, x.Decode(v.r))
 		} else {
-			XML(v.r, v.got)
+			assert.NoError(t, XML(v.r, v.got))
 		}
 		assert.Equal(t, v.need, v.got)
 	}

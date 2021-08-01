@@ -1,10 +1,11 @@
 package encode
 
 import (
-	"github.com/guonaihong/gout/setting"
 	"net/http"
 	"net/url"
 	"reflect"
+
+	"github.com/guonaihong/gout/setting"
 )
 
 var _ Adder = (*QueryEncode)(nil)
@@ -12,7 +13,6 @@ var _ Adder = (*QueryEncode)(nil)
 // QueryEncode URL query encoder structure
 type QueryEncode struct {
 	values url.Values
-	r      *http.Request
 	setting.Setting
 }
 

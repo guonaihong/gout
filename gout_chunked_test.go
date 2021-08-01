@@ -30,8 +30,11 @@ func testTcpSocket(out *bytes.Buffer, quit chan bool, t *testing.T) (addr string
 			return
 		}
 
-		io.Copy(out, conn)
-		conn.Close()
+		defer conn.Close()
+		if _, err = io.Copy(out, conn); err != nil {
+			t.Errorf("%v\n", err)
+			return
+		}
 	}()
 
 	return addr
@@ -45,7 +48,8 @@ func Test_Use_Chunked(t *testing.T) {
 	addr := testTcpSocket(&out, quit, t)
 	time.Sleep(time.Second / 100) //等待服务起好
 
-	POST(addr).SetTimeout(time.Second / 100).Chunked().SetBody("11111111111").Do()
+	// 这里超时返回错误, 原因tcp服务没有构造http返回报文
+	assert.Error(t, POST(addr).SetTimeout(time.Second/100).Chunked().SetBody("11111111111").Do())
 	<-quit
 	//time.Sleep(time.Second)
 

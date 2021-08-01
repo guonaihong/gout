@@ -28,18 +28,16 @@ func createGeneralEcho() *httptest.Server {
 		router := gin.New()
 
 		router.POST("/", func(c *gin.Context) {
-			io.Copy(c.Writer, c.Request.Body)
+			_, err := io.Copy(c.Writer, c.Request.Body)
+			if err != nil {
+				fmt.Printf("createGeneralEcho fail:%v\n", err)
+			}
 		})
 
 		return router
 	}()
 
 	return httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-}
-
-type testDataFlow struct {
-	send  bool
-	total int32
 }
 
 type data struct {
@@ -482,7 +480,7 @@ func TestUnixSocket(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := setupUnixSocket(t, path)
 	defer func() {
-		srv.Shutdown(ctx)
+		assert.NoError(t, srv.Shutdown(ctx))
 		cancel()
 	}()
 
@@ -878,7 +876,7 @@ func Test_DataFlow_SetRequest(t *testing.T) {
 		router := gin.New()
 
 		router.POST("/test.json", func(c *gin.Context) {
-			c.BindJSON(&d3)
+			assert.NoError(t, c.BindJSON(&d3))
 			c.JSON(200, d3)
 		})
 

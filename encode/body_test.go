@@ -2,11 +2,12 @@ package encode
 
 import (
 	"bytes"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBodyEncode(t *testing.T) {
@@ -51,7 +52,7 @@ func Test_body_Encode(t *testing.T) {
 
 	for _, v := range tests {
 		b := NewBodyEncode(v.set)
-		b.Encode(v.w)
+		assert.NoError(t, b.Encode(v.w))
 		assert.Equal(t, v.w.String(), v.need)
 	}
 }

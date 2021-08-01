@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type chanWriter chan string
@@ -19,7 +21,8 @@ func (w chanWriter) Write(p []byte) (n int, err error) {
 func Test_WithInsecureSkipVerify(t *testing.T) {
 
 	ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello"))
+		_, err := w.Write([]byte("Hello"))
+		assert.NoError(t, err)
 	}))
 
 	errc := make(chanWriter, 10) // but only expecting 1

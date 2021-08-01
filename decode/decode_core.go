@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/guonaihong/gout/core"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/guonaihong/gout/core"
 )
 
 type setter interface {

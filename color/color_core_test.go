@@ -2,12 +2,13 @@ package color
 
 import (
 	"bytes"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 type testFormat struct {
@@ -50,7 +51,8 @@ func Test_ColorCore_Read(t *testing.T) {
 	f := NewFormatEncoder(strings.NewReader(j), true /*open color*/, JSONType)
 	var out bytes.Buffer
 
-	io.Copy(&out, f)
+	_, err := io.Copy(&out, f)
+	assert.NoError(t, err)
 
 	all, err := ioutil.ReadFile("./testdata/color.data")
 	if err != nil {

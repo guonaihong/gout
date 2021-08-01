@@ -15,10 +15,8 @@ import (
 )
 
 type formTest struct {
-	set      interface{} //传入的值
-	need     interface{} //期望的值
-	got      interface{} //获取的值
-	openFile bool
+	set  interface{} //传入的值
+	need interface{} //期望的值
 }
 
 func Test_Form_FormEncodeNew(t *testing.T) {
@@ -324,7 +322,7 @@ func Test_Form(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		v.f.End()
+		assert.NoError(t, v.f.End())
 
 		boundary := v.f.Writer.Boundary()
 		checkForm(t, boundary, &out, k, v.needCheckFileName)

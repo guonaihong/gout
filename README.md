@@ -46,8 +46,8 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
     - [Query Parameters](#Query-Parameters)
     - [http header](#http-header)
-		- [Set request header](#Set-request-header)
-		- [Parsing the response header](#Parsing-the-response-header)
+		- [Set request header](#set-request-header)
+		- [Parsing the response header](#parsing-the-response-header)
 		- [get all header](#get-all-header)
     - [http body](#http-body)
         - [body](#body)
@@ -62,6 +62,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [x-www-form-urlencoded](#x-www-form-urlencoded)
 		- [protobuf](#protobuf)
         - [callback](#callback)
+		- [get *http.Response](#get-response)
 	- [Set request timeout](#Set-request-timeout)
     - [proxy](#proxy)
 	- [socks5](#socks5)
@@ -967,7 +968,19 @@ func main() {
 }
 
 ```
+### get .Response
+```go
+func main() {
+	
 
+	resp, err := gout.GET(":8080").SetJSON(`{"test":"value"}`).Response()
+
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+}
+
+```
 ## Set request timeout
 setimeout是request级别的超时方案。相比http.Client级别，更灵活。
 ```go

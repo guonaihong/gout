@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"net/url"
+	"time"
+
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	api "github.com/guonaihong/gout/interface"
 	"github.com/guonaihong/gout/setting"
 	"golang.org/x/net/proxy"
-	"net"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 const (

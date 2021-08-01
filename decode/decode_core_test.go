@@ -1,12 +1,13 @@
 package decode
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type Tstruct struct {
@@ -132,14 +133,6 @@ func Test_Core_setSlice_fail(t *testing.T) {
 	//测试出错
 	err := setSlice([]string{"1", "2"}, emptyField, reflect.ValueOf([]chan struct{}{make(chan struct{})}))
 	assert.Error(t, err)
-}
-
-type time1 struct {
-	Time time.Time `test:"time"`
-}
-
-type time2 struct {
-	Time time.Time `test:"time"`
 }
 
 type time3 struct {

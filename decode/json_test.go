@@ -2,8 +2,9 @@ package decode
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewJSONDecode(t *testing.T) {
@@ -31,9 +32,9 @@ func testDecodeJSON(t *testing.T, funcName string) {
 	for _, v := range tests {
 		if funcName == "TestDecode" {
 			j := NewJSONDecode(v.got)
-			j.Decode(v.r)
+			assert.NoError(t, j.Decode(v.r))
 		} else {
-			JSON(v.r, v.got)
+			assert.NoError(t, JSON(v.r, v.got))
 		}
 		assert.Equal(t, v.need, v.got)
 	}

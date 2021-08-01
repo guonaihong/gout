@@ -60,7 +60,7 @@ type Formatter struct {
 // NewFormatEncoder 着色json/yaml/xml构造函数
 func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter {
 	// 如果颜色没打开，或者bodyType为txt
-	if openColor == false || bodyType == TxtType {
+	if !openColor || bodyType == TxtType {
 		return nil
 	}
 

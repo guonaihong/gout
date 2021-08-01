@@ -40,7 +40,7 @@ func TestProtoBuf_Encode(t *testing.T) {
 		p := NewProtoBufEncode(v)
 		out.Reset()
 
-		p.Encode(&out)
+		assert.NoError(t, p.Encode(&out))
 
 		got := testdata.Req{}
 
