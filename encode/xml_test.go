@@ -3,8 +3,9 @@ package encode
 import (
 	"bytes"
 	"encoding/xml"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type testXML struct {
@@ -39,7 +40,7 @@ func TestXMLEncode_Encode(t *testing.T) {
 		x := NewXMLEncode(v)
 		out.Reset()
 
-		x.Encode(&out)
+		assert.NoError(t, x.Encode(&out))
 
 		got := testXML{}
 

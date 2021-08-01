@@ -3,8 +3,9 @@ package encode
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type testJSON struct {
@@ -38,7 +39,7 @@ func TestJSONEncode_Encode(t *testing.T) {
 		j := NewJSONEncode(v)
 		out.Reset()
 
-		j.Encode(&out)
+		assert.NoError(t, j.Encode(&out))
 
 		got := testJSON{}
 

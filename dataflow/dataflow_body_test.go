@@ -49,11 +49,12 @@ func TestSetBody(t *testing.T) {
 
 			testBody := testBodyNeed{}
 
-			c.ShouldBindQuery(&testBody)
+			assert.NoError(t, c.ShouldBindQuery(&testBody))
 
 			var s string
 			b := bytes.NewBuffer(nil)
-			io.Copy(b, c.Request.Body)
+			_, err := io.Copy(b, c.Request.Body)
+			assert.NoError(t, err)
 			defer c.Request.Body.Close()
 
 			s = b.String()
@@ -171,7 +172,7 @@ func TestBindBody(t *testing.T) {
 		bodyBind := testBodyBind{}
 
 		router.GET("/:type", func(c *gin.Context) {
-			c.ShouldBindUri(&bodyBind)
+			assert.NoError(t, c.ShouldBindUri(&bodyBind))
 
 			switch bodyBind.Type {
 			case "uint":

@@ -2,15 +2,16 @@ package export
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/guonaihong/gout/core"
-	"github.com/guonaihong/gout/dataflow"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/dataflow"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -84,7 +85,7 @@ func Test_Curl(t *testing.T) {
 		err := c.Do()
 		assert.NoError(t, err)
 
-		os.Remove(fmt.Sprintf("./voice.pcm"))
+		os.Remove("./voice.pcm")
 		for i := 0; i < 10; i++ {
 			os.Remove(fmt.Sprintf("./voice.pcm.%d", i))
 		}

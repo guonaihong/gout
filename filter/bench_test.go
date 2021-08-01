@@ -3,17 +3,18 @@ package filter
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
+	"testing"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/guonaihong/gout/bench"
 	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/dataflow"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"sync/atomic"
-	"testing"
-	"time"
 )
 
 const (
@@ -64,7 +65,7 @@ func Test_Bench_Durations(t *testing.T) {
 		Durations(benchTime).
 		Do()
 
-	take := time.Now().Sub(s)
+	take := time.Since(s)
 
 	assert.NoError(t, err)
 	assert.LessOrEqual(t, int64(benchNumber-100*time.Millisecond), int64(take))
@@ -88,7 +89,7 @@ func Test_Bench_Rate(t *testing.T) {
 		Number(number).
 		Do()
 
-	take := time.Now().Sub(s)
+	take := time.Since(s)
 
 	assert.NoError(t, err)
 

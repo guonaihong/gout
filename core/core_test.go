@@ -2,11 +2,12 @@ package core
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type testCore struct {
@@ -93,7 +94,8 @@ func Test_Bench_closeRequest(t *testing.T) {
 	assert.NoError(t, err)
 
 	b3 := bytes.NewBuffer(nil)
-	io.Copy(b3, b2)
+	_, err = io.Copy(b3, b2)
+	assert.NoError(t, err)
 
 	// 测试body是否一样
 	assert.Equal(t, b, b3)

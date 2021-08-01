@@ -2,10 +2,11 @@ package encode
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/setting"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type testWWWForm struct {
@@ -23,8 +24,8 @@ func Test_WWWForm_Encode(t *testing.T) {
 	}
 
 	for _, v := range tests {
-		v.w.Encode(v.in)
-		v.w.End(&out)
+		assert.NoError(t, v.w.Encode(v.in))
+		assert.NoError(t, v.w.End(&out))
 		assert.Equal(t, out.String(), v.need)
 		out.Reset()
 	}

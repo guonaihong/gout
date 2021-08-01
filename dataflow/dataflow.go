@@ -4,15 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
+	"net/url"
+	"time"
+
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	api "github.com/guonaihong/gout/interface"
 	"github.com/guonaihong/gout/setting"
 	"golang.org/x/net/proxy"
-	"net"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 const (
@@ -328,6 +329,12 @@ func (df *DataFlow) BindYAML(obj interface{}) *DataFlow {
 func (df *DataFlow) BindXML(obj interface{}) *DataFlow {
 	df.out.opt.RspBodyType = "xml"
 	df.Req.bodyDecoder = decode.NewXMLDecode(obj)
+	return df
+}
+
+// The BindResponse interface returns data of type http.response
+func (df *DataFlow) BindResponse(rsp *http.Response) *DataFlow {
+	df.Req.rsp = rsp
 	return df
 }
 

@@ -59,6 +59,7 @@ type Req struct {
 
 	reqModify []api.RequestMiddler
 	req       *http.Request
+	rsp       *http.Response
 
 	// 内嵌字段
 	setting.Setting
@@ -85,6 +86,7 @@ func (r *Req) Reset() {
 	r.queryEncode = nil
 	r.reqModify = nil
 	r.c = nil
+	r.rsp = nil
 	r.req = nil
 }
 

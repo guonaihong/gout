@@ -3,10 +3,11 @@ package decode
 import (
 	"bytes"
 	"errors"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBodyDecode(t *testing.T) {
@@ -73,9 +74,9 @@ func testDecodeBody(t *testing.T, funcName string) {
 	for _, v := range tests {
 		if funcName == "TestDecode" {
 			body := NewBodyDecode(v.got)
-			body.Decode(v.r)
+			assert.NoError(t, body.Decode(v.r))
 		} else {
-			Body(v.r, v.got)
+			assert.NoError(t, Body(v.r, v.got))
 		}
 		assert.Equal(t, v.need, v.got)
 	}

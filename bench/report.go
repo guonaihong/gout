@@ -169,7 +169,7 @@ func (r *Report) Process(work chan struct{}) {
 
 		r.addComplete()
 		r.allResult <- result{
-			time:       time.Now().Sub(start),
+			time:       time.Since(start),
 			statusCode: resp.StatusCode,
 		}
 	}
@@ -178,6 +178,7 @@ func (r *Report) Process(work chan struct{}) {
 // WaitAll 等待结束
 func (r *Report) WaitAll() {
 	<-r.waitQuit
+	//TODO 处理错误
 	r.outputReport() //输出最终报表
 }
 
@@ -285,7 +286,7 @@ func (r *Report) startReport() {
 	}()
 }
 
-func (r *Report) outputReport() {
+func (r *Report) outputReport() error {
 	r.Duration = time.Now().Sub(r.startTime)
 	r.Tps = float64(r.SendNum) / r.Duration.Seconds()
 	r.AllMean = float64(r.Concurrency) * float64(r.Duration) / float64(time.Millisecond) / float64(r.SendNum)
@@ -310,5 +311,5 @@ func (r *Report) outputReport() {
 	}
 
 	tmpl := newTemplate()
-	tmpl.Execute(os.Stdout, r.report)
+	return tmpl.Execute(os.Stdout, r.report)
 }

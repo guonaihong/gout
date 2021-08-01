@@ -124,7 +124,7 @@ func TestSetForm_NoAutoContentType(t *testing.T) {
 			}
 
 			var header testFormHeader
-			c.ShouldBindHeader(&header)
+			assert.NoError(t, c.ShouldBindHeader(&header))
 			assert.Equal(t, header.ContentType, header.NeedValue)
 			if header.ContentType == header.NeedValue {
 				c.String(200, "ok")

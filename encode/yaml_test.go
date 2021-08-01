@@ -2,9 +2,10 @@ package encode
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
-	"testing"
 )
 
 type testYaml struct {
@@ -40,7 +41,7 @@ s: test encode yaml`
 		x := NewYAMLEncode(v)
 		out.Reset()
 
-		x.Encode(&out)
+		assert.NoError(t, x.Encode(&out))
 
 		got := testYaml{}
 

@@ -2,8 +2,9 @@ package decode
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewYAMLDecode(t *testing.T) {
@@ -35,9 +36,9 @@ b: bbb
 	for _, v := range tests {
 		if funcName == "TestDecode" {
 			x := NewYAMLDecode(v.got)
-			x.Decode(v.r)
+			assert.NoError(t, x.Decode(v.r))
 		} else {
-			YAML(v.r, v.got)
+			assert.NoError(t, YAML(v.r, v.got))
 		}
 		assert.Equal(t, v.need, v.got)
 	}

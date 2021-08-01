@@ -28,18 +28,16 @@ func createGeneralEcho() *httptest.Server {
 		router := gin.New()
 
 		router.POST("/", func(c *gin.Context) {
-			io.Copy(c.Writer, c.Request.Body)
+			_, err := io.Copy(c.Writer, c.Request.Body)
+			if err != nil {
+				fmt.Printf("createGeneralEcho fail:%v\n", err)
+			}
 		})
 
 		return router
 	}()
 
 	return httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-}
-
-type testDataFlow struct {
-	send  bool
-	total int32
 }
 
 type data struct {
