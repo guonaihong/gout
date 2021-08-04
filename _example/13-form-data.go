@@ -21,6 +21,7 @@ type testForm2 struct {
 	Voice2 []byte `form:"voice2" form-file:"mem"` //从内存中构造
 }
 
+// 使用map装载数据
 func mapExample() {
 
 	// 1.使用gout.H
@@ -42,6 +43,7 @@ func mapExample() {
 	}
 }
 
+// 使用结构体装载数据
 func structExample() {
 	code := 0
 	// 2.使用结构体里面的数据
@@ -60,12 +62,32 @@ func structExample() {
 	}
 }
 
+// 自定义filename
+func mapExample2() {
+	code := 0
+	// 2.使用结构体里面的数据
+	fmt.Printf("\n\n====3. use struct==============\n\n")
+	err := gout.
+		POST(":8080/test.form").
+		Debug(true).
+		SetForm(gout.H{
+			"Mode":  "A",
+			"Text":  "good",
+			"Voice": gout.FormType{FileName: "test-file-name", File: gout.FormFile("../testdata/voice.pcm")},
+		}).
+		Code(&code).Do()
+	if err != nil || code != 200 {
+
+	}
+}
+
 func main() {
 	go server()
 	time.Sleep(time.Millisecond * 500) //sleep下等服务端真正起好
 
 	mapExample()
 	structExample()
+	mapExample2()
 }
 
 func server() {
