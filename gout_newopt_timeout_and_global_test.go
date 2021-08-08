@@ -56,7 +56,7 @@ func Test_Global_Timeout(t *testing.T) {
 		Do()
 
 	assert.Error(t, err)
-	assert.GreaterOrEqual(t, int(time.Now().Sub(s)), int(middleTimeout*time.Millisecond))
+	assert.GreaterOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
 
 	SetTimeout(time.Duration(0))
 }
@@ -89,6 +89,6 @@ func Test_NewWithOpt_Timeout(t *testing.T) {
 		Do()
 
 	assert.Error(t, err)
-	assert.GreaterOrEqual(t, int(time.Now().Sub(s)), int(middleTimeout*time.Millisecond))
+	assert.GreaterOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
 
 }

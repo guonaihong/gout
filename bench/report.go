@@ -266,6 +266,7 @@ func (r *Report) startReport() {
 
 				count++
 				next := begin.Add(time.Duration(count * int(interval)))
+				//if newInterval := next.Until(time.Now()); newInterval > 0 {
 				if newInterval := next.Sub(time.Now()); newInterval > 0 {
 					nTick = time.NewTicker(newInterval)
 				} else {

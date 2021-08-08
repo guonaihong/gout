@@ -15,13 +15,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func setupEcho(total *int32) *gin.Engine {
+func setupEcho(total *int32, t *testing.T) *gin.Engine {
 
 	router := gin.Default()
 
 	cb := func(c *gin.Context) {
 		atomic.AddInt32(total, 1)
-		io.Copy(c.Writer, c.Request.Body)
+		_, err := io.Copy(c.Writer, c.Request.Body)
+		assert.NoError(t, err)
 	}
 
 	router.GET("/echo", cb)
@@ -31,7 +32,7 @@ func setupEcho(total *int32) *gin.Engine {
 
 func Test_SetProtoBuf(t *testing.T) {
 	total := int32(0)
-	router := setupEcho(&total)
+	router := setupEcho(&total, t)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 	defer ts.Close()
 

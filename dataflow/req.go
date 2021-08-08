@@ -96,10 +96,7 @@ func isAndGetString(x interface{}) (string, bool) {
 	}
 
 	if s, ok := core.GetString(p.Interface()); ok {
-		if strings.HasPrefix(s, "?") {
-			s = s[1:]
-		}
-		return s, true
+		return strings.TrimPrefix(s, "?"), true
 	}
 	return "", false
 }

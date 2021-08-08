@@ -117,7 +117,7 @@ func TestBindJSON(t *testing.T) {
 		router := gin.New()
 
 		router.POST("/test.json", func(c *gin.Context) {
-			c.BindJSON(&d3)
+			assert.NoError(t, c.BindJSON(&d3))
 			c.JSON(200, d3)
 		})
 
