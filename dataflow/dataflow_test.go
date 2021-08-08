@@ -410,7 +410,8 @@ func setupContext(t *testing.T) *gin.Engine {
 
 // test timeout
 func testWithContextTimeout(t *testing.T, ts *httptest.Server) {
-	ctx, _ := context.WithTimeout(context.Background(), withContextTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), withContextTimeout)
+	defer cancel()
 
 	err := GET(ts.URL + "/timeout").WithContext(ctx).Do()
 	assert.Error(t, err)
@@ -461,7 +462,8 @@ func setupUnixSocket(t *testing.T, path string) *http.Server {
 
 	srv := http.Server{Handler: router}
 	go func() {
-		srv.Serve(listener)
+		//外层是通过context关闭， 所以这里会返回错误
+		assert.Error(t, srv.Serve(listener))
 	}()
 
 	return &srv
@@ -667,7 +669,9 @@ func Test_DataFlow_Timeout(t *testing.T) {
 
 	// 使用互斥api的原则，后面的覆盖前面的
 	// 这里是SetTimeout生效, 超时时间200ms
-	ctx, _ := context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
+	defer cancel()
+
 	s := time.Now()
 	err = GET(ts.URL + "/timeout").
 		WithContext(ctx).
@@ -676,7 +680,7 @@ func Test_DataFlow_Timeout(t *testing.T) {
 
 	assert.Error(t, err)
 
-	assert.LessOrEqual(t, int(time.Now().Sub(s)), int(middleTimeout*time.Millisecond))
+	assert.LessOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
 
 	// 使用互斥api的原则，后面的覆盖前面的
 	// 这里是WithContext生效, 超时时间400ms
@@ -688,7 +692,7 @@ func Test_DataFlow_Timeout(t *testing.T) {
 		Do()
 
 	assert.Error(t, err)
-	assert.GreaterOrEqual(t, int(time.Now().Sub(s)), int(middleTimeout*time.Millisecond))
+	assert.GreaterOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
 }
 
 func Test_DataFlow_SetURL(t *testing.T) {
@@ -747,28 +751,28 @@ func Test_DataFlow_GetHost(t *testing.T) {
 	// 测试正确的情况
 	for _, v := range []core.Need{
 		{
-			func() string {
+			Got: func() string {
 				req, err := http.NewRequest("GET", "http://test.xx", nil)
 				assert.NoError(t, err)
 				host, err := New().SetRequest(req).GetHost()
 				assert.NoError(t, err)
 				return host
-			}(), "test.xx"},
+			}(), Need: "test.xx"},
 		{
-			func() string {
+			Got: func() string {
 				host, err := GET("192.168.6.100:3333").GetHost()
 				assert.NoError(t, err)
 				return host
 			}(),
-			"192.168.6.100:3333",
+			Need: "192.168.6.100:3333",
 		},
 		{
-			func() string {
+			Got: func() string {
 				host, err := GET("192.168.6.100:3333").SetHost("test.com").GetHost()
 				assert.NoError(t, err)
 				return host
 
-			}(), "test.com",
+			}(), Need: "test.com",
 		},
 	} {
 		assert.Equal(t, v.Need, v.Got)

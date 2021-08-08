@@ -103,7 +103,7 @@ func isAndGetString(x interface{}) (string, bool) {
 
 func (r *Req) addDefDebug() {
 	if r.bodyEncoder != nil {
-		switch bodyType := r.bodyEncoder.(encode.Encoder); bodyType.Name() {
+		switch bodyType := r.bodyEncoder; bodyType.Name() {
 		case "json":
 			r.opt.ReqBodyType = "json"
 		case "xml":
@@ -121,7 +121,7 @@ func (r *Req) addContextType(req *http.Request) {
 	}
 
 	if r.bodyEncoder != nil {
-		switch bodyType := r.bodyEncoder.(encode.Encoder); bodyType.Name() {
+		switch bodyType := r.bodyEncoder; bodyType.Name() {
 		case "json":
 			req.Header.Add("Content-Type", "application/json")
 		case "xml":

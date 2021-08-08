@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/guonaihong/gout/dataflow"
-	pkgerr "github.com/pkg/errors"
 	"math"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/guonaihong/gout/dataflow"
+	pkgerr "github.com/pkg/errors"
 )
 
 var (
@@ -138,7 +139,7 @@ func (r *Retry) Do() (err error) {
 			err = r.cb(r.genContext(resp, err))
 			if err != nil {
 				if resp != nil {
-					r.df.Bind(req, resp) //为的是输出debug信息
+					_ = r.df.Bind(req, resp) //为的是输出debug信息
 					resp.Body.Close()
 				}
 

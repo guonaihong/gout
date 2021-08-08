@@ -46,8 +46,7 @@ type report struct {
 	ErrMsg          map[string]int
 }
 
-// Report 是报表核心数据结构
-type Report struct {
+type ReportData struct {
 	SendNum int // 已经发送的http 请求
 	report
 	Number     int // 发送总次数
@@ -61,7 +60,11 @@ type Report struct {
 
 	startTime time.Time
 	*http.Client
+}
 
+// Report 是报表核心数据结构
+type Report struct {
+	ReportData
 	lerr  sync.Mutex
 	lcode sync.Mutex
 }
@@ -84,21 +87,23 @@ func NewReport(ctx context.Context,
 
 	ctx, cancel := context.WithCancel(ctx)
 	return &Report{
-		allResult: make(chan result),
-		report: report{
-			Concurrency: c,
-			StatusCodes: make(map[int]int, 1000),
-			Duration:    duration,
-			ErrMsg:      make(map[string]int, 2),
+		ReportData: ReportData{
+			allResult: make(chan result),
+			report: report{
+				Concurrency: c,
+				StatusCodes: make(map[int]int, 1000),
+				Duration:    duration,
+				ErrMsg:      make(map[string]int, 2),
+			},
+			waitQuit:   make(chan struct{}),
+			Number:     n,
+			step:       step,
+			ctx:        ctx,
+			cancel:     cancel,
+			getRequest: getRequest,
+			Client:     client,
+			startTime:  time.Now(),
 		},
-		waitQuit:   make(chan struct{}),
-		Number:     n,
-		step:       step,
-		ctx:        ctx,
-		cancel:     cancel,
-		getRequest: getRequest,
-		Client:     client,
-		startTime:  time.Now(),
 	}
 }
 
@@ -266,8 +271,8 @@ func (r *Report) startReport() {
 
 				count++
 				next := begin.Add(time.Duration(count * int(interval)))
-				//if newInterval := next.Until(time.Now()); newInterval > 0 {
-				if newInterval := next.Sub(time.Now()); newInterval > 0 {
+				if newInterval := time.Until(next); newInterval > 0 {
+					//if newInterval := next.Sub(time.Now()); newInterval > 0 {
 					nTick = time.NewTicker(newInterval)
 				} else {
 					nTick = time.NewTicker(time.Millisecond * 100)
@@ -288,7 +293,7 @@ func (r *Report) startReport() {
 }
 
 func (r *Report) outputReport() error {
-	r.Duration = time.Now().Sub(r.startTime)
+	r.Duration = time.Since(r.startTime)
 	r.Tps = float64(r.SendNum) / r.Duration.Seconds()
 	r.AllMean = float64(r.Concurrency) * float64(r.Duration) / float64(time.Millisecond) / float64(r.SendNum)
 	r.Mean = float64(r.Duration) / float64(r.SendNum) / float64(time.Millisecond)
