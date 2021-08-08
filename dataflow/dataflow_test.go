@@ -684,7 +684,8 @@ func Test_DataFlow_Timeout(t *testing.T) {
 
 	// 使用互斥api的原则，后面的覆盖前面的
 	// 这里是WithContext生效, 超时时间400ms
-	ctx, _ = context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
+	ctx, cancel = context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
+	defer cancel()
 	s = time.Now()
 	err = GET(ts.URL + "/timeout").
 		SetTimeout(shortTimeout * time.Millisecond).
