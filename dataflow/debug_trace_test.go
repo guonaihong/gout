@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func checkValue(b *bytes.Buffer) bool {
@@ -28,7 +29,7 @@ func checkValue(b *bytes.Buffer) bool {
 		}
 
 		name := sf.Name
-		if strings.Index(debugInfo, name) == -1 {
+		if !strings.Contains(debugInfo, name) {
 			return false
 		}
 		have = true

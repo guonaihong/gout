@@ -21,20 +21,7 @@ type setter interface {
 		tagValue string) error
 }
 
-type defaultSet map[string][]string
-
 var emptyField = reflect.StructField{}
-
-func (d defaultSet) Set(
-
-	value reflect.Value,
-
-	sf reflect.StructField,
-
-	tagValue string) error {
-
-	return setForm(d, value, sf, tagValue)
-}
 
 func setForm(m map[string][]string,
 	value reflect.Value,

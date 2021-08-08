@@ -3,7 +3,6 @@ package dataflow
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/guonaihong/gout/color"
 	"io"
 	"net/http"
 	"net/http/httptrace"
@@ -11,6 +10,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/guonaihong/gout/color"
 )
 
 func Trace() DebugOpt {
@@ -47,7 +48,7 @@ func (t *TraceInfo) startTrace(opt *DebugOption, needTrace bool, req *http.Reque
 			},
 
 			DNSDone: func(dnsInfo httptrace.DNSDoneInfo) {
-				dnsDuration = time.Now().Sub(dnsStart)
+				dnsDuration = time.Since(dnsStart)
 			},
 
 			GetConn: func(hostPort string) {
@@ -65,7 +66,7 @@ func (t *TraceInfo) startTrace(opt *DebugOption, needTrace bool, req *http.Reque
 			},
 
 			TLSHandshakeDone: func(tls.ConnectionState, error) {
-				tlsDuration = time.Now().Sub(tlsStart)
+				tlsDuration = time.Since(tlsStart)
 			},
 
 			WroteRequest: func(_ httptrace.WroteRequestInfo) {
@@ -75,7 +76,7 @@ func (t *TraceInfo) startTrace(opt *DebugOption, needTrace bool, req *http.Reque
 			},
 
 			GotFirstResponseByte: func() {
-				waitResponeDuration = time.Now().Sub(waitResponseStart)
+				waitResponeDuration = time.Since(waitResponseStart)
 				respStart = time.Now()
 			},
 		}
@@ -91,8 +92,8 @@ func (t *TraceInfo) startTrace(opt *DebugOption, needTrace bool, req *http.Reque
 		t.TLSDuration = tlsDuration
 		t.RequestDuration = reqDuration
 		t.WaitResponeDuration = waitResponeDuration
-		t.ResponseDuration = time.Now().Sub(respStart)
-		t.TotalDuration = time.Now().Sub(startNow)
+		t.ResponseDuration = time.Since(respStart)
+		t.TotalDuration = time.Since(startNow)
 		t.w = w
 		t.output(opt)
 	}

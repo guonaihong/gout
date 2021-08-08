@@ -3,12 +3,13 @@ package dataflow
 import (
 	"bytes"
 	"fmt"
-	"github.com/guonaihong/gout/color"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/guonaihong/gout/color"
 )
 
 // ToBodyType Returns the http body type,
@@ -79,12 +80,12 @@ func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response)
 }
 
 func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
-	if t := req.Header.Get("Content-Type"); len(t) > 0 && strings.Index(t, "json") != -1 {
+	if t := req.Header.Get("Content-Type"); len(t) > 0 && strings.Contains(t, "json") {
 		do.ReqBodyType = "json"
 	}
 
 	if t := rsp.Header.Get("Content-Type"); len(t) != 0 &&
-		strings.Index(t, "application/json") != -1 {
+		strings.Contains(t, "application/json") {
 		do.RspBodyType = "json"
 	}
 

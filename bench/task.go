@@ -108,7 +108,8 @@ func (t *Task) run(sub SubTasker) {
 
 			for {
 				next := begin.Add(time.Duration(count * interval))
-				time.Sleep(next.Sub(time.Now()))
+				time.Sleep(time.Until(next))
+				//time.Sleep(next.Sub(time.Now()))
 
 				_, ok := <-oldwork
 				if !ok {

@@ -66,7 +66,7 @@ func Test_Bench_Task_rate(t *testing.T) {
 	testTask := &testTask{}
 	task.Run(testTask)
 
-	e := time.Now().Sub(s)
+	e := time.Since(s)
 
 	assert.LessOrEqual(t, int64(e), int64(400*time.Millisecond))
 	assert.GreaterOrEqual(t, int64(e), int64(200*time.Millisecond))
