@@ -6,10 +6,48 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/guonaihong/gout/dataflow"
 )
+
+type queryWithSlice struct {
+	A []string `query:"a" form:"a"`
+	B string   `query:"b" form:"b"`
+}
+
+func testQueryWithSliceServer(t *testing.T) *httptest.Server {
+
+	r := gin.New()
+
+	need := queryWithSlice{A: []string{"1", "2", "3"}, B: "b"}
+	r.GET("/query", func(c *gin.Context) {
+
+		got := queryWithSlice{}
+		err := c.ShouldBindQuery(&got)
+		assert.NoError(t, err)
+		assert.Equal(t, need, got)
+	})
+
+	return httptest.NewServer(http.HandlerFunc(r.ServeHTTP))
+}
+
+// 测试query接口，带slice的情况
+func TestQuery_slice(t *testing.T) {
+
+	ts := testQueryWithSliceServer(t)
+
+	for _, v := range []interface{}{
+		queryWithSlice{A: []string{"1", "2", "3"}, B: "b"},
+		H{"a": []string{"1", "2", "3"}, "b": "b"},
+		A{"a", []string{"1", "2", "3"}, "b", "b"},
+	} {
+
+		err := GET(ts.URL + "/query").Debug(true).SetQuery(v).Do()
+		assert.NoError(t, err)
+	}
+}
 
 func TestQuery_NotIgnoreEmpty(t *testing.T) {
 

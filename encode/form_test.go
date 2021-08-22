@@ -79,13 +79,19 @@ func checkForm(t *testing.T, boundary string, out *bytes.Buffer, caseID int, nee
 		}
 
 		if needCheckFileName && p.FileName() != "" {
-			assert.Equal(t, p.FileName(), "voice.pcm", fmt.Sprintf("-->test case id:%d", caseID))
+			b := assert.Equal(t, p.FileName(), "voice.pcm", fmt.Sprintf("-->test case id:%d", caseID))
+			if !b {
+				return
+			}
 		}
 
 		// key
 		key := p.FormName()
 		if key == "voice" || key == "voice2" {
-			assert.NotEqual(t, len(p.FileName()), 0, fmt.Sprintf("filename is empty:%d", caseID))
+			b := assert.NotEqual(t, len(p.FileName()), 0, fmt.Sprintf("filename is empty:%d", caseID))
+			if !b {
+				return
+			}
 		}
 		// slurp is value
 		v := need[key]
