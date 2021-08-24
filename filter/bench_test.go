@@ -37,6 +37,7 @@ func Test_Bench_Number(t *testing.T) {
 	total := int32(0)
 	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
 
 	err := dataflow.POST(ts.URL).
 		SetJSON(core.H{"hello": "world"}).
@@ -55,6 +56,7 @@ func Test_Bench_Durations(t *testing.T) {
 	total := int32(0)
 	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
 
 	s := time.Now()
 	err := dataflow.POST(ts.URL).
@@ -76,6 +78,7 @@ func Test_Bench_Rate(t *testing.T) {
 	total := int32(0)
 	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
 
 	number := 800
 	rate := 400
@@ -106,6 +109,7 @@ func Test_Bench_Loop(t *testing.T) {
 	total := int32(0)
 	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
 
 	err := NewBench().
 		Concurrent(25).
@@ -128,6 +132,7 @@ func Test_Bench_fail(t *testing.T) {
 	total := int32(0)
 	router := setupBenchNumber(&total)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
 
 	tests := []dataflow.Bencher{
 		dataflow.POST(ts.URL).SetBody(time.Time{}).Filter().Bench().Concurrent(25).Number(benchNumber),
