@@ -379,6 +379,14 @@ func (df *DataFlow) RequestUse(reqModify ...api.RequestMiddler) *DataFlow {
 	return df
 }
 
+// Response middleware
+func (df *DataFlow) ResponseUse(responseModify ...api.ResponseMiddler) *DataFlow {
+	if len(responseModify) > 0 {
+		df.responseModify = append(df.responseModify, responseModify...)
+	}
+	return df
+}
+
 // Debug start debug mode
 func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 	for _, v := range d {

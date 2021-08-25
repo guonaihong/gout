@@ -58,7 +58,10 @@ type Req struct {
 	Err error
 
 	reqModify []api.RequestMiddler
-	req       *http.Request
+
+	responseModify []api.ResponseMiddler
+
+	req *http.Request
 
 	// 内嵌字段
 	setting.Setting
@@ -420,6 +423,13 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 		return err
 	}
 
+	//运行响应中间件
+	for _, modify := range r.responseModify {
+		err = modify.ModifyResponse(resp)
+		if err != nil {
+			return err
+		}
+	}
 	if r.callback != nil {
 		// 注意这里的r.callback使用了r.DataFlow的地址, r.callback和r.decode操作的是同一个的DataFlow
 		// 执行r.callback只是装载解码器, 后面的r.decode才是真正的解码
