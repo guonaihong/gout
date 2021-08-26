@@ -33,6 +33,7 @@ func testDecodeJSON(t *testing.T, funcName string) {
 		if funcName == "TestDecode" {
 			j := NewJSONDecode(v.got)
 			assert.NoError(t, j.Decode(v.r))
+			assert.Equal(t, v.got, j.Value())
 		} else {
 			assert.NoError(t, JSON(v.r, v.got))
 		}

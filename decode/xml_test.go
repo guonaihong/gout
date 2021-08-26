@@ -33,6 +33,7 @@ func testDecodeXML(t *testing.T, funcName string) {
 		if funcName == "TestDecode" {
 			x := NewXMLDecode(v.got)
 			assert.NoError(t, x.Decode(v.r))
+			assert.Equal(t, v.got, x.Value())
 		} else {
 			assert.NoError(t, XML(v.r, v.got))
 		}
