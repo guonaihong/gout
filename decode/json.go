@@ -24,6 +24,11 @@ func (j *JSONDecode) Decode(r io.Reader) error {
 	return decode.Decode(j.obj)
 }
 
+// Decode obj
+func (j *JSONDecode) Value() interface{} {
+	return j.obj
+}
+
 // JSON json decoder
 func JSON(r io.Reader, obj interface{}) error {
 	decode := json.NewDecoder(r)

@@ -24,6 +24,11 @@ func (x *XMLDecode) Decode(r io.Reader) error {
 	return decode.Decode(x.obj)
 }
 
+// Decode object
+func (x *XMLDecode) Value() interface{} {
+	return x.obj
+}
+
 // XML xml decoder
 func XML(r io.Reader, obj interface{}) error {
 	decode := xml.NewDecoder(r)

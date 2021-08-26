@@ -33,13 +33,13 @@ type testCurl struct {
 func Test_Curl(t *testing.T) {
 
 	tests := []testCurl{
+		{testCurlHeader | testCurlQuery | testCurlForm, `curl -X POST -H "H1:hv1" -H "H2:hv2" -F "mode=A" -F "text=good" -F "voice=@./voice.pcm" "http://www.qq.com?q1=qv1&q2=qv2"`},
 		{testCurlHeader, `curl -X POST -H "H1:hv1" -H "H2:hv2" "http://www.qq.com"`},
 
 		{testCurlHeader | testCurlQuery, `curl -X POST -H "H1:hv1" -H "H2:hv2" "http://www.qq.com?q1=qv1&q2=qv2"`},
-		{testCurlHeader | testCurlQuery | testCurlForm, `curl -X POST -H "H1:hv1" -H "H2:hv2" -F "mode=A" -F "text=good" -F "voice=@./voice.pcm.0" "http://www.qq.com?q1=qv1&q2=qv2"`},
 		{testCurlHeader | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --url "http://www.qq.com"`},
 		{testCurlHeader | testCurlQuery | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
-		{testCurlHeader | testCurlQuery | testCurlForm | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --form "mode=A" --form "text=good" --form "voice=@./voice.pcm.0" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
+		{testCurlHeader | testCurlQuery | testCurlForm | testLong, `curl --request POST --header "H1:hv1" --header "H2:hv2" --form "mode=A" --form "text=good" --form "voice=@./voice.pcm" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
 
 		{testCurlHeader | testJSON, `curl -X POST -H "Content-Type:application/json" -H "H1:hv1" -H "H2:hv2" -d "{\"jk1\":\"jv1\"}" "http://www.qq.com"`},
 		{testCurlHeader | testCurlQuery | testJSON, `curl -X POST -H "Content-Type:application/json" -H "H1:hv1" -H "H2:hv2" -d "{\"jk1\":\"jv1\"}" "http://www.qq.com?q1=qv1&q2=qv2"`},
@@ -48,7 +48,7 @@ func Test_Curl(t *testing.T) {
 		{testCurlHeader | testCurlQuery | testLong | testJSON, `curl --request POST --header "Content-Type:application/json" --header "H1:hv1" --header "H2:hv2" --data "{\"jk1\":\"jv1\"}" --url "http://www.qq.com?q1=qv1&q2=qv2"`},
 	}
 
-	for _, v := range tests {
+	for index, v := range tests {
 		var buf strings.Builder
 
 		g := dataflow.POST("www.qq.com")
@@ -85,7 +85,9 @@ func Test_Curl(t *testing.T) {
 		err := c.Do()
 		assert.NoError(t, err)
 
+		//fmt.Println(os.Getwd())
 		os.Remove("./voice.pcm")
+
 		for i := 0; i < 10; i++ {
 			os.Remove(fmt.Sprintf("./voice.pcm.%d", i))
 		}
@@ -95,7 +97,10 @@ func Test_Curl(t *testing.T) {
 		}
 
 		fmt.Printf("%s\n%s\n", buf.String(), v.need)
-		assert.Equal(t, strings.TrimSpace(buf.String()), v.need)
+		b := assert.Equal(t, strings.TrimSpace(buf.String()), v.need, fmt.Sprintf("test case index:%d", index))
+		if !b {
+			return
+		}
 	}
 
 }

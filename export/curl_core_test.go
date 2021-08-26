@@ -16,6 +16,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_IsExists(t *testing.T) {
+	assert.False(t, isExists("/xxxxx"))
+	assert.True(t, isExists("curl_core.go"))
+}
+
 func Test_Export_Curl_newTemplate(t *testing.T) {
 	ts := []*template.Template{newTemplate(false), newTemplate(true)}
 

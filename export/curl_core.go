@@ -83,8 +83,8 @@ func (c *curl) formData(req *http.Request) error {
 
 		if p.FileName() != "" {
 
-			fileName := getFileName(p.FileName())
-			fileName = path.Base(fileName)
+			fileName := path.Base(p.FileName())
+			fileName = getFileName(fileName)
 			fd, err := os.Create(fileName)
 			if err != nil {
 				return err

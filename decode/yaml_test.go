@@ -37,6 +37,7 @@ b: bbb
 		if funcName == "TestDecode" {
 			x := NewYAMLDecode(v.got)
 			assert.NoError(t, x.Decode(v.r))
+			assert.Equal(t, v.got, x.Value())
 		} else {
 			assert.NoError(t, YAML(v.r, v.got))
 		}

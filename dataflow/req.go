@@ -373,8 +373,11 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 	}
 
 	if r.headerDecode != nil {
-		err = decode.Header.Decode(resp, r.headerDecode)
-		if err != nil {
+		if err = decode.Header.Decode(resp, r.headerDecode); err != nil {
+			return err
+		}
+
+		if err = valid.ValidateStruct(r.headerDecode); err != nil {
 			return err
 		}
 	}
@@ -510,7 +513,14 @@ func (r *Req) Do() (err error) {
 		return err
 	}
 
-	return r.Bind(req, resp)
+	if err := r.Bind(req, resp); err != nil {
+		return err
+	}
+
+	if r.bodyDecoder != nil {
+		return valid.ValidateStruct(r.bodyDecoder.Value())
+	}
+	return nil
 }
 
 func modifyURL(url string) string {

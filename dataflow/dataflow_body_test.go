@@ -26,6 +26,7 @@ func createBodyNil(accept *bool) *httptest.Server {
 func TestSetBody_Nil(t *testing.T) {
 	accept := false
 	ts := createBodyNil(&accept)
+	defer ts.Close()
 
 	err := New().GET(ts.URL).SetBody(nil).Do()
 	assert.Error(t, err)
@@ -36,6 +37,8 @@ func TestSetBody_Nil(t *testing.T) {
 func TestBindBody_Nil(t *testing.T) {
 	accept := false
 	ts := createBodyNil(&accept)
+	defer ts.Close()
+
 	err := New().GET(ts.URL).SetBody("").BindBody(nil).Do()
 	assert.Error(t, err)
 	assert.False(t, accept)
