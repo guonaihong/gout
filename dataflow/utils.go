@@ -20,13 +20,22 @@ func lastChar(str string) uint8 {
 func join(elem ...string) (rv string) {
 
 	defer func() {
-		if strings.HasPrefix(rv, httpProto) {
-			rv = httpProto + path.Clean(rv[len(httpProto):])
-			return
-		}
+		if strings.HasPrefix(rv, httpProto) || strings.HasPrefix(rv, httpsProto) {
+			var proto, domainPath, query string
+			protoEndIdx := strings.Index(rv, "//") + 2
+			queryIdx := strings.Index(rv, "?")
 
-		if strings.HasPrefix(rv, httpsProto) {
-			rv = httpsProto + path.Clean(rv[len(httpsProto):])
+			proto = rv[:protoEndIdx]
+			if queryIdx != -1 {
+				domainPath = rv[protoEndIdx:queryIdx]
+				query = rv[queryIdx:]
+			} else if rv != proto {
+				domainPath = rv[protoEndIdx:]
+			}
+			if domainPath != "" {
+				domainPath = path.Clean(domainPath)
+			}
+			rv = proto + domainPath + query
 			return
 		}
 
