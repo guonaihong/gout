@@ -393,6 +393,13 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 			return err
 		}
 	}
+	//运行响应中间件。放到debug打印后面，避免混淆请求返回内容
+	for _, modify := range r.responseModify {
+		err = modify.ModifyResponse(resp)
+		if err != nil {
+			return err
+		}
+	}
 
 	if r.bodyDecoder != nil {
 		if err = r.bodyDecoder.Decode(resp.Body); err != nil {
@@ -426,13 +433,6 @@ func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 		return err
 	}
 
-	//运行响应中间件
-	for _, modify := range r.responseModify {
-		err = modify.ModifyResponse(resp)
-		if err != nil {
-			return err
-		}
-	}
 	if r.callback != nil {
 		// 注意这里的r.callback使用了r.DataFlow的地址, r.callback和r.decode操作的是同一个的DataFlow
 		// 执行r.callback只是装载解码器, 后面的r.decode才是真正的解码
