@@ -30,6 +30,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 传入自定义*http.Client
 * 支持请求中间件(https://github.com/antlabs/gout-middleware)
 * 支持设置chunked数据格式发送
+* 支持body, header的数据校验
 * 等等更多
 
 ## 演示
@@ -49,6 +50,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [Set request header](#set-request-header)
 		- [Parsing the response header](#parsing-the-response-header)
 		- [get all header](#get-all-header)
+	- [data valid](#data-valid)
     - [http body](#http-body)
         - [body](#body)
             - [Set the data to the http request body](#Set-the-data-to-the-http-request-body)
@@ -514,6 +516,38 @@ SetHeader([]string{"active", "enable", "action", "drop"})
 ```
 
 </details>
+
+## data valid
+数据校验使用 https://github.com/go-playground/validator 完成功能, 更多语法可看该文档.
+```go
+import (
+	"fmt"
+	"github.com/guonaihong/gout"
+)
+
+type testValid struct {        
+        Val string `valid:"required"`   
+} 
+
+func main() {
+	tv := testValid{}
+	err := gout.
+		// 设置POST方法和url
+		POST(":8080/req/body").
+		//打开debug模式
+		Debug(true).
+		//解析json, 并且当需要的字段没有值时, 返回错误
+		BindJSON(&tv).
+		//结束函数
+		Do()
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+
+}
+```
 
 ## http body
 ### body

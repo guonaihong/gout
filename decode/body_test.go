@@ -75,6 +75,7 @@ func testDecodeBody(t *testing.T, funcName string) {
 		if funcName == "TestDecode" {
 			body := NewBodyDecode(v.got)
 			assert.NoError(t, body.Decode(v.r))
+			assert.Equal(t, v.got, body.Value())
 		} else {
 			assert.NoError(t, Body(v.r, v.got))
 		}
