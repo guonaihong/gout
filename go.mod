@@ -1,7 +1,5 @@
 module github.com/guonaihong/gout
 
-go 1.16
-
 require (
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/locales v0.13.0
