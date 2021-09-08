@@ -29,7 +29,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持导出curl命令
 * 传入自定义*http.Client
 * 支持请求中间件(https://github.com/antlabs/gout-middleware)
-* 支持相应中间件
+* 支持相应中间件ResponseUse
 * 支持设置chunked数据格式发送
 * 支持body, header的数据校验
 * 等等更多
@@ -52,6 +52,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [Parsing the response header](#parsing-the-response-header)
 		- [get all header](#get-all-header)
 	- [data valid](#data-valid)
+	- [responseUse](#responseuse)
     - [http body](#http-body)
         - [body](#body)
             - [Set the data to the http request body](#Set-the-data-to-the-http-request-body)
