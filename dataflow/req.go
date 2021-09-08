@@ -58,7 +58,10 @@ type Req struct {
 	Err error
 
 	reqModify []api.RequestMiddler
-	req       *http.Request
+
+	responseModify []api.ResponseMiddler
+
+	req *http.Request
 
 	// 内嵌字段
 	setting.Setting
@@ -387,6 +390,13 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 		// all, err := ioutil.ReadAll(resp.Body)
 		// respBody  = bytes.NewReader(all)
 		if err = r.opt.resetBodyAndPrint(req, resp); err != nil {
+			return err
+		}
+	}
+	//运行响应中间件。放到debug打印后面，避免混淆请求返回内容
+	for _, modify := range r.responseModify {
+		err = modify.ModifyResponse(resp)
+		if err != nil {
 			return err
 		}
 	}
