@@ -14,7 +14,10 @@ type ProtoBufEncode struct {
 	obj interface{}
 }
 
-func NewProtoBufEncode(obj interface{}) *ProtoBufEncode {
+func NewProtoBufEncode(obj interface{}) Encoder {
+	if nil == obj {
+		return nil
+	}
 	return &ProtoBufEncode{obj: obj}
 }
 

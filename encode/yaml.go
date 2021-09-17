@@ -16,7 +16,7 @@ type YAMLEncode struct {
 }
 
 // NewYAMLEncode create a new yaml encoder
-func NewYAMLEncode(obj interface{}) *YAMLEncode {
+func NewYAMLEncode(obj interface{}) Encoder {
 	if obj == nil {
 		return nil
 	}

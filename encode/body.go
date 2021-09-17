@@ -13,7 +13,7 @@ type BodyEncode struct {
 }
 
 // NewBodyEncode create a new body encoder
-func NewBodyEncode(obj interface{}) *BodyEncode {
+func NewBodyEncode(obj interface{}) Encoder {
 	if obj == nil {
 		return nil
 	}
