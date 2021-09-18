@@ -163,7 +163,7 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 		}
 
 		if len(r.host) > 0 {
-			urlStr := modifyURL(joinPaths("", r.host))
+			urlStr := modifyURL(cleanPaths(r.host))
 			URL, err := url.Parse(urlStr)
 			if err != nil {
 				r.Err = err

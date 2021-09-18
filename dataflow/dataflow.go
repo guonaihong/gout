@@ -35,43 +35,43 @@ type DataFlow struct {
 
 // GET send HTTP GET method
 func (df *DataFlow) GET(url string) *DataFlow {
-	df.Req = reqDef(get, joinPaths("", url), df.out)
+	df.Req = reqDef(get, cleanPaths(url), df.out)
 	return df
 }
 
 // POST send HTTP POST method
 func (df *DataFlow) POST(url string) *DataFlow {
-	df.Req = reqDef(post, joinPaths("", url), df.out)
+	df.Req = reqDef(post, cleanPaths(url), df.out)
 	return df
 }
 
 // PUT send HTTP PUT method
 func (df *DataFlow) PUT(url string) *DataFlow {
-	df.Req = reqDef(put, joinPaths("", url), df.out)
+	df.Req = reqDef(put, cleanPaths(url), df.out)
 	return df
 }
 
 // DELETE send HTTP DELETE method
 func (df *DataFlow) DELETE(url string) *DataFlow {
-	df.Req = reqDef(delete2, joinPaths("", url), df.out)
+	df.Req = reqDef(delete2, cleanPaths(url), df.out)
 	return df
 }
 
 // PATCH send HTTP PATCH method
 func (df *DataFlow) PATCH(url string) *DataFlow {
-	df.Req = reqDef(patch, joinPaths("", url), df.out)
+	df.Req = reqDef(patch, cleanPaths(url), df.out)
 	return df
 }
 
 // HEAD send HTTP HEAD method
 func (df *DataFlow) HEAD(url string) *DataFlow {
-	df.Req = reqDef(head, joinPaths("", url), df.out)
+	df.Req = reqDef(head, cleanPaths(url), df.out)
 	return df
 }
 
 // OPTIONS send HTTP OPTIONS method
 func (df *DataFlow) OPTIONS(url string) *DataFlow {
-	df.Req = reqDef(options, joinPaths("", url), df.out)
+	df.Req = reqDef(options, cleanPaths(url), df.out)
 	return df
 }
 
@@ -132,11 +132,11 @@ func (df *DataFlow) SetURL(url string) *DataFlow {
 	}
 
 	if df.Req.url == "" && df.Req.req == nil && df.Req.method == "" {
-		df.Req = reqDef("", joinPaths("", url), df.out)
+		df.Req = reqDef("", cleanPaths(url), df.out)
 		return df
 	}
 
-	df.Req.url = modifyURL(joinPaths("", url))
+	df.Req.url = modifyURL(cleanPaths(url))
 
 	return df
 }
