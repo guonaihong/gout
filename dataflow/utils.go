@@ -33,7 +33,11 @@ func join(elem ...string) (rv string) {
 				domainPath = rv[protoEndIdx:]
 			}
 			if domainPath != "" {
+				appendSlash := len(domainPath) > 0 && domainPath[len(domainPath)-1] == '/'
 				domainPath = path.Clean(domainPath)
+				if appendSlash {
+					domainPath += "/"
+				}
 			}
 			rv = proto + domainPath + query
 			return

@@ -1,8 +1,9 @@
 package dataflow
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUtil_Join(t *testing.T) {
@@ -44,6 +45,7 @@ func TestUtil_joinPaths(t *testing.T) {
 		{absolutePath: "", relativePath: "https://www.aa.com/urls?site=http://bb.com", need: "https://www.aa.com/urls?site=http://bb.com"},
 		{absolutePath: "", relativePath: "http://www.aa.com/urls/./a?site=https://bb.com", need: "http://www.aa.com/urls/a?site=https://bb.com"},
 		{absolutePath: "", relativePath: "https://www.aa.com/urls/../a?site=https://bb.com", need: "https://www.aa.com/a?site=https://bb.com"},
+		{absolutePath: "", relativePath: "https://api.map.baidu.com/weather/v1/?district_id=310100&data_type=all&ak=ffyu0pP8P6Ao0KYr8FTZwDgsOFiA1oYA", need: "https://api.map.baidu.com/weather/v1/?district_id=310100&data_type=all&ak=ffyu0pP8P6Ao0KYr8FTZwDgsOFiA1oYA"},
 	}
 
 	for _, v := range test {
