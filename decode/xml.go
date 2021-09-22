@@ -11,7 +11,7 @@ type XMLDecode struct {
 }
 
 // NewXMLDecode create a new xml decoder
-func NewXMLDecode(obj interface{}) *XMLDecode {
+func NewXMLDecode(obj interface{}) Decoder {
 	if obj == nil {
 		return nil
 	}
