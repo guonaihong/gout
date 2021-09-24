@@ -11,7 +11,7 @@ type JSONDecode struct {
 }
 
 // NewJSONDecode create a new json decoder
-func NewJSONDecode(obj interface{}) *JSONDecode {
+func NewJSONDecode(obj interface{}) Decoder {
 	if obj == nil {
 		return nil
 	}

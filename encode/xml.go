@@ -16,7 +16,7 @@ type XMLEncode struct {
 }
 
 // NewXMLEncode create a new xml encoder
-func NewXMLEncode(obj interface{}) *XMLEncode {
+func NewXMLEncode(obj interface{}) Encoder {
 	if obj == nil {
 		return nil
 	}

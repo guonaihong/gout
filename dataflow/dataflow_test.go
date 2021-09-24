@@ -49,6 +49,7 @@ type BindTest struct {
 	InBody   interface{}
 	OutBody  interface{}
 	httpCode int
+	subPath  string
 }
 
 func TestBindXML(t *testing.T) {
@@ -59,6 +60,10 @@ func TestBindXML(t *testing.T) {
 		router.POST("/test.xml", func(c *gin.Context) {
 			var d3 data
 			err := c.BindXML(&d3)
+			if nil != err && "EOF" == err.Error() {
+				//t.Logf("read eof")
+				return
+			}
 			assert.NoError(t, err)
 			c.XML(200, d3)
 		})
@@ -78,6 +83,10 @@ func TestBindXML(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 	assert.Equal(t, d, d2)
+
+	err = New().POST(ts.URL + "/test.xml").SetXML(nil).BindXML(nil).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 400)
 }
 
 func TestBindYAML(t *testing.T) {
@@ -88,6 +97,10 @@ func TestBindYAML(t *testing.T) {
 		router.POST("/test.yaml", func(c *gin.Context) {
 			var d3 data
 			err := c.BindYAML(&d3)
+			if nil != err && "EOF" == err.Error() {
+				//t.Logf("read eof")
+				return
+			}
 			assert.NoError(t, err)
 			c.YAML(200, d3)
 		})
@@ -109,6 +122,10 @@ func TestBindYAML(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 	assert.Equal(t, d, d2)
+
+	err = g.POST(ts.URL + "/test.yaml").SetYAML(nil).BindYAML(nil).Code(&code).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, code, 400)
 }
 
 func TestBindJSON(t *testing.T) {
@@ -121,6 +138,9 @@ func TestBindJSON(t *testing.T) {
 			c.JSON(200, d3)
 		})
 
+		router.GET("/test.nil", func(c *gin.Context) {
+			c.JSON(200, &data{})
+		})
 		return router
 	}()
 
@@ -128,16 +148,22 @@ func TestBindJSON(t *testing.T) {
 	defer ts.Close()
 
 	tests := []BindTest{
-		{InBody: data{ID: 9, Data: "早上测试结构体"}, OutBody: data{}},
-		{InBody: core.H{"id": 10, "data": "早上测试map"}, OutBody: data{}},
+		{InBody: &data{ID: 9, Data: "早上测试结构体"}, OutBody: &data{}, subPath: "/test.json"},
+		{InBody: &core.H{"id": 10, "data": "早上测试map"}, OutBody: &data{}, subPath: "/test.json"},
+		{InBody: nil, OutBody: nil, subPath: "/test.nil"},
 	}
 
 	for k := range tests {
 		//t.Logf("outbody type:%T:%p\n", tests[k].OutBody, &tests[k].OutBody)
 
-		err := POST(ts.URL + "/test.json").
-			SetJSON(&tests[k].InBody).
-			BindJSON(&tests[k].OutBody).
+		var flow *DataFlow
+		if "/test.json" == tests[k].subPath {
+			flow = POST(ts.URL + tests[k].subPath)
+		} else {
+			flow = GET(ts.URL + tests[k].subPath)
+		}
+		err := flow.SetJSON(tests[k].InBody).
+			BindJSON(tests[k].OutBody).
 			Code(&tests[k].httpCode).
 			Do()
 		if err != nil {
@@ -145,9 +171,9 @@ func TestBindJSON(t *testing.T) {
 		}
 		assert.NoError(t, err)
 
-		assert.Equal(t, tests[k].httpCode, 200)
+		assert.Equal(t, 200, tests[k].httpCode)
 
-		if tests[k].OutBody.(map[string]interface{})["id"].(float64) != float64(d3.ID) {
+		if nil != tests[k].OutBody && tests[k].OutBody.(*data).ID != d3.ID {
 			t.Errorf("got:%#v(P:%p), want:%#v(T:%T)\n", tests[k].OutBody, &tests[k].OutBody, tests[k].InBody, tests[k].InBody)
 		}
 

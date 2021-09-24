@@ -12,7 +12,7 @@ type YAMLDecode struct {
 }
 
 // NewYAMLDecode create a new yaml decoder
-func NewYAMLDecode(obj interface{}) *YAMLDecode {
+func NewYAMLDecode(obj interface{}) Decoder {
 	if obj == nil {
 		return nil
 	}

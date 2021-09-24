@@ -15,7 +15,7 @@ type JSONEncode struct {
 }
 
 // NewJSONEncode create a new json encoder
-func NewJSONEncode(obj interface{}) *JSONEncode {
+func NewJSONEncode(obj interface{}) Encoder {
 	if obj == nil {
 		return nil
 	}

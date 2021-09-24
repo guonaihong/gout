@@ -15,7 +15,7 @@ type BodyDecode struct {
 }
 
 // NewBodyDecode create a new body decoder
-func NewBodyDecode(obj interface{}) *BodyDecode {
+func NewBodyDecode(obj interface{}) Decoder {
 	if obj == nil {
 		return nil
 	}
