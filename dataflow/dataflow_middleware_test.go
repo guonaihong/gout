@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	core "github.com/guonaihong/gout/core"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"testing"
+
+	core "github.com/guonaihong/gout/core"
 
 	api "github.com/guonaihong/gout/interface"
 	"github.com/stretchr/testify/assert"
@@ -95,7 +95,14 @@ func Test_ResponseModify(t *testing.T) {
 
 		err := New().POST(ts.URL).SetJSON(marshal).ResponseUse(demoResponse()).BindJSON(&res).Do()
 
-		log.Printf("请求 %d -->  参数 %s \n 响应 %s  \n  err  %s \n ", i, marshal, res, err)
+		m := arr.(core.H)
+		code := m["code"].(int)
+		if code == 200 {
+			assert.NoError(t, err, fmt.Sprintf("test case index:%d", i))
+		} else {
+			assert.Error(t, err, fmt.Sprintf("test case index:%d", i))
+		}
+		//log.Printf("请求 %d -->  参数 %s \n 响应 %s  \n  err  %s \n ", i, marshal, res, err)
 
 	}
 }

@@ -1,7 +1,6 @@
 package encode
 
 import (
-	"net/http"
 	"net/url"
 	"reflect"
 
@@ -17,7 +16,7 @@ type QueryEncode struct {
 }
 
 // NewQueryEncode create a new URL query  encoder
-func NewQueryEncode(req *http.Request, s setting.Setting) *QueryEncode {
+func NewQueryEncode(s setting.Setting) *QueryEncode {
 	return &QueryEncode{values: make(url.Values), Setting: s}
 }
 

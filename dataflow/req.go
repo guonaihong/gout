@@ -191,9 +191,13 @@ func (r *Req) selectRequest(body *bytes.Buffer) (req *http.Request, err error) {
 
 func (r *Req) encodeQuery() error {
 	var query string
-	q := encode.NewQueryEncode(nil, r.Setting)
+	q := encode.NewQueryEncode(r.Setting)
 
 	for _, queryEncode := range r.queryEncode {
+		if queryEncode == nil {
+			continue
+		}
+
 		if qStr, ok := isAndGetString(queryEncode); ok {
 			joiner := "&"
 			if len(query) == 0 {
@@ -225,6 +229,10 @@ func (r *Req) encodeQuery() error {
 
 func (r *Req) encodeForm(body *bytes.Buffer, f *encode.FormEncode) error {
 	for _, body := range r.form {
+		if body == nil {
+			continue
+		}
+
 		if err := encode.Encode(body, f); err != nil {
 			return err
 		}
@@ -236,6 +244,9 @@ func (r *Req) encodeForm(body *bytes.Buffer, f *encode.FormEncode) error {
 func (r *Req) encodeWWWForm(body *bytes.Buffer) error {
 	enc := encode.NewWWWFormEncode(r.Setting)
 	for _, formData := range r.wwwForm {
+		if formData == nil {
+			continue
+		}
 		if err := enc.Encode(formData); err != nil {
 			return err
 		}

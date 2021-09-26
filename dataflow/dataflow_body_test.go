@@ -2,6 +2,7 @@ package dataflow
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -22,26 +23,98 @@ func createBodyNil(accept *bool) *httptest.Server {
 	return ts
 }
 
-// 测试SetBody参数传递空指针
-func TestSetBody_Nil(t *testing.T) {
+// 测试SetHeader SetQuery 混合
+// SetBody/SetJSON/SetYAML 参数传递空指针
+func TestSetXXX_Nil(t *testing.T) {
 	accept := false
-	ts := createBodyNil(&accept)
-	defer ts.Close()
 
-	err := New().GET(ts.URL).SetBody(nil).Do()
-	assert.Error(t, err)
-	assert.False(t, accept)
+	for index, err := range []error{
+
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).SetBody(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).SetJSON(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).SetXML(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).SetYAML(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).SetProtoBuf(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).SetWWWForm(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).SetForm(nil).Do()
+		}(),
+	} {
+
+		assert.NoError(t, err, fmt.Sprintf("test case index:%d", index))
+		assert.False(t, accept)
+	}
+
 }
 
-// 测试BindBody参数传递空指针
-func TestBindBody_Nil(t *testing.T) {
+// 测试BindXXX参数传递空指针
+func TestBindXXX_Nil(t *testing.T) {
 	accept := false
-	ts := createBodyNil(&accept)
-	defer ts.Close()
 
-	err := New().GET(ts.URL).SetBody("").BindBody(nil).Do()
-	assert.Error(t, err)
-	assert.False(t, accept)
+	for index, err := range []error{
+
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).BindBody(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).BindJSON(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).BindXML(nil).Do()
+		}(),
+		func() error {
+			accept = false
+			ts := createBodyNil(&accept)
+			defer ts.Close()
+			return New().GET(ts.URL).SetHeader(nil).SetQuery(nil).BindYAML(nil).Do()
+		}(),
+	} {
+
+		assert.NoError(t, err, fmt.Sprintf("test case index:%d", index))
+		assert.False(t, accept)
+	}
 }
 
 func TestSetBody(t *testing.T) {
