@@ -1,7 +1,6 @@
 package encode
 
 import (
-	"net/http"
 	"strconv"
 	"testing"
 	"time"
@@ -13,9 +12,7 @@ import (
 
 // 测试[]string类型
 func TestQueryStringSlice(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/", nil)
-
-	q := NewQueryEncode(req, setting.Setting{})
+	q := NewQueryEncode(setting.Setting{})
 
 	err := Encode([]string{"q1", "v1", "q2", "v2", "q3", "v3"}, q)
 
@@ -26,9 +23,8 @@ func TestQueryStringSlice(t *testing.T) {
 
 // 测试map[string]interface{}
 func TestQueryMap(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/", nil)
 
-	q := NewQueryEncode(req, setting.Setting{})
+	q := NewQueryEncode(setting.Setting{})
 
 	err := Encode(testH{"q1": "v1", "q2": "v2", "q3": "v3"}, q)
 
@@ -47,9 +43,8 @@ type testQuery struct {
 
 // 测试结构体
 func TestQueryStruct(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/", nil)
 
-	q := NewQueryEncode(req, setting.Setting{})
+	q := NewQueryEncode(setting.Setting{})
 
 	unixTime := time.Date(2019, 07, 27, 20, 42, 53, 0, time.Local)
 	unixNano := time.Date(2019, 07, 27, 20, 42, 53, 1000, time.Local)
@@ -75,9 +70,7 @@ func TestQueryFieldWithSlice(t *testing.T) {
 		core.A{"a", []string{"1", "2", "3"}, "b", "b"},
 	} {
 
-		req, _ := http.NewRequest("GET", "/", nil)
-
-		q := NewQueryEncode(req, setting.Setting{})
+		q := NewQueryEncode(setting.Setting{})
 
 		err := Encode(v, q)
 

@@ -60,7 +60,7 @@ func TestBindXML(t *testing.T) {
 		router.POST("/test.xml", func(c *gin.Context) {
 			var d3 data
 			err := c.BindXML(&d3)
-			if nil != err && "EOF" == err.Error() {
+			if err == io.EOF {
 				//t.Logf("read eof")
 				return
 			}
@@ -97,7 +97,7 @@ func TestBindYAML(t *testing.T) {
 		router.POST("/test.yaml", func(c *gin.Context) {
 			var d3 data
 			err := c.BindYAML(&d3)
-			if nil != err && "EOF" == err.Error() {
+			if err == io.EOF {
 				//t.Logf("read eof")
 				return
 			}

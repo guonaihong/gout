@@ -10,6 +10,12 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func TestNewProtoBufEncode(t *testing.T) {
+	j := NewProtoBufEncode(nil)
+	assert.Nil(t, j)
+
+}
+
 func TestProtoBuf_Name(t *testing.T) {
 	assert.Equal(t, NewProtoBufEncode("").Name(), "protobuf")
 }
