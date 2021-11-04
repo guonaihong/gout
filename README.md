@@ -552,7 +552,8 @@ func main() {
 ```
 
 ## responseUse 
-response中间件，在Bind()之前执行。可以对response进行通用逻辑处理
+response中间件，在Bind()之前执行。可以对response进行通用逻辑处理。
+如果只需要闭包逻辑，则可以使用`WithResponseMiddlerFunc`，而不必创建一个结构体，下面的例子中对两种方法都进行了使用。
 ```go
 
 
@@ -563,6 +564,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout"
+	middler "github.com/guonaihong/gout/interface"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -610,7 +612,14 @@ func main() {
 func responseUseExample() {
 	//成功请求
 	successRes := new(map[string]interface{})
-	err := gout.GET(":8080/success").ResponseUse(demoResponse()).BindJSON(&successRes).Do()
+	err := gout.GET(":8080/success").ResponseUse(
+		demoResponse(),
+		// 注意这里使用了WithResponseMiddlerFunc
+		middler.WithResponseMiddlerFunc(func(response *http.Response) error {
+			// Do your magic
+			return nil
+		}),
+	).BindJSON(&successRes).Do()
 	log.Printf("success请求  -->   响应 %s  \n  err  %s \n ", successRes, err)
 
 	//fail请求
