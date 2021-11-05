@@ -125,9 +125,13 @@ func valToStr(v reflect.Value, sf reflect.StructField) string {
 		return timeToStr(v, sf)
 	}
 
-	if v.IsZero() {
-		return ""
-	}
+	// 看:
+	// https://github.com/guonaihong/gout/issues/322
+	/*
+		if v.IsZero() {
+			return ""
+		}
+	*/
 
 	if b, ok := v.Interface().([]byte); ok {
 		return *(*string)(unsafe.Pointer(&b))

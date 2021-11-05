@@ -193,14 +193,14 @@ type testForm struct {
 	Int8    int8    `form:"int8"`
 	Int16   int16   `form:"int16"`
 	Int32   int32   `form:"int32"`
-	Int64   int64   `form:"int64"`
-	Uint    uint    `form:"uint"`
-	Uint8   uint8   `form:"uint8"`
-	Uint16  uint16  `form:"uint16"`
-	Uint32  uint32  `form:"uint32"`
-	Uint64  uint64  `form:"uint64"`
-	Float32 float32 `form:"float32"`
-	Float64 float64 `form:"float64"`
+	Int64   int64   `form:"int64,omitempty"`
+	Uint    uint    `form:"uint,omitempty"`
+	Uint8   uint8   `form:"uint8,omitempty"`
+	Uint16  uint16  `form:"uint16,omitempty"`
+	Uint32  uint32  `form:"uint32,omitempty"`
+	Uint64  uint64  `form:"uint64,omitempty"`
+	Float32 float32 `form:"float32,omitempty"`
+	Float64 float64 `form:"float64,omitempty"`
 	//Voice   []byte  `form-mem:"true"`  //测试从内存中构造
 	//Voice2  []byte  `form-file:"true"` //测试从文件中读取
 }

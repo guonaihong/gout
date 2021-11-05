@@ -3,12 +3,13 @@ package encode
 import (
 	"errors"
 	"fmt"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 type encodeTest struct {
@@ -84,16 +85,17 @@ func TestEncodeCore_Encode(t *testing.T) {
 func TestEncodeCore_valToStr(t *testing.T) {
 	p := new(int)
 	test := []encodeTest{
+		{set: 0, need: "0"},
 		//测试空指针
 		{set: (*int)(nil), need: ""},
 		//测试指针
-		{set: new(int), need: ""},
+		{set: new(int), need: "0"},
 		//测试双重指针
-		{set: &p, need: ""},
+		{set: &p, need: "0"},
 	}
 
-	for _, v := range test {
-		assert.Equal(t, valToStr(reflect.ValueOf(v.set), emptyField), v.need)
+	for index, v := range test {
+		assert.Equal(t, valToStr(reflect.ValueOf(v.set), emptyField), v.need, fmt.Sprintf("test index:%d\n", index))
 	}
 }
 
