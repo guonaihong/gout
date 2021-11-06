@@ -99,7 +99,7 @@ func TestSetFormStruct(t *testing.T) {
 		},
 	} {
 		err := New().POST(ts.URL + "/test.form").
-			//Debug(true).
+			Debug(true).
 			SetForm(v...).
 			Code(&code).
 			Do()
