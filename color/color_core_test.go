@@ -2,6 +2,7 @@ package color
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -25,8 +26,8 @@ func Test_ColorCore_NewFormat_Nil(t *testing.T) {
 		{strings.NewReader("xxx"), true, JSONType},
 	}
 
-	for _, d := range data {
-		assert.Nil(t, NewFormatEncoder(d.r, d.openColor, d.bodyType))
+	for index, d := range data {
+		assert.Nil(t, NewFormatEncoder(d.r, d.openColor, d.bodyType), fmt.Sprintf("fail index:%d", index))
 	}
 }
 

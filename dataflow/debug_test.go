@@ -141,12 +141,24 @@ func TestDebug_Debug(t *testing.T) {
 			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
 			return err
 		}(),
-		// json
+		// object json
 		func() error {
 			buf.Reset()
 			key := "testkeyjson"
 			val := "testvaluejson"
 			err := New().POST(ts.URL).SetJSON(core.H{key: val}).Debug(dbug).Do()
+
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(key)), -1, core.BytesToString(buf.Bytes()))
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(val)), -1)
+			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(rspVal)), -1)
+			return err
+		}(),
+		// array json
+		func() error {
+			buf.Reset()
+			key := "testkeyjson"
+			val := "testvaluejson"
+			err := New().POST(ts.URL).SetJSON(core.A{key, val}).Debug(dbug).Do()
 
 			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(key)), -1, core.BytesToString(buf.Bytes()))
 			assert.NotEqual(t, bytes.Index(buf.Bytes(), []byte(val)), -1)

@@ -57,6 +57,21 @@ type Formatter struct {
 	r io.Reader
 }
 
+func strToObject(all []byte) (interface{}, error) {
+
+	var obj map[string]interface{}
+	if err := json.Unmarshal(all, &obj); err != nil {
+		var arr []interface{}
+		if err = json.Unmarshal(all, &arr); err != nil {
+			return nil, err
+		}
+
+		return arr, nil
+	}
+
+	return obj, nil
+}
+
 // NewFormatEncoder 着色json/yaml/xml构造函数
 func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter {
 	// 如果颜色没打开，或者bodyType为txt
@@ -69,11 +84,12 @@ func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter
 		return nil
 	}
 
-	var obj map[string]interface{}
-
+	var data interface{}
 	switch bodyType {
 	case JSONType:
-		err = json.Unmarshal(all, &obj)
+		if data, err = strToObject(all); err != nil {
+			return nil
+		}
 		//todo xmlType and yamlType
 	case XMLType:
 	case YAMLType:
@@ -95,7 +111,7 @@ func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter
 		r:               r,
 	}
 
-	all, _ = f.Marshal(obj)
+	all, _ = f.Marshal(data)
 
 	f.r = bytes.NewReader(all)
 	return f
