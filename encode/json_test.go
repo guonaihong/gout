@@ -28,12 +28,12 @@ func TestJSONEncode_Encode(t *testing.T) {
 	need := testJSON{
 		I: 100,
 		F: 3.14,
-		S: "test encode json > < &",
+		S: "test encode json > < & \u0026",
 	}
 
 	out := bytes.Buffer{}
 
-	s := `{"I" : 100, "F" : 3.14, "S":"test encode json > < &"}`
+	s := `{"I" : 100, "F" : 3.14, "S":"test encode json > < & \u0026"}`
 	data := []interface{}{need, &need, s, []byte(s)}
 	for _, v := range data {
 		j := NewJSONEncode(v)
