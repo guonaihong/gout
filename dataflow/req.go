@@ -35,7 +35,7 @@ type Req struct {
 
 	// http body
 	bodyEncoder encode.Encoder
-	bodyDecoder decode.Decoder
+	bodyDecoder []decode.Decoder
 
 	// http header
 	headerEncode []interface{}
@@ -375,6 +375,34 @@ func (r *Req) GetContext() context.Context {
 	return r.c
 }
 
+// TODO 优化代码，每个decode都有自己的指针偏移直接指向流，减少大body的内存使用
+func (r *Req) decodeBody(req *http.Request, resp *http.Response) (err error) {
+
+	if r.bodyDecoder != nil {
+		var all []byte
+		if len(r.bodyDecoder) > 1 {
+			all, err = ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return err
+			}
+			//已经取走数据，直接关闭body
+			resp.Body.Close()
+		}
+
+		for _, bodyDecoder := range r.bodyDecoder {
+			if len(all) > 0 {
+				resp.Body = ioutil.NopCloser(bytes.NewReader(all))
+			}
+
+			if err = bodyDecoder.Decode(resp.Body); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (err error) {
 	defer func() {
 		if err == io.EOF {
@@ -412,13 +440,7 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 		}
 	}
 
-	if r.bodyDecoder != nil {
-		if err = r.bodyDecoder.Decode(resp.Body); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return r.decodeBody(req, resp)
 }
 
 func (r *Req) getDataFlow() *DataFlow {
@@ -539,8 +561,13 @@ func (r *Req) Do() (err error) {
 	}
 
 	if r.bodyDecoder != nil {
-		return valid.ValidateStruct(r.bodyDecoder.Value())
+		for _, bodyDecoder := range r.bodyDecoder {
+			if err := valid.ValidateStruct(bodyDecoder.Value()); err != nil {
+				return err
+			}
+		}
 	}
+
 	return nil
 }
 
