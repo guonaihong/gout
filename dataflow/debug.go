@@ -73,6 +73,8 @@ func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response)
 		return err
 	}
 
+	resp.Body.Close()
+
 	resp.Body = ioutil.NopCloser(bytes.NewReader(all))
 	err = do.debugPrint(req, resp)
 	resp.Body = ioutil.NopCloser(bytes.NewReader(all))

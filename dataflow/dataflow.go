@@ -296,16 +296,21 @@ func (df *DataFlow) BindHeader(obj interface{}) *DataFlow {
 // BindBody parse the variables in http body to obj.
 // obj must be a pointer variable
 func (df *DataFlow) BindBody(obj interface{}) *DataFlow {
-
-	df.Req.bodyDecoder = decode.NewBodyDecode(obj)
+	if obj == nil {
+		return df
+	}
+	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewBodyDecode(obj))
 	return df
 }
 
 // BindJSON parse the json string in http body to obj.
 // obj must be a pointer variable
 func (df *DataFlow) BindJSON(obj interface{}) *DataFlow {
+	if obj == nil {
+		return df
+	}
 	df.out.opt.RspBodyType = "json"
-	df.Req.bodyDecoder = decode.NewJSONDecode(obj)
+	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewJSONDecode(obj))
 	return df
 
 }
@@ -313,16 +318,22 @@ func (df *DataFlow) BindJSON(obj interface{}) *DataFlow {
 // BindYAML parse the yaml string in http body to obj.
 // obj must be a pointer variable
 func (df *DataFlow) BindYAML(obj interface{}) *DataFlow {
+	if obj == nil {
+		return df
+	}
 	df.out.opt.RspBodyType = "yaml"
-	df.Req.bodyDecoder = decode.NewYAMLDecode(obj)
+	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewYAMLDecode(obj))
 	return df
 }
 
 // BindXML parse the xml string in http body to obj.
 // obj must be a pointer variable
 func (df *DataFlow) BindXML(obj interface{}) *DataFlow {
+	if obj == nil {
+		return df
+	}
 	df.out.opt.RspBodyType = "xml"
-	df.Req.bodyDecoder = decode.NewXMLDecode(obj)
+	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewXMLDecode(obj))
 	return df
 }
 

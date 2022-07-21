@@ -67,6 +67,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [protobuf](#protobuf)
         - [callback](#callback)
 		- [get *http.Response](#get-response)
+		- [multiple binding functions](#multiple-binding-functions)
 	- [Set request timeout](#Set-request-timeout)
     - [proxy](#proxy)
 	- [socks5](#socks5)
@@ -1116,6 +1117,31 @@ func main() {
 	if resp != nil {
 		defer resp.Body.Close()
 	}
+}
+
+```
+### multiple binding functions
+支持绑定多个对象
+```go
+var responseStruct struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+func main() {
+
+	var responseStr string
+	err := gout.GET("url").
+		SetQuery(gout.H{}).
+		BindJSON(&responseStruct).
+		BindBody(&responseStr).
+		Do()
+
+	if err != nil {
+		return
+	}
+
+	log.Println(responseStr)
 }
 
 ```

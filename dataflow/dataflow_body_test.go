@@ -241,6 +241,31 @@ func TestSetBody(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, code, 200)
 }
+
+// 同时绑定json, body
+func TestBindBodyJSON(t *testing.T) {
+	router := gin.New()
+
+	router.GET("", func(c *gin.Context) {
+		c.JSON(200, gin.H{"code": 1})
+	})
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
+
+	type body struct {
+		Code int
+	}
+
+	gotJson := body{}
+	s := ""
+
+	err := GET(ts.URL).BindJSON(&gotJson).BindBody(&s).Do()
+	assert.NoError(t, err)
+	assert.Equal(t, body{Code: 1}, gotJson)
+	assert.Equal(t, `{"code":1}`, s)
+}
+
 func TestBindBody(t *testing.T) {
 	router := func() *gin.Engine {
 		router := gin.New()
@@ -290,6 +315,7 @@ func TestBindBody(t *testing.T) {
 	}()
 
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+	defer ts.Close()
 
 	tests := []testBodyReq{
 		{url: "/uint", got: new(uint), need: core.NewPtrVal(uint(1))},
