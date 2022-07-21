@@ -381,7 +381,7 @@ func (r *Req) decodeBody(req *http.Request, resp *http.Response) (err error) {
 	if r.bodyDecoder != nil {
 		var all []byte
 		if len(r.bodyDecoder) > 1 {
-			all, err = io.ReadAll(resp.Body)
+			all, err = ioutil.ReadAll(resp.Body)
 			if err != nil {
 				return err
 			}
