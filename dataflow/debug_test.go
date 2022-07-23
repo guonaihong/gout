@@ -20,7 +20,7 @@ func TestDebug_Debug(t *testing.T) {
 	var buf bytes.Buffer
 
 	dbug := func() debug.DebugOpt {
-		return debug.DebugFunc(func(o *debug.DebugOption) {
+		return debug.DebugFunc(func(o *debug.Option) {
 			o.Debug = true
 			o.Color = true
 			o.Write = &buf

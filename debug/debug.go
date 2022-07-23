@@ -27,8 +27,8 @@ func ToBodyType(s string) color.BodyType {
 	return color.TxtType
 }
 
-// DebugOption Debug mode core data structure
-type DebugOption struct {
+// Option Debug mode core data structure
+type Option struct {
 	Write       io.Writer
 	Debug       bool
 	Color       bool
@@ -38,20 +38,20 @@ type DebugOption struct {
 	TraceInfo
 }
 
-// DebugOpt is an interface for operating DebugOption
+// DebugOpt is an interface for operating Option
 type DebugOpt interface {
-	Apply(*DebugOption)
+	Apply(*Option)
 }
 
 // DebugFunc DebugOpt is a function that manipulates core data structures
-type DebugFunc func(*DebugOption)
+type DebugFunc func(*Option)
 
-// Apply is an interface for operating DebugOption
-func (f DebugFunc) Apply(o *DebugOption) {
+// Apply is an interface for operating Option
+func (f DebugFunc) Apply(o *Option) {
 	f(o)
 }
 
-func DefaultDebug(o *DebugOption) {
+func DefaultDebug(o *Option) {
 	o.Color = true
 	o.Debug = true
 	o.Write = os.Stdout
@@ -59,7 +59,7 @@ func DefaultDebug(o *DebugOption) {
 
 // NoColor Turn off color highlight debug mode
 func NoColor() DebugOpt {
-	return DebugFunc(func(o *DebugOption) {
+	return DebugFunc(func(o *Option) {
 		o.Color = false
 		o.Debug = true
 		o.Trace = true
@@ -67,7 +67,7 @@ func NoColor() DebugOpt {
 	})
 }
 
-func (do *DebugOption) ResetBodyAndPrint(req *http.Request, resp *http.Response) error {
+func (do *Option) ResetBodyAndPrint(req *http.Request, resp *http.Response) error {
 	all, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (do *DebugOption) ResetBodyAndPrint(req *http.Request, resp *http.Response)
 	return err
 }
 
-func (do *DebugOption) debugPrint(req *http.Request, rsp *http.Response) error {
+func (do *Option) debugPrint(req *http.Request, rsp *http.Response) error {
 	if t := req.Header.Get("Content-Type"); len(t) > 0 && strings.Contains(t, "json") {
 		do.ReqBodyType = "json"
 	}

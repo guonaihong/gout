@@ -34,7 +34,7 @@ func Test_Debug_Trace(t *testing.T) {
 			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 			var b bytes.Buffer
 			custom := func() debug.DebugOpt {
-				return debug.DebugFunc(func(o *debug.DebugOption) {
+				return debug.DebugFunc(func(o *debug.Option) {
 					o.Color = true
 					o.Trace = true
 					o.Write = &b

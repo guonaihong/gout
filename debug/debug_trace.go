@@ -16,7 +16,7 @@ import (
 )
 
 func Trace() DebugOpt {
-	return DebugFunc(func(o *DebugOption) {
+	return DebugFunc(func(o *Option) {
 		o.Color = true
 		o.Trace = true
 		o.Write = os.Stdout
@@ -34,7 +34,7 @@ type TraceInfo struct {
 	w                   io.Writer
 }
 
-func (t *TraceInfo) StartTrace(opt *DebugOption, needTrace bool, req *http.Request, do api.Do) (*http.Response, error) {
+func (t *TraceInfo) StartTrace(opt *Option, needTrace bool, req *http.Request, do api.Do) (*http.Response, error) {
 	w := opt.Write
 	var dnsStart, connStart, reqStart, tlsStart, waitResponseStart, respStart time.Time
 	var dnsDuration, connDuration, reqDuration, tlsDuration, waitResponeDuration time.Duration
@@ -101,7 +101,7 @@ func (t *TraceInfo) StartTrace(opt *DebugOption, needTrace bool, req *http.Reque
 	return resp, err
 }
 
-func (t *TraceInfo) output(opt *DebugOption) {
+func (t *TraceInfo) output(opt *Option) {
 	v := reflect.ValueOf(t)
 	v = v.Elem()
 

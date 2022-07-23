@@ -590,7 +590,7 @@ func TestDebug(t *testing.T) {
 	test := []func() debug.DebugOpt{
 		// 测试颜色
 		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.DebugOption) {
+			return debug.DebugFunc(func(o *debug.Option) {
 				buf.Reset()
 				o.Debug = true
 				o.Color = true
@@ -600,16 +600,16 @@ func TestDebug(t *testing.T) {
 
 		// 测试打开日志输出
 		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.DebugOption) {
-				//t.Logf("--->1.debug.DebugOption address = %p\n", o)
+			return debug.DebugFunc(func(o *debug.Option) {
+				//t.Logf("--->1.debug.Option address = %p\n", o)
 				o.Debug = true
 			})
 		},
 
 		// 测试修改输出源
 		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.DebugOption) {
-				//t.Logf("--->2.debug.DebugOption address = %p\n", o)
+			return debug.DebugFunc(func(o *debug.Option) {
+				//t.Logf("--->2.debug.Option address = %p\n", o)
 				buf.Reset()
 				o.Debug = true
 				o.Write = buf
@@ -618,7 +618,7 @@ func TestDebug(t *testing.T) {
 
 		// 测试环境变量
 		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.DebugOption) {
+			return debug.DebugFunc(func(o *debug.Option) {
 				buf.Reset()
 				if len(os.Getenv("IOS_DEBUG")) > 0 {
 					o.Debug = true

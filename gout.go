@@ -11,7 +11,7 @@ import (
 )
 
 // debug
-type DebugOption = debug.DebugOption
+type DebugOption = debug.Option
 type DebugOpt = debug.DebugOpt
 type DebugFunc = debug.DebugFunc
 

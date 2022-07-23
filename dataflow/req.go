@@ -63,8 +63,6 @@ type Req struct {
 	// 内嵌字段
 	setting.Setting
 
-	opt debug.DebugOption
-
 	cancel context.CancelFunc
 }
 
@@ -110,11 +108,11 @@ func (r *Req) addDefDebug() {
 	if r.bodyEncoder != nil {
 		switch bodyType := r.bodyEncoder; bodyType.Name() {
 		case "json":
-			r.opt.ReqBodyType = "json"
+			r.ReqBodyType = "json"
 		case "xml":
-			r.opt.ReqBodyType = "xml"
+			r.ReqBodyType = "xml"
 		case "yaml":
-			r.opt.ReqBodyType = "yaml"
+			r.ReqBodyType = "yaml"
 		}
 	}
 
@@ -425,7 +423,7 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 		// This is code(output debug info) be placed here
 		// all, err := ioutil.ReadAll(resp.Body)
 		// respBody  = bytes.NewReader(all)
-		if err = r.opt.ResetBodyAndPrint(req, resp); err != nil {
+		if err = r.ResetBodyAndPrint(req, resp); err != nil {
 			return err
 		}
 	}
@@ -459,7 +457,7 @@ func clearBody(resp *http.Response) error {
 
 func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 
-	if err = r.decode(req, resp, r.g.opt.Debug); err != nil {
+	if err = r.decode(req, resp, r.Setting.Debug); err != nil {
 		return err
 	}
 
@@ -493,8 +491,8 @@ func (r *Req) Client() *http.Client {
 	return r.g.Client
 }
 
-func (r *Req) getDebugOpt() *debug.DebugOption {
-	return &r.opt
+func (r *Req) getDebugOpt() *debug.Option {
+	return &r.Setting.Option
 }
 
 func (r *Req) canTrace() bool {
