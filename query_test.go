@@ -76,7 +76,7 @@ func TestQuery_NotIgnoreEmpty(t *testing.T) {
 	}
 
 	var out bytes.Buffer
-	SaveDebug := func() debug.DebugOpt {
+	SaveDebug := func() debug.Apply {
 		return DebugFunc(func(o *DebugOption) {
 			o.Write = &out
 			o.Debug = true

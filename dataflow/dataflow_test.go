@@ -1,7 +1,6 @@
 package dataflow
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -18,9 +17,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/guonaihong/gout/color"
 	"github.com/guonaihong/gout/core"
-	"github.com/guonaihong/gout/debug"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -536,131 +533,6 @@ func setupDebug(t *testing.T) *gin.Engine {
 	})
 
 	return r
-}
-
-/*
-// TODO
-type myDup struct {
-	stdout *os.File
-}
-
-func (m *myDup) dup(t *testing.T) {
-	// stdout备份fd
-	stdoutFd2, err := syscall.Dup(1)
-	assert.NoError(t, err)
-
-	outFd, err := os.Create("./testdata/my.dat")
-	assert.NoError(t, err)
-
-	// 重定向stdout 到outFd
-	err = syscall.Dup2(int(outFd.Fd()), 1)
-	assert.NoError(t, err)
-	m.stdout = os.NewFile(uintptr(stdoutFd2), "mystdout")
-	outFd.Close()
-}
-
-func (m *myDup) reset() {
-	// 还原一个stdout
-	os.Stdout = m.stdout
-}
-
-func (m *myDup) empty() bool {
-	fd, err := os.Open("./testdata/my.dat")
-	if err != nil {
-		return false
-	}
-	defer fd.Close()
-
-	fi, err := fd.Stat()
-	if err != nil {
-		return false
-	}
-
-	return fi.Size() == 0
-}
-*/
-
-func TestDebug(t *testing.T) {
-	buf := &bytes.Buffer{}
-
-	router := setupDebug(t)
-	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-
-	color.NoColor = false
-	test := []func() debug.DebugOpt{
-		// 测试颜色
-		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.Option) {
-				buf.Reset()
-				o.Debug = true
-				o.Color = true
-				o.Write = buf
-			})
-		},
-
-		// 测试打开日志输出
-		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.Option) {
-				//t.Logf("--->1.debug.Option address = %p\n", o)
-				o.Debug = true
-			})
-		},
-
-		// 测试修改输出源
-		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.Option) {
-				//t.Logf("--->2.debug.Option address = %p\n", o)
-				buf.Reset()
-				o.Debug = true
-				o.Write = buf
-			})
-		},
-
-		// 测试环境变量
-		func() debug.DebugOpt {
-			return debug.DebugFunc(func(o *debug.Option) {
-				buf.Reset()
-				if len(os.Getenv("IOS_DEBUG")) > 0 {
-					o.Debug = true
-				}
-				o.Write = buf
-			})
-		},
-
-		// 没有颜色输出
-		debug.NoColor,
-	}
-
-	s := ""
-	os.Setenv("IOS_DEBUG", "true")
-	for k, v := range test {
-		s = ""
-		err := GET(ts.URL).
-			Debug(v()).
-			SetBody(fmt.Sprintf("%d test debug.", k)).
-			BindBody(&s).
-			Do()
-		assert.NoError(t, err)
-
-		if k != 0 {
-			assert.NotEqual(t, buf.Len(), 0)
-		}
-
-		assert.Equal(t, fmt.Sprintf("%d test debug.", k), s)
-	}
-
-	err := GET(ts.URL).Debug(true).SetBody("true test debug").BindBody(&s).Do()
-
-	assert.NoError(t, err)
-	assert.Equal(t, s, "true test debug")
-
-	//d := myDup{}
-	err = GET(ts.URL).Debug(false).SetBody("false test debug").BindBody(&s).Do()
-	//d.reset()
-
-	//assert.Equal(t, false, d.empty())
-	assert.NoError(t, err)
-	assert.Equal(t, s, "false test debug")
 }
 
 func setupDataFlow(t *testing.T) *gin.Engine {

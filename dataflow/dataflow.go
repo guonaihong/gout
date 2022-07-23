@@ -399,10 +399,10 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 		switch opt := v.(type) {
 		case bool:
 			if opt {
-				debug.DefaultDebug(&df.Setting.Option)
+				debug.DefaultDebug(&df.Setting.Options)
 			}
-		case debug.DebugOpt:
-			opt.Apply(&df.Setting.Option)
+		case debug.Apply:
+			opt.Apply(&df.Setting.Options)
 		}
 	}
 

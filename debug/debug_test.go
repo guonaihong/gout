@@ -92,7 +92,7 @@ func TestResetBodyAndPrintFail(t *testing.T) {
 		},
 	}
 
-	do := Option{}
+	do := Options{}
 	for i, c := range test {
 		req, rsp := c()
 		err := do.ResetBodyAndPrint(req, rsp)
@@ -118,7 +118,7 @@ func TestResetBodyAndPrint(t *testing.T) {
 		},
 	}
 
-	do := Option{}
+	do := Options{}
 	for i, c := range test {
 		req, rsp := c()
 		err := do.ResetBodyAndPrint(req, rsp)

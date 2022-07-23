@@ -33,8 +33,8 @@ func Test_Debug_Trace(t *testing.T) {
 		func() error {
 			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 			var b bytes.Buffer
-			custom := func() debug.DebugOpt {
-				return debug.DebugFunc(func(o *debug.Option) {
+			custom := func() debug.Apply {
+				return debug.Func(func(o *debug.Options) {
 					o.Color = true
 					o.Trace = true
 					o.Write = &b

@@ -491,8 +491,8 @@ func (r *Req) Client() *http.Client {
 	return r.g.Client
 }
 
-func (r *Req) getDebugOpt() *debug.Option {
-	return &r.Setting.Option
+func (r *Req) getDebugOpt() *debug.Options {
+	return &r.Setting.Options
 }
 
 func (r *Req) canTrace() bool {
@@ -586,10 +586,13 @@ func reqDef(method string, url string, g *Gout) Req {
 	r := Req{method: method, url: modifyURL(url), g: g}
 	//后面收敛GlobalSetting, 计划删除这个变量
 	//先这么写, 控制影响的范围
-	r.Setting.NotIgnoreEmpty = GlobalSetting.NotIgnoreEmpty
-	r.Setting.Timeout = GlobalSetting.Timeout
-	r.Setting.Index = GlobalSetting.Index
-	r.TimeoutIndex = GlobalSetting.TimeoutIndex
+	r.Setting = GlobalSetting
+	/*
+		r.Setting.NotIgnoreEmpty = GlobalSetting.NotIgnoreEmpty
+		r.Setting.Timeout = GlobalSetting.Timeout
+		r.Setting.Index = GlobalSetting.Index
+		r.TimeoutIndex = GlobalSetting.TimeoutIndex
+	*/
 
 	return r
 }

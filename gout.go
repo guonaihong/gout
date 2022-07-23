@@ -11,9 +11,9 @@ import (
 )
 
 // debug
-type DebugOption = debug.Option
-type DebugOpt = debug.DebugOpt
-type DebugFunc = debug.DebugFunc
+type DebugOption = debug.Options //不推荐gout.DebugOption方式引用, 推荐debug.Options引用
+type DebugOpt = debug.Apply      //不推荐gout.DebugOpt方式引用，推荐debug.Apply方式引用
+type DebugFunc = debug.Func      //不推荐gout.DebugFunc方式引用，推荐debug.Func方式引用
 
 func NoColor() DebugOpt {
 	return debug.NoColor()
@@ -82,6 +82,6 @@ func SetTimeout(d time.Duration) {
 	dataflow.GlobalSetting.SetTimeout(d)
 }
 
-func Debug(b bool) {
-	//dataflow.GlobalSetting.SetDebug(b)
+func SetDebug(b bool) {
+	dataflow.GlobalSetting.SetDebug(b)
 }

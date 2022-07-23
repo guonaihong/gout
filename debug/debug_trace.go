@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptrace"
-	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -14,14 +13,6 @@ import (
 	"github.com/guonaihong/gout/color"
 	api "github.com/guonaihong/gout/interface"
 )
-
-func Trace() DebugOpt {
-	return DebugFunc(func(o *Option) {
-		o.Color = true
-		o.Trace = true
-		o.Write = os.Stdout
-	})
-}
 
 type TraceInfo struct {
 	DnsDuration         time.Duration
@@ -34,7 +25,7 @@ type TraceInfo struct {
 	w                   io.Writer
 }
 
-func (t *TraceInfo) StartTrace(opt *Option, needTrace bool, req *http.Request, do api.Do) (*http.Response, error) {
+func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, do api.Do) (*http.Response, error) {
 	w := opt.Write
 	var dnsStart, connStart, reqStart, tlsStart, waitResponseStart, respStart time.Time
 	var dnsDuration, connDuration, reqDuration, tlsDuration, waitResponeDuration time.Duration
@@ -101,7 +92,7 @@ func (t *TraceInfo) StartTrace(opt *Option, needTrace bool, req *http.Request, d
 	return resp, err
 }
 
-func (t *TraceInfo) output(opt *Option) {
+func (t *TraceInfo) output(opt *Options) {
 	v := reflect.ValueOf(t)
 	v = v.Elem()
 
