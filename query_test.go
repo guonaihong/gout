@@ -7,9 +7,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/debug"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/guonaihong/gout/dataflow"
 )
 
 type queryWithSlice struct {
@@ -77,7 +76,7 @@ func TestQuery_NotIgnoreEmpty(t *testing.T) {
 	}
 
 	var out bytes.Buffer
-	SaveDebug := func() dataflow.DebugOpt {
+	SaveDebug := func() debug.DebugOpt {
 		return DebugFunc(func(o *DebugOption) {
 			o.Write = &out
 			o.Debug = true

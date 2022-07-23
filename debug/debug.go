@@ -1,4 +1,4 @@
-package dataflow
+package debug
 
 import (
 	"bytes"
@@ -51,7 +51,7 @@ func (f DebugFunc) Apply(o *DebugOption) {
 	f(o)
 }
 
-func defaultDebug(o *DebugOption) {
+func DefaultDebug(o *DebugOption) {
 	o.Color = true
 	o.Debug = true
 	o.Write = os.Stdout
@@ -67,7 +67,7 @@ func NoColor() DebugOpt {
 	})
 }
 
-func (do *DebugOption) resetBodyAndPrint(req *http.Request, resp *http.Response) error {
+func (do *DebugOption) ResetBodyAndPrint(req *http.Request, resp *http.Response) error {
 	all, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err

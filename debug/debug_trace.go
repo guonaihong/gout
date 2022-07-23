@@ -1,4 +1,4 @@
-package dataflow
+package debug
 
 import (
 	"crypto/tls"
@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/guonaihong/gout/color"
+	api "github.com/guonaihong/gout/interface"
 )
 
 func Trace() DebugOpt {
@@ -33,7 +34,7 @@ type TraceInfo struct {
 	w                   io.Writer
 }
 
-func (t *TraceInfo) startTrace(opt *DebugOption, needTrace bool, req *http.Request, do Do) (*http.Response, error) {
+func (t *TraceInfo) StartTrace(opt *DebugOption, needTrace bool, req *http.Request, do api.Do) (*http.Response, error) {
 	w := opt.Write
 	var dnsStart, connStart, reqStart, tlsStart, waitResponseStart, respStart time.Time
 	var dnsDuration, connDuration, reqDuration, tlsDuration, waitResponeDuration time.Duration

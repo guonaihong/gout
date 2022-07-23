@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/guonaihong/gout/debug"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	api "github.com/guonaihong/gout/interface"
@@ -398,9 +399,9 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 		switch opt := v.(type) {
 		case bool:
 			if opt {
-				defaultDebug(&df.out.opt)
+				debug.DefaultDebug(&df.out.opt)
 			}
-		case DebugOpt:
+		case debug.DebugOpt:
 			opt.Apply(&df.out.opt)
 		}
 	}

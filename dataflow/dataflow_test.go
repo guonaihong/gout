@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout/color"
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/debug"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -586,10 +587,10 @@ func TestDebug(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
 
 	color.NoColor = false
-	test := []func() DebugOpt{
+	test := []func() debug.DebugOpt{
 		// 测试颜色
-		func() DebugOpt {
-			return DebugFunc(func(o *DebugOption) {
+		func() debug.DebugOpt {
+			return debug.DebugFunc(func(o *debug.DebugOption) {
 				buf.Reset()
 				o.Debug = true
 				o.Color = true
@@ -598,17 +599,17 @@ func TestDebug(t *testing.T) {
 		},
 
 		// 测试打开日志输出
-		func() DebugOpt {
-			return DebugFunc(func(o *DebugOption) {
-				//t.Logf("--->1.DebugOption address = %p\n", o)
+		func() debug.DebugOpt {
+			return debug.DebugFunc(func(o *debug.DebugOption) {
+				//t.Logf("--->1.debug.DebugOption address = %p\n", o)
 				o.Debug = true
 			})
 		},
 
 		// 测试修改输出源
-		func() DebugOpt {
-			return DebugFunc(func(o *DebugOption) {
-				//t.Logf("--->2.DebugOption address = %p\n", o)
+		func() debug.DebugOpt {
+			return debug.DebugFunc(func(o *debug.DebugOption) {
+				//t.Logf("--->2.debug.DebugOption address = %p\n", o)
 				buf.Reset()
 				o.Debug = true
 				o.Write = buf
@@ -616,8 +617,8 @@ func TestDebug(t *testing.T) {
 		},
 
 		// 测试环境变量
-		func() DebugOpt {
-			return DebugFunc(func(o *DebugOption) {
+		func() debug.DebugOpt {
+			return debug.DebugFunc(func(o *debug.DebugOption) {
 				buf.Reset()
 				if len(os.Getenv("IOS_DEBUG")) > 0 {
 					o.Debug = true
@@ -627,7 +628,7 @@ func TestDebug(t *testing.T) {
 		},
 
 		// 没有颜色输出
-		NoColor,
+		debug.NoColor,
 	}
 
 	s := ""

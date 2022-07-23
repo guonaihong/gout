@@ -11,11 +11,54 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/debug"
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_Debug_Trace(t *testing.T) {
+	router := func() *gin.Engine {
+		router := gin.Default()
+
+		router.POST("/test.json", func(c *gin.Context) {
+			c.String(200, "ok")
+		})
+
+		return router
+	}()
+	errs := []error{
+		func() error {
+			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+			return New().GET(ts.URL).Debug(debug.Trace()).Do()
+		}(),
+		func() error {
+			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+			var b bytes.Buffer
+			custom := func() debug.DebugOpt {
+				return debug.DebugFunc(func(o *debug.DebugOption) {
+					o.Color = true
+					o.Trace = true
+					o.Write = &b
+				})
+			}
+			err := New().GET(ts.URL).Debug(custom()).Do()
+			if err != nil {
+				return err
+			}
+
+			if !checkValue(&b) {
+				return errors.New("No caring fields")
+			}
+			return nil
+		}(),
+	}
+
+	for id, e := range errs {
+		assert.NoError(t, e, fmt.Sprintf("test case id:%d", id))
+	}
+}
+
 func checkValue(b *bytes.Buffer) bool {
-	info := &TraceInfo{}
+	info := &debug.TraceInfo{}
 	v := reflect.ValueOf(info)
 	v = v.Elem()
 
@@ -40,46 +83,4 @@ func checkValue(b *bytes.Buffer) bool {
 	}
 
 	return true
-}
-
-func Test_Debug_Trace(t *testing.T) {
-	router := func() *gin.Engine {
-		router := gin.Default()
-
-		router.POST("/test.json", func(c *gin.Context) {
-			c.String(200, "ok")
-		})
-
-		return router
-	}()
-	errs := []error{
-		func() error {
-			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-			return New().GET(ts.URL).Debug(Trace()).Do()
-		}(),
-		func() error {
-			ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-			var b bytes.Buffer
-			custom := func() DebugOpt {
-				return DebugFunc(func(o *DebugOption) {
-					o.Color = true
-					o.Trace = true
-					o.Write = &b
-				})
-			}
-			err := New().GET(ts.URL).Debug(custom()).Do()
-			if err != nil {
-				return err
-			}
-
-			if !checkValue(&b) {
-				return errors.New("No caring fields")
-			}
-			return nil
-		}(),
-	}
-
-	for id, e := range errs {
-		assert.NoError(t, e, fmt.Sprintf("test case id:%d", id))
-	}
 }

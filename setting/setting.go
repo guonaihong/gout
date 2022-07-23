@@ -35,6 +35,10 @@ func (s *Setting) SetTimeout(d time.Duration) {
 	s.Timeout = d
 }
 
+func (s *Setting) Debug(b bool) {
+
+}
+
 func (s *Setting) Reset() {
 	s.NotIgnoreEmpty = false
 	s.NoAutoContentType = false
