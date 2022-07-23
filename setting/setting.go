@@ -1,9 +1,15 @@
 package setting
 
-import "time"
+import (
+	"time"
+
+	"github.com/guonaihong/gout/debug"
+)
 
 // 设置
 type Setting struct {
+	// debug相关字段
+	debug.Options
 	// 控制是否使用空值
 	NotIgnoreEmpty bool
 
@@ -33,6 +39,10 @@ func (s *Setting) SetTimeout(d time.Duration) {
 	s.Index++
 	s.TimeoutIndex = s.Index
 	s.Timeout = d
+}
+
+func (s *Setting) SetDebug(b bool) {
+	s.Debug = b
 }
 
 func (s *Setting) Reset() {

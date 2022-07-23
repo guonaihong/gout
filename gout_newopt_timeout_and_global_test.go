@@ -25,10 +25,14 @@ func setupDataFlow(t *testing.T) *gin.Engine {
 		}
 	})
 
+	router.GET("/setdebug", func(c *gin.Context) {
+		c.String(200, "setdebug")
+	})
+
 	return router
 }
 
-func Test_Global_Timeout(t *testing.T) {
+func Test_Global_SetTimeout(t *testing.T) {
 	router := setupDataFlow(t)
 
 	const (

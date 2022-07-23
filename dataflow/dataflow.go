@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/guonaihong/gout/debug"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	api "github.com/guonaihong/gout/interface"
@@ -179,21 +180,21 @@ func (df *DataFlow) SetHeader(obj ...interface{}) *DataFlow {
 
 // SetJSON send json to the http body, Support raw json(string, []byte)/struct/map types
 func (df *DataFlow) SetJSON(obj interface{}) *DataFlow {
-	df.out.opt.ReqBodyType = "json"
+	df.ReqBodyType = "json"
 	df.Req.bodyEncoder = encode.NewJSONEncode(obj)
 	return df
 }
 
 // SetXML send xml to the http body
 func (df *DataFlow) SetXML(obj interface{}) *DataFlow {
-	df.out.opt.ReqBodyType = "xml"
+	df.ReqBodyType = "xml"
 	df.Req.bodyEncoder = encode.NewXMLEncode(obj)
 	return df
 }
 
 // SetYAML send yaml to the http body, Support struct,map types
 func (df *DataFlow) SetYAML(obj interface{}) *DataFlow {
-	df.out.opt.ReqBodyType = "yaml"
+	df.ReqBodyType = "yaml"
 	df.Req.bodyEncoder = encode.NewYAMLEncode(obj)
 	return df
 }
@@ -201,7 +202,7 @@ func (df *DataFlow) SetYAML(obj interface{}) *DataFlow {
 // SetProtoBuf send yaml to the http body, Support struct types
 // obj必须是结构体指针或者[]byte类型
 func (df *DataFlow) SetProtoBuf(obj interface{}) *DataFlow {
-	df.out.opt.ReqBodyType = "protobuf"
+	df.ReqBodyType = "protobuf"
 	df.Req.bodyEncoder = encode.NewProtoBufEncode(obj)
 	return df
 }
@@ -309,7 +310,7 @@ func (df *DataFlow) BindJSON(obj interface{}) *DataFlow {
 	if obj == nil {
 		return df
 	}
-	df.out.opt.RspBodyType = "json"
+	df.out.RspBodyType = "json"
 	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewJSONDecode(obj))
 	return df
 
@@ -321,7 +322,7 @@ func (df *DataFlow) BindYAML(obj interface{}) *DataFlow {
 	if obj == nil {
 		return df
 	}
-	df.out.opt.RspBodyType = "yaml"
+	df.RspBodyType = "yaml"
 	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewYAMLDecode(obj))
 	return df
 }
@@ -332,7 +333,7 @@ func (df *DataFlow) BindXML(obj interface{}) *DataFlow {
 	if obj == nil {
 		return df
 	}
-	df.out.opt.RspBodyType = "xml"
+	df.RspBodyType = "xml"
 	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewXMLDecode(obj))
 	return df
 }
@@ -398,10 +399,10 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 		switch opt := v.(type) {
 		case bool:
 			if opt {
-				defaultDebug(&df.out.opt)
+				debug.DefaultDebug(&df.Setting.Options)
 			}
-		case DebugOpt:
-			opt.Apply(&df.out.opt)
+		case debug.Apply:
+			opt.Apply(&df.Setting.Options)
 		}
 	}
 
@@ -420,7 +421,7 @@ func (df *DataFlow) NoAutoContentType() *DataFlow {
 }
 
 func (df *DataFlow) IsDebug() bool {
-	return df.out.opt.Debug
+	return df.Setting.Debug
 }
 
 // Do send function

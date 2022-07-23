@@ -12,15 +12,12 @@ import (
 	"strings"
 
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/debug"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	api "github.com/guonaihong/gout/interface"
 	"github.com/guonaihong/gout/setting"
 )
-
-type Do interface {
-	Do(*http.Request) (*http.Response, error)
-}
 
 // Req controls core data structure of http request
 type Req struct {
@@ -65,8 +62,6 @@ type Req struct {
 
 	// 内嵌字段
 	setting.Setting
-
-	opt DebugOption
 
 	cancel context.CancelFunc
 }
@@ -113,11 +108,11 @@ func (r *Req) addDefDebug() {
 	if r.bodyEncoder != nil {
 		switch bodyType := r.bodyEncoder; bodyType.Name() {
 		case "json":
-			r.opt.ReqBodyType = "json"
+			r.ReqBodyType = "json"
 		case "xml":
-			r.opt.ReqBodyType = "xml"
+			r.ReqBodyType = "xml"
 		case "yaml":
-			r.opt.ReqBodyType = "yaml"
+			r.ReqBodyType = "yaml"
 		}
 	}
 
@@ -428,7 +423,7 @@ func (r *Req) decode(req *http.Request, resp *http.Response, openDebug bool) (er
 		// This is code(output debug info) be placed here
 		// all, err := ioutil.ReadAll(resp.Body)
 		// respBody  = bytes.NewReader(all)
-		if err = r.opt.resetBodyAndPrint(req, resp); err != nil {
+		if err = r.ResetBodyAndPrint(req, resp); err != nil {
 			return err
 		}
 	}
@@ -462,7 +457,7 @@ func clearBody(resp *http.Response) error {
 
 func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 
-	if err = r.decode(req, resp, r.g.opt.Debug); err != nil {
+	if err = r.decode(req, resp, r.Setting.Debug); err != nil {
 		return err
 	}
 
@@ -496,8 +491,8 @@ func (r *Req) Client() *http.Client {
 	return r.g.Client
 }
 
-func (r *Req) getDebugOpt() *DebugOption {
-	return &r.opt
+func (r *Req) getDebugOpt() *debug.Options {
+	return &r.Setting.Options
 }
 
 func (r *Req) canTrace() bool {
@@ -530,7 +525,7 @@ func (r *Req) getReqAndRsp() (req *http.Request, rsp *http.Response, err error) 
 
 	//resp, err := r.Client().Do(req)
 	//TODO r.Client() 返回Do接口
-	rsp, err = opt.startTrace(opt, r.canTrace(), req, r.Client())
+	rsp, err = opt.StartTrace(opt, r.canTrace(), req, r.Client())
 	return
 
 }
@@ -591,10 +586,13 @@ func reqDef(method string, url string, g *Gout) Req {
 	r := Req{method: method, url: modifyURL(url), g: g}
 	//后面收敛GlobalSetting, 计划删除这个变量
 	//先这么写, 控制影响的范围
-	r.Setting.NotIgnoreEmpty = GlobalSetting.NotIgnoreEmpty
-	r.Setting.Timeout = GlobalSetting.Timeout
-	r.Setting.Index = GlobalSetting.Index
-	r.TimeoutIndex = GlobalSetting.TimeoutIndex
+	r.Setting = GlobalSetting
+	/*
+		r.Setting.NotIgnoreEmpty = GlobalSetting.NotIgnoreEmpty
+		r.Setting.Timeout = GlobalSetting.Timeout
+		r.Setting.Index = GlobalSetting.Index
+		r.TimeoutIndex = GlobalSetting.TimeoutIndex
+	*/
 
 	return r
 }

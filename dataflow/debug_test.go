@@ -2,106 +2,18 @@ package dataflow
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/guonaihong/gout/color"
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/debug"
 	"github.com/stretchr/testify/assert"
 )
-
-// 测试resetBodyAndPrint出错
-func TestResetBodyAndPrintFail(t *testing.T) {
-
-	test := []func() (*http.Request, *http.Response){
-		func() (*http.Request, *http.Response) {
-			// GetBody为空的情况
-			req, _ := http.NewRequest("GET", "/", nil)
-			rsp := http.Response{}
-			req.GetBody = func() (io.ReadCloser, error) { return nil, errors.New("fail") }
-			rsp.Body = ioutil.NopCloser(bytes.NewReader(nil))
-			return req, &rsp
-		},
-		func() (*http.Request, *http.Response) {
-			// GetBody不为空的情况, 但是GetBody第二参数返回错误
-			req, _ := http.NewRequest("GET", "/", nil)
-			rsp := http.Response{}
-			req.GetBody = func() (io.ReadCloser, error) { return &core.ReadCloseFail{}, errors.New("fail") }
-			rsp.Body = ioutil.NopCloser(bytes.NewReader(nil))
-			return req, &rsp
-		},
-		func() (*http.Request, *http.Response) {
-			// GetBody不为空的情况, 但是io.Copy时候返回错误
-			req, _ := http.NewRequest("GET", "/", nil)
-			rsp := http.Response{}
-			req.GetBody = func() (io.ReadCloser, error) { return &core.ReadCloseFail{}, nil }
-			rsp.Body = ioutil.NopCloser(bytes.NewReader(nil))
-			return req, &rsp
-		},
-		func() (*http.Request, *http.Response) {
-			// rsp.Body出错的情况
-			req, _ := http.NewRequest("GET", "/", &bytes.Buffer{})
-			req.GetBody = func() (io.ReadCloser, error) { return ioutil.NopCloser(bytes.NewReader(nil)), nil }
-			rsp := http.Response{}
-			rsp.Body = ioutil.NopCloser(&core.ReadCloseFail{})
-			return req, &rsp
-		},
-	}
-
-	do := DebugOption{}
-	for i, c := range test {
-		req, rsp := c()
-		err := do.resetBodyAndPrint(req, rsp)
-		assert.Error(t, err, fmt.Sprintf("test index = %d", i))
-	}
-}
-
-func TestResetBodyAndPrint(t *testing.T) {
-
-	test := []func() (*http.Request, *http.Response){
-		func() (*http.Request, *http.Response) {
-			req, _ := http.NewRequest("GET", "/", nil)
-			req.Header.Add("reqHeader1", "reqHeaderValue1")
-			req.Header.Add("reqHeader2", "reqHeaderValue2")
-			req.GetBody = func() (io.ReadCloser, error) { return ioutil.NopCloser(bytes.NewReader(nil)), nil }
-
-			rsp := http.Response{}
-			rsp.Body = ioutil.NopCloser(bytes.NewReader(nil))
-			rsp.Header = http.Header{}
-			rsp.Header.Add("rspHeader1", "rspHeaderValue1")
-			rsp.Header.Add("rspHeader2", "rspHeaderValue2")
-			return req, &rsp
-		},
-	}
-
-	do := DebugOption{}
-	for i, c := range test {
-		req, rsp := c()
-		err := do.resetBodyAndPrint(req, rsp)
-		assert.NoError(t, err, fmt.Sprintf("test index = %d", i))
-	}
-}
-
-func TestDebug_ToBodyType(t *testing.T) {
-	type bodyTest struct {
-		in   string
-		need color.BodyType
-	}
-
-	tests := []bodyTest{
-		{"json", color.JSONType},
-		{"", color.TxtType},
-	}
-
-	for _, test := range tests {
-		got := ToBodyType(test.in)
-		assert.Equal(t, test.need, got)
-	}
-}
 
 // 测试Debug接口在各个数据类型下面是否可以打印request和response消息
 func TestDebug_Debug(t *testing.T) {
@@ -112,8 +24,8 @@ func TestDebug_Debug(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	dbug := func() DebugOpt {
-		return DebugFunc(func(o *DebugOption) {
+	dbug := func() debug.Apply {
+		return debug.Func(func(o *debug.Options) {
 			o.Debug = true
 			o.Color = true
 			o.Write = &buf
@@ -214,5 +126,124 @@ func TestDebug_Debug(t *testing.T) {
 			break
 		}
 
+	}
+}
+
+func TestDebug(t *testing.T) {
+	buf := &bytes.Buffer{}
+
+	router := setupDebug(t)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	color.NoColor = false
+	test := []func() debug.Apply{
+		// 测试颜色
+		func() debug.Apply {
+			return debug.Func(func(o *debug.Options) {
+				buf.Reset()
+				o.Debug = true
+				o.Color = true
+				o.Write = buf
+			})
+		},
+
+		// 测试打开日志输出
+		func() debug.Apply {
+			return debug.Func(func(o *debug.Options) {
+				//t.Logf("--->1.debug.Options address = %p\n", o)
+				o.Debug = true
+			})
+		},
+
+		// 测试修改输出源
+		func() debug.Apply {
+			return debug.Func(func(o *debug.Options) {
+				//t.Logf("--->2.debug.Options address = %p\n", o)
+				buf.Reset()
+				o.Debug = true
+				o.Write = buf
+			})
+		},
+
+		// 测试环境变量
+		func() debug.Apply {
+			return debug.Func(func(o *debug.Options) {
+				buf.Reset()
+				if len(os.Getenv("IOS_DEBUG")) > 0 {
+					o.Debug = true
+				}
+				o.Write = buf
+			})
+		},
+
+		// 没有颜色输出
+		debug.NoColor,
+	}
+
+	s := ""
+	os.Setenv("IOS_DEBUG", "true")
+	for k, v := range test {
+		s = ""
+		err := GET(ts.URL).
+			Debug(v()).
+			SetBody(fmt.Sprintf("%d test debug.", k)).
+			BindBody(&s).
+			Do()
+		assert.NoError(t, err)
+
+		if k != 0 {
+			assert.NotEqual(t, buf.Len(), 0)
+		}
+
+		assert.Equal(t, fmt.Sprintf("%d test debug.", k), s)
+	}
+
+	err := GET(ts.URL).Debug(true).SetBody("true test debug").BindBody(&s).Do()
+
+	assert.NoError(t, err)
+	assert.Equal(t, s, "true test debug")
+
+	//d := myDup{}
+	err = GET(ts.URL).Debug(false).SetBody("false test debug").BindBody(&s).Do()
+	//d.reset()
+
+	//assert.Equal(t, false, d.empty())
+	assert.NoError(t, err)
+	assert.Equal(t, s, "false test debug")
+}
+
+//
+func Test_Debug_Apply(t *testing.T) {
+
+	router := setupDebug(t)
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	fd, err := os.Create("../testdata/debug_apply.1.txt")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer fd.Close()
+
+	test := []debug.Apply{
+		debug.ToWriter(fd, true),
+		debug.ToFile("../testdata/debug_apply.2.txt", true),
+	}
+
+	s := ""
+	for _, debugApply := range test {
+
+		err := GET(ts.URL).Debug(debugApply).SetBody("true test debug").BindBody(&s).Do()
+		assert.NoError(t, err)
+		assert.Equal(t, s, "true test debug")
+	}
+
+	for _, file := range []string{
+		"../testdata/debug_apply.1.txt",
+		"../testdata/debug_apply.2.txt",
+	} {
+		all, err := ioutil.ReadFile(file)
+		assert.NoError(t, err)
+		assert.NotEqual(t, bytes.Index(all, []byte("true test debug")), -1)
+		os.Remove(file)
 	}
 }

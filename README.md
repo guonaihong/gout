@@ -78,10 +78,12 @@ gout 是go写的http 客户端，为提高工作效率而开发
     - [unix socket](#unix-socket)
     - [http2 doc](#http2-doc)
     - [debug mode](#debug-mode)
-        - [Turn on debug mode](#Turn-on-debug-mode)
-        - [Turn off color highlighting in debug mode](#Turn-off-color-highlighting-in-debug-mode)
-		- [Custom debug mode](#Custom-debug-mode)
+        - [Turn on debug mode](#turn-on-debug-mode)
+        - [Turn off color highlighting in debug mode](#turn-off-color-highlighting-in-debug-mode)
+		- [Custom debug mode](#custom-debug-mode)
 		- [trace info](#trace-info)
+		- [save to writer](#save-to-writer)
+		- [save to file](#save-to-file)
 	- [benchmark](#benchmark)
 		- [benchmarking a certain number of times](#benchmarking-a-certain-number-of-times)
 		- [benchmarking for a certain time](#benchmark-duration)
@@ -1419,12 +1421,16 @@ func main() {
 }
 ```
 ### Turn off color highlighting in debug mode
-使用gout.NoColor()传入Debug函数关闭颜色高亮
+使用debug.NoColor()传入Debug函数关闭颜色高亮
 ```go
+import (
+	"github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/debug"
+)
 func main() {
 	
 	err := gout.POST(":8080/colorjson").
-		Debug(gout.NoColor()).
+		Debug(debug.NoColor()).
 		SetJSON(gout.H{"str": "foo",
 			"num":   100,
 			"bool":  false,
@@ -1447,11 +1453,12 @@ package main
 import (
     "fmt"
     "github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/debug"
     "os"
 )
 
-func IOSDebug() gout.DebugOpt {
-    return gout.DebugFunc(func(o *gout.DebugOption) {
+func IOSDebug() debug.Apply {
+    return gout.DebugFunc(func(o *debug.Options) {
         if len(os.Getenv("IOS_DEBUG")) > 0 { 
             o.Debug = true
         }
@@ -1477,18 +1484,19 @@ func main() {
 // env IOS_DEBUG=true go run customize.go
 ```
 ### trace info
-gout.Trace()可输出http各个阶段的耗时，比如dns lookup时间，tcp连接时间等等。可以很方便的做些性能调优。
+debug.Trace()可输出http各个阶段的耗时，比如dns lookup时间，tcp连接时间等等。可以很方便的做些性能调优。
 ```go
 package main
 
 import (
     "fmt"
     "github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/debug"
 )
 
 func openDebugTrace() {
     err := gout.POST(":8080/colorjson").
-        Debug(gout.Trace()).
+        Debug(debug.Trace()).
         SetJSON(gout.H{"str": "foo",
             "num":   100,
             "bool":  false,
@@ -1514,6 +1522,53 @@ func openDebugTrace() {
      ResponseDuration      : 76.158µs
      TotalDuration         : 2.13921ms
 =================== Trace Info(E): ===================
+```
+### save to writer
+`debug.ToWriter`可以传递任何io.Writer对象，比如`bytes.Buffer`, 文件等。。。
+```go
+import (
+	"github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/debug"
+)
+func main() {
+	var buf bytes.Buffer
+	err := gout.POST(":8080/colorjson").
+		Debug(debug.ToWriter(&buf, false)).
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
+```
+### save to file
+```go
+import (
+	"github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/debug"
+)
+func main() {
+	
+	err := gout.POST(":8080/colorjson").
+		Debug(debug.ToFile("./req.txt", false)).
+		SetJSON(gout.H{"str": "foo",
+			"num":   100,
+			"bool":  false,
+			"null":  nil,
+			"array": gout.A{"foo", "bar", "baz"},
+			"obj":   gout.H{"a": 1, "b": 2},
+		}).Do()
+
+	if err != nil {
+		fmt.Printf("err = %v\n", err)
+	}
+}
 ```
 ## benchmark
 ### benchmarking a certain number of times

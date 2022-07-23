@@ -1,5 +1,7 @@
 module github.com/guonaihong/gout
 
+go 1.18
+
 require (
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/locales v0.13.0
@@ -22,6 +24,7 @@ require (
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/kisielk/godepgraph v0.0.0-20220719222756-573dc89cecc8 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect

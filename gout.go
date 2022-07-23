@@ -5,21 +5,22 @@ import (
 	"time"
 
 	"github.com/guonaihong/gout/dataflow"
+	"github.com/guonaihong/gout/debug"
 	_ "github.com/guonaihong/gout/export"
 	_ "github.com/guonaihong/gout/filter"
 )
 
 // debug
-type DebugOption = dataflow.DebugOption
-type DebugOpt = dataflow.DebugOpt
-type DebugFunc = dataflow.DebugFunc
+type DebugOption = debug.Options //不推荐gout.DebugOption方式引用, 推荐debug.Options引用
+type DebugOpt = debug.Apply      //不推荐gout.DebugOpt方式引用，推荐debug.Apply方式引用
+type DebugFunc = debug.Func      //不推荐gout.DebugFunc方式引用，推荐debug.Func方式引用
 
 func NoColor() DebugOpt {
-	return dataflow.NoColor()
+	return debug.NoColor()
 }
 
 func Trace() DebugOpt {
-	return dataflow.Trace()
+	return debug.Trace()
 }
 
 type Context = dataflow.Context
@@ -79,4 +80,8 @@ func IgnoreEmpty() {
 // d == 0，取消全局变量
 func SetTimeout(d time.Duration) {
 	dataflow.GlobalSetting.SetTimeout(d)
+}
+
+func SetDebug(b bool) {
+	dataflow.GlobalSetting.SetDebug(b)
 }
