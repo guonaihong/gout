@@ -105,6 +105,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [NewWithOpt set timeout](#NewWithOpt-set-timeout)
 	- [Global configuration](#Global-configuration)
 		- [set timeout](#set-timeout)
+		- [set debug](#set-debug)
  - [Unique features](#Unique-features)
     - [forward gin data](#forward-gin-data)
 
@@ -1526,10 +1527,16 @@ func openDebugTrace() {
 ### save to writer
 `debug.ToWriter`可以传递任何io.Writer对象，比如`bytes.Buffer`, 文件等。。。
 ```go
+package main
+
 import (
+	"bytes"
+	"fmt"
+
 	"github.com/guonaihong/gout"
 	"github.com/guonaihong/gout/debug"
 )
+
 func main() {
 	var buf bytes.Buffer
 	err := gout.POST(":8080/colorjson").
@@ -1545,7 +1552,9 @@ func main() {
 	if err != nil {
 		fmt.Printf("err = %v\n", err)
 	}
+	fmt.Println(buf.String())
 }
+
 ```
 ### save to file
 ```go
@@ -2007,7 +2016,26 @@ func main() {
 	}
 }
 ```
+## set debug
+打开全局debug开关。
+```go
+package main
 
+import (
+	"fmt"
+
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	gout.SetDebug(true)
+	err := gout.GET(":8080/colorjson").Do()
+	if err != nil {
+		fmt.Printf("err is:%v\n")
+	}
+}
+
+```
 # Unique features
 ## forward gin data
 gout 设计之初就考虑到要和gin协同工作的可能性，下面展示如何方便地使用gout转发gin绑定的数据。
