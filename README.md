@@ -68,6 +68,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
         - [callback](#callback)
 		- [get *http.Response](#get-response)
 		- [multiple binding functions](#multiple-binding-functions)
+		- [Auto decode body](#auto-decode-body)
 	- [Set request timeout](#Set-request-timeout)
     - [proxy](#proxy)
 	- [socks5](#socks5)
@@ -569,7 +570,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout"
-	middler "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/middler"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -1124,7 +1125,7 @@ func main() {
 
 ```
 ### multiple binding functions
-支持绑定多个对象
+支持绑定多个对象, BindXXX函数可以多次调用。例子里面是BindJSON和BindBody
 ```go
 var responseStruct struct {
 	Name string `json:"name"`
@@ -1147,6 +1148,17 @@ func main() {
 	log.Println(responseStr)
 }
 
+```
+### Auto decode body
+响应头里面指明压缩格式，使用AutoDecodeBody接口可以自动解压。
+```go
+//Content-Encoding: gzip
+//Content-Encoding: deflate
+//Content-Encoding: br
+//gzip由标准库原生支持，不需要使用AutoDecodeBody接口，后两种由gout支持.
+func main() {
+	gout.GET(url).AutoDecodeBody().BindBody(&s).Do()
+}
 ```
 ## Set request timeout
 setimeout是request级别的超时方案。相比http.Client级别，更灵活。

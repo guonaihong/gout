@@ -15,7 +15,6 @@ type Setting struct {
 
 	//是否自动加ContentType
 	NoAutoContentType bool
-
 	//超时时间
 	Timeout time.Duration
 
