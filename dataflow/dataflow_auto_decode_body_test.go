@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"compress/zlib"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -63,12 +62,14 @@ func create_AutoDecodeBody() *httptest.Server {
 		c.String(200, buf.String())
 	})
 
+	r.GET("/compress", func(c *gin.Context) {
+		c.Header("Content-Encoding", "compress")
+	})
 	return httptest.NewServer(http.HandlerFunc(r.ServeHTTP))
 }
 
 func Test_AutoDecodeBody(t *testing.T) {
 	ts := create_AutoDecodeBody()
-	fmt.Printf("url:%s\n", ts.URL)
 	var err error
 	for _, path := range []string{"/gzip", "/br", "/deflate"} {
 		s := ""
@@ -81,4 +82,10 @@ func Test_AutoDecodeBody(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, s, test_autoDecodeBody_data)
 	}
+}
+
+func Test_AutoDecodeBody_Fail(t *testing.T) {
+	ts := create_AutoDecodeBody()
+	err := New().GET(ts.URL + "/compress").AutoDecodeBody().Do()
+	assert.Error(t, err)
 }
