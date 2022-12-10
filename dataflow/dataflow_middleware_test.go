@@ -12,7 +12,7 @@ import (
 
 	core "github.com/guonaihong/gout/core"
 
-	api "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/middler"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +24,7 @@ func (d *demoRequestMiddler) ModifyRequest(req *http.Request) error {
 	return nil
 }
 
-func demoRequest() api.RequestMiddler {
+func demoRequest() middler.RequestMiddler {
 	return &demoRequestMiddler{}
 }
 
@@ -65,7 +65,7 @@ func (d *demoResponseMiddler) ModifyResponse(response *http.Response) error {
 		return nil
 	}
 }
-func demoResponse() api.ResponseMiddler {
+func demoResponse() middler.ResponseMiddler {
 	return &demoResponseMiddler{}
 }
 

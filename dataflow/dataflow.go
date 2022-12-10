@@ -12,7 +12,8 @@ import (
 	"github.com/guonaihong/gout/debug"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
-	api "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/middler"
+	"github.com/guonaihong/gout/middleware/rsp/autodecodebody"
 	"github.com/guonaihong/gout/setting"
 	"golang.org/x/net/proxy"
 )
@@ -378,7 +379,7 @@ func (df *DataFlow) SetBasicAuth(username, password string) *DataFlow {
 }
 
 // Request middleware
-func (df *DataFlow) RequestUse(reqModify ...api.RequestMiddler) *DataFlow {
+func (df *DataFlow) RequestUse(reqModify ...middler.RequestMiddler) *DataFlow {
 	if len(reqModify) > 0 {
 		df.reqModify = append(df.reqModify, reqModify...)
 	}
@@ -386,7 +387,7 @@ func (df *DataFlow) RequestUse(reqModify ...api.RequestMiddler) *DataFlow {
 }
 
 // Response middleware
-func (df *DataFlow) ResponseUse(responseModify ...api.ResponseMiddler) *DataFlow {
+func (df *DataFlow) ResponseUse(responseModify ...middler.ResponseMiddler) *DataFlow {
 	if len(responseModify) > 0 {
 		df.responseModify = append(df.responseModify, responseModify...)
 	}
@@ -418,6 +419,12 @@ func (df *DataFlow) Debug(d ...interface{}) *DataFlow {
 func (df *DataFlow) NoAutoContentType() *DataFlow {
 	df.Req.NoAutoContentType = true
 	return df
+}
+
+// https://github.com/guonaihong/gout/issues/343
+// content-encoding会指定response body的压缩方法，支持常用的压缩，gzip, deflate, br等
+func (df *DataFlow) AutoDecodeBody() *DataFlow {
+	return df.ResponseUse(middler.WithResponseMiddlerFunc(autodecodebody.AutoDecodeBody))
 }
 
 func (df *DataFlow) IsDebug() bool {

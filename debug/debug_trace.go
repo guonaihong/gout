@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/guonaihong/gout/color"
-	api "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/middler"
 )
 
 type TraceInfo struct {
@@ -25,7 +25,7 @@ type TraceInfo struct {
 	w                   io.Writer
 }
 
-func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, do api.Do) (*http.Response, error) {
+func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, do middler.Do) (*http.Response, error) {
 	w := opt.Write
 	var dnsStart, connStart, reqStart, tlsStart, waitResponseStart, respStart time.Time
 	var dnsDuration, connDuration, reqDuration, tlsDuration, waitResponeDuration time.Duration

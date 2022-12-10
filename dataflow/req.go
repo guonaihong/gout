@@ -15,7 +15,7 @@ import (
 	"github.com/guonaihong/gout/debug"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
-	api "github.com/guonaihong/gout/interface"
+	"github.com/guonaihong/gout/middler"
 	"github.com/guonaihong/gout/setting"
 )
 
@@ -54,9 +54,9 @@ type Req struct {
 	c   context.Context
 	Err error
 
-	reqModify []api.RequestMiddler
+	reqModify []middler.RequestMiddler
 
-	responseModify []api.ResponseMiddler
+	responseModify []middler.ResponseMiddler
 
 	req *http.Request
 
