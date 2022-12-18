@@ -15,6 +15,7 @@ import (
 	"github.com/guonaihong/gout/debug"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	"github.com/guonaihong/gout/encoder"
 	"github.com/guonaihong/gout/middler"
 	"github.com/guonaihong/gout/setting"
 )
@@ -31,7 +32,7 @@ type Req struct {
 	wwwForm []interface{}
 
 	// http body
-	bodyEncoder encode.Encoder
+	bodyEncoder encoder.Encoder
 	bodyDecoder []decode.Decoder
 
 	// http header

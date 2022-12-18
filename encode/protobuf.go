@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/encoder"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -14,7 +15,7 @@ type ProtoBufEncode struct {
 	obj interface{}
 }
 
-func NewProtoBufEncode(obj interface{}) Encoder {
+func NewProtoBufEncode(obj interface{}) encoder.Encoder {
 	if nil == obj {
 		return nil
 	}

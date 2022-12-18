@@ -27,7 +27,7 @@ func Test_ColorCore_NewFormat_Nil(t *testing.T) {
 	}
 
 	for index, d := range data {
-		assert.Nil(t, NewFormatEncoder(d.r, d.openColor, d.bodyType), fmt.Sprintf("fail index:%d", index))
+		assert.Nil(t, NewFormatEncoder(d.r, d.openColor, d.bodyType, true), fmt.Sprintf("fail index:%d", index))
 	}
 }
 
@@ -49,7 +49,7 @@ func Test_ColorCore_Read(t *testing.T) {
 }`
 
 	NoColor = false
-	f := NewFormatEncoder(strings.NewReader(j), true /*open color*/, JSONType)
+	f := NewFormatEncoder(strings.NewReader(j), true /*open color*/, JSONType, true)
 	var out bytes.Buffer
 
 	_, err := io.Copy(&out, f)

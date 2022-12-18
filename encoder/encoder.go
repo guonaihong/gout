@@ -1,4 +1,4 @@
-package encode
+package encoder
 
 import (
 	"io"

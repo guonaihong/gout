@@ -1,8 +1,9 @@
-package encode
+package enjson
 
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,13 +16,16 @@ type testJSON struct {
 }
 
 func TestNewJSONEncode(t *testing.T) {
-	j := NewJSONEncode(nil)
+	j := NewJSONEncode(nil, false)
 	assert.Nil(t, j)
 
+	j = NewJSONEncode(nil, true)
+	assert.Nil(t, j)
 }
 
 func TestJSONEncode_Name(t *testing.T) {
-	assert.Equal(t, NewJSONEncode("").Name(), "json")
+	assert.Equal(t, NewJSONEncode("", false).Name(), "json")
+	assert.Equal(t, NewJSONEncode("", true).Name(), "json")
 }
 
 func TestJSONEncode_Encode(t *testing.T) {
@@ -36,23 +40,28 @@ func TestJSONEncode_Encode(t *testing.T) {
 	s := `{"I" : 100, "F" : 3.14, "S":"test encode json"}`
 	data := []interface{}{need, &need, s, []byte(s)}
 	for _, v := range data {
-		j := NewJSONEncode(v)
-		out.Reset()
+		for _, on := range []bool{true, false} {
 
-		assert.NoError(t, j.Encode(&out))
+			j := NewJSONEncode(v, on)
+			out.Reset()
 
-		got := testJSON{}
+			assert.NoError(t, j.Encode(&out))
 
-		err := json.Unmarshal(out.Bytes(), &got)
-		assert.NoError(t, err)
-		assert.Equal(t, got, need)
+			got := testJSON{}
+
+			err := json.Unmarshal(out.Bytes(), &got)
+			assert.NoError(t, err)
+			assert.Equal(t, got, need)
+		}
 	}
 
 	// test fail
 	for _, v := range []interface{}{func() {}, `{"query":"value"`} {
-		j := NewJSONEncode(v)
-		out.Reset()
-		err := j.Encode(&out)
-		assert.Error(t, err)
+		for _, on := range []bool{true, false} {
+			j := NewJSONEncode(v, on)
+			out.Reset()
+			err := j.Encode(&out)
+			assert.Error(t, err, fmt.Sprintf("on:%t", on))
+		}
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/encoder"
 	"gopkg.in/yaml.v2"
 )
 
@@ -16,7 +17,7 @@ type YAMLEncode struct {
 }
 
 // NewYAMLEncode create a new yaml encoder
-func NewYAMLEncode(obj interface{}) Encoder {
+func NewYAMLEncode(obj interface{}) encoder.Encoder {
 	if obj == nil {
 		return nil
 	}
