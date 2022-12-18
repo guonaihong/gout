@@ -29,6 +29,7 @@ func ToBodyType(s string) color.BodyType {
 
 // Options Debug mode core data structure
 type Options struct {
+	EscapeHTML  bool
 	Write       io.Writer
 	Debug       bool
 	Color       bool
@@ -106,7 +107,7 @@ func (do *Options) debugPrint(req *http.Request, rsp *http.Response) error {
 		}
 
 		var r = io.Reader(b)
-		format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.ReqBodyType))
+		format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.ReqBodyType), do.EscapeHTML)
 		if format != nil {
 			r = format
 		}
@@ -126,7 +127,7 @@ func (do *Options) debugPrint(req *http.Request, rsp *http.Response) error {
 	fmt.Fprintf(w, "\r\n\r\n")
 	// write rsp body
 	var r = io.Reader(rsp.Body)
-	format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.RspBodyType))
+	format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.RspBodyType), do.EscapeHTML)
 	if format != nil {
 		r = format
 	}

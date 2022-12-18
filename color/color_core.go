@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/guonaihong/gout/enjson"
 )
 
 // BodyType 区分body的类型
@@ -44,6 +46,7 @@ const emptyArray = startArray + endArray
 
 // Formatter 是颜色高亮核心结构体
 type Formatter struct {
+	escapeHTML      bool
 	KeyColor        *Color // 设置key的颜色
 	StringColor     *Color // 设置string的颜色
 	BoolColor       *Color // 设置bool的颜色
@@ -73,7 +76,7 @@ func strToObject(all []byte) (interface{}, error) {
 }
 
 // NewFormatEncoder 着色json/yaml/xml构造函数
-func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter {
+func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType, escapeHTML bool) *Formatter {
 	// 如果颜色没打开，或者bodyType为txt
 	if !openColor || bodyType == TxtType {
 		return nil
@@ -99,6 +102,7 @@ func NewFormatEncoder(r io.Reader, openColor bool, bodyType BodyType) *Formatter
 	}
 
 	f := &Formatter{
+		escapeHTML:      escapeHTML,
 		KeyColor:        New(true, FgWhite),
 		StringColor:     New(true, FgGreen),
 		BoolColor:       New(true, FgYellow),
@@ -215,7 +219,7 @@ func (f *Formatter) marshalValue(val interface{}, buf *bytes.Buffer, depth int) 
 
 func (f *Formatter) marshalString(str string, buf *bytes.Buffer) {
 	if !f.RawStrings {
-		strBytes, _ := json.Marshal(str)
+		strBytes, _ := enjson.Marshal(str, f.escapeHTML)
 		str = string(strBytes)
 	}
 

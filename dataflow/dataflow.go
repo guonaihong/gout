@@ -12,6 +12,7 @@ import (
 	"github.com/guonaihong/gout/debug"
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
+	"github.com/guonaihong/gout/enjson"
 	"github.com/guonaihong/gout/middler"
 	"github.com/guonaihong/gout/middleware/rsp/autodecodebody"
 	"github.com/guonaihong/gout/setting"
@@ -182,7 +183,16 @@ func (df *DataFlow) SetHeader(obj ...interface{}) *DataFlow {
 // SetJSON send json to the http body, Support raw json(string, []byte)/struct/map types
 func (df *DataFlow) SetJSON(obj interface{}) *DataFlow {
 	df.ReqBodyType = "json"
-	df.Req.bodyEncoder = encode.NewJSONEncode(obj)
+	df.EscapeHTML = true
+	df.Req.bodyEncoder = enjson.NewJSONEncode(obj, true)
+	return df
+}
+
+// SetJSON send json to the http body, Support raw json(string, []byte)/struct/map types
+// 与SetJSON的区一区别就是不转义HTML里面的标签
+func (df *DataFlow) SetJSONNotEscape(obj interface{}) *DataFlow {
+	df.ReqBodyType = "json"
+	df.Req.bodyEncoder = enjson.NewJSONEncode(obj, false)
 	return df
 }
 
