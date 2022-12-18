@@ -15,6 +15,12 @@ type testJSON struct {
 	S string  `json:"s"`
 }
 
+func TestMarshal(t *testing.T) {
+	all, err := Marshal(map[string]any{"a": "a"}, true)
+	assert.NoError(t, err)
+	assert.False(t, bytes.Contains(all, []byte("\n")))
+}
+
 func TestNewJSONEncode(t *testing.T) {
 	j := NewJSONEncode(nil, false)
 	assert.Nil(t, j)

@@ -58,8 +58,9 @@ gout 是go写的http 客户端，为提高工作效率而开发
             - [Set the data to the http request body](#Set-the-data-to-the-http-request-body)
             - [Parse the response body into a variable](#Parse-the-response-body-into-a-variable)
         - [json](#json)
-            - [Serialize json to request body](#Serialize-json-to-request-body)
-            - [Parsed http response body in json format](#Parsed-http-response-body-in-json-format)
+            - [Serialize json to request body](#serialize-json-to-request-body)
+            - [Parsed http response body in json format](#parsed-http-response-body-in-json-format)
+			- [Do not escape html characters](#do-not-escape-html-characters)
         - [yaml](#yaml)
         - [xml](#xml)
         - [form-data](#form-data)
@@ -862,6 +863,26 @@ func main() {
 }
 
 ``` 
+#### do not escape html characters
+* SetJSONNotEscape 和SetJSON唯一的区别就是不转义HTML字符
+```go
+err := gout.POST(ts.URL).
+			Debug(true).
+			SetJSONNotEscape(gout.H{"url": "http://www.com?a=b&c=d"}).
+			Do()
+
+//> POST / HTTP/1.1
+//> Content-Type: application/json
+//>
+
+//{
+//    "url": "http://www.com?a=b&c=d"
+//}
+
+//< HTTP/1.1 200 OK
+//< Date: Sun, 18 Dec 2022 14:05:21 GMT
+//< Content-Length: 0
+```
 ### yaml
 * SetYAML() 设置请求http body为yaml
 * BindYAML() 解析响应http body里面的yaml到结构体里面

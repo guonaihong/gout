@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/guonaihong/gout/enjson"
 )
 
 // BodyType 区分body的类型
@@ -217,27 +219,8 @@ func (f *Formatter) marshalValue(val interface{}, buf *bytes.Buffer, depth int) 
 
 func (f *Formatter) marshalString(str string, buf *bytes.Buffer) {
 	if !f.RawStrings {
-		if !f.escapeHTML {
-			var buf bytes.Buffer
-			encode := json.NewEncoder(&buf)
-			encode.SetEscapeHTML(f.escapeHTML)
-			err := encode.Encode(str)
-			if err != nil {
-				return
-			}
-
-			all := buf.Bytes()
-			if buf.Len() > 0 && buf.Bytes()[buf.Len()-1] == '\n' {
-				all = buf.Bytes()[:buf.Len()-1]
-			}
-			str = string(all)
-
-		} else {
-			strBytes, _ := json.Marshal(str)
-
-			str = string(strBytes)
-		}
-
+		strBytes, _ := enjson.Marshal(str, f.escapeHTML)
+		str = string(strBytes)
 	}
 
 	if f.StringMaxLength != 0 && len(str) >= f.StringMaxLength {
