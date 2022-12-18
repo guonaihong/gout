@@ -16,7 +16,7 @@ type testJSON struct {
 }
 
 func TestMarshal(t *testing.T) {
-	all, err := Marshal(map[string]any{"a": "a"}, true)
+	all, err := Marshal(map[string]interface{}{"a": "a"}, true)
 	assert.NoError(t, err)
 	assert.False(t, bytes.Contains(all, []byte("\n")))
 }
