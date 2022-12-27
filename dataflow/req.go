@@ -3,6 +3,7 @@ package dataflow
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -18,6 +19,7 @@ import (
 	"github.com/guonaihong/gout/encoder"
 	"github.com/guonaihong/gout/middler"
 	"github.com/guonaihong/gout/setting"
+	"golang.org/x/net/http2"
 )
 
 // Req controls core data structure of http request
@@ -456,10 +458,35 @@ func clearBody(resp *http.Response) error {
 	return err
 }
 
+func transformResponse(resp *http.Response) error {
+	var body []byte
+	if resp.Body != nil {
+		data, err := io.ReadAll(resp.Body)
+		switch err.(type) {
+		case nil:
+			body = data
+		case http2.StreamError:
+			return fmt.Errorf("stream error when reading response body, may be caused by closed connection. Please retry. Original error: %w", err)
+		default:
+			return fmt.Errorf("unexpected error when reading response body. Please retry. Original error: %w", err)
+		}
+	}
+	if len(body) == 0 {
+		return errors.New(resp.Status)
+	}
+	return errors.New(string(body))
+}
+
 func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 
 	if err = r.decode(req, resp, r.Setting.Debug); err != nil {
-		return err
+	    switch {
+	    case resp.StatusCode == http.StatusSwitchingProtocols:
+		// no-op, we've been upgraded
+	    case resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusPartialContent:
+		return transformResponse(resp)
+	    }
+	    return err
 	}
 
 	if r.callback != nil {
