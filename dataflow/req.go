@@ -480,12 +480,6 @@ func transformResponse(resp *http.Response) error {
 func (r *Req) Bind(req *http.Request, resp *http.Response) (err error) {
 
 	if err = r.decode(req, resp, r.Setting.Debug); err != nil {
-	    switch {
-	    case resp.StatusCode == http.StatusSwitchingProtocols:
-		// no-op, we've been upgraded
-	    case resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusPartialContent:
-		return transformResponse(resp)
-	    }
 	    return err
 	}
 
@@ -577,6 +571,15 @@ func (r *Req) Do() (err error) {
 
 	if err != nil {
 		return err
+	}
+
+	switch {
+	case resp.StatusCode == http.StatusSwitchingProtocols:
+		// no-op, we've been upgraded
+	case resp.StatusCode >= http.StatusInternalServerError:
+		return errors.New("服务器内部错误")
+	case resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusPartialContent:
+		return transformResponse(resp)
 	}
 
 	if err := r.Bind(req, resp); err != nil {
