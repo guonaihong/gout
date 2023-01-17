@@ -37,44 +37,44 @@ type DataFlow struct {
 }
 
 // GET send HTTP GET method
-func (df *DataFlow) GET(url string) *DataFlow {
-	df.Req = reqDef(get, cleanPaths(url), df.out)
+func (df *DataFlow) GET(url string, urlStruct ...interface{}) *DataFlow {
+	df.Req = reqDef(get, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // POST send HTTP POST method
-func (df *DataFlow) POST(url string) *DataFlow {
-	df.Req = reqDef(post, cleanPaths(url), df.out)
+func (df *DataFlow) POST(url string, urlStruct ...interface{}) *DataFlow {
+	df.Req = reqDef(post, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // PUT send HTTP PUT method
-func (df *DataFlow) PUT(url string) *DataFlow {
-	df.Req = reqDef(put, cleanPaths(url), df.out)
+func (df *DataFlow) PUT(url string, urlStruct ...interface{}) *DataFlow {
+	df.Req = reqDef(put, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // DELETE send HTTP DELETE method
-func (df *DataFlow) DELETE(url string) *DataFlow {
-	df.Req = reqDef(delete2, cleanPaths(url), df.out)
+func (df *DataFlow) DELETE(url string, urlStruct ...interface{}) *DataFlow {
+	df.Req = reqDef(delete2, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // PATCH send HTTP PATCH method
-func (df *DataFlow) PATCH(url string) *DataFlow {
-	df.Req = reqDef(patch, cleanPaths(url), df.out)
+func (df *DataFlow) PATCH(url string, urlStruct ...interface{}) *DataFlow {
+	df.Req = reqDef(patch, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // HEAD send HTTP HEAD method
-func (df *DataFlow) HEAD(url string) *DataFlow {
-	df.Req = reqDef(head, cleanPaths(url), df.out)
+func (df *DataFlow) HEAD(url string, urlStruct ...interface{}) *DataFlow {
+	df.Req = reqDef(head, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // OPTIONS send HTTP OPTIONS method
-func (df *DataFlow) OPTIONS(url string) *DataFlow {
-	df.Req = reqDef(options, cleanPaths(url), df.out)
+func (df *DataFlow) OPTIONS(url string, urlStruct ...interface{}) *DataFlow {
+	df.Req = reqDef(options, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
@@ -129,13 +129,13 @@ func (df *DataFlow) SetMethod(method string) *DataFlow {
 }
 
 // SetURL set url
-func (df *DataFlow) SetURL(url string) *DataFlow {
+func (df *DataFlow) SetURL(url string, urlStruct ...interface{}) *DataFlow {
 	if df.Err != nil {
 		return df
 	}
 
-	if df.Req.url == "" && df.Req.req == nil && df.Req.method == "" {
-		df.Req = reqDef("", cleanPaths(url), df.out)
+	if df.Req.url == "" && df.Req.req == nil {
+		df.Req = reqDef(df.method, cleanPaths(url), df.out, urlStruct...)
 		return df
 	}
 
