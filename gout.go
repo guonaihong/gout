@@ -31,38 +31,49 @@ func New(c ...*http.Client) *dataflow.Gout {
 }
 
 // GET send HTTP GET method
-func GET(url string) *dataflow.DataFlow {
-	return dataflow.GET(url)
+// 第一种情况
+// gout.GET("wwww.demo.xx/test-appkey")
+//
+// 第二种情况
+//
+//	type host struct {
+//	 Host string
+//	 AppKey string
+//	}
+//
+// gout.GET("http://{{.Host}/{{.AppKey}}}", &host{Host:"www.demo.xx", AppKey:"test-appkey"})
+func GET(url string, urlStruct ...interface{}) *dataflow.DataFlow {
+	return dataflow.New().GET(url, urlStruct...)
 }
 
 // POST send HTTP POST method
-func POST(url string) *dataflow.DataFlow {
-	return dataflow.POST(url)
+func POST(url string, urlStruct ...interface{}) *dataflow.DataFlow {
+	return dataflow.New().POST(url, urlStruct)
 }
 
 // PUT send HTTP PUT method
-func PUT(url string) *dataflow.DataFlow {
-	return dataflow.PUT(url)
+func PUT(url string, urlStruct ...interface{}) *dataflow.DataFlow {
+	return dataflow.New().PUT(url, urlStruct)
 }
 
 // DELETE send HTTP DELETE method
-func DELETE(url string) *dataflow.DataFlow {
-	return dataflow.DELETE(url)
+func DELETE(url string, urlStruct ...interface{}) *dataflow.DataFlow {
+	return dataflow.New().DELETE(url, urlStruct)
 }
 
 // PATCH send HTTP PATCH method
-func PATCH(url string) *dataflow.DataFlow {
-	return dataflow.PATCH(url)
+func PATCH(url string, urlStruct ...interface{}) *dataflow.DataFlow {
+	return dataflow.New().PATCH(url, urlStruct)
 }
 
 // HEAD send HTTP HEAD method
-func HEAD(url string) *dataflow.DataFlow {
-	return dataflow.HEAD(url)
+func HEAD(url string, urlStruct ...interface{}) *dataflow.DataFlow {
+	return dataflow.New().HEAD(url, urlStruct)
 }
 
 // OPTIONS send HTTP OPTIONS method
-func OPTIONS(url string) *dataflow.DataFlow {
-	return dataflow.OPTIONS(url)
+func OPTIONS(url string, urlStruct ...interface{}) *dataflow.DataFlow {
+	return dataflow.New().OPTIONS(url, urlStruct)
 }
 
 // 设置不忽略空值

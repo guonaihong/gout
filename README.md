@@ -46,6 +46,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 - [quick start](#quick-start)
 - [API Examples](#api-examples)
     - [GET POST PUT DELETE PATH HEAD OPTIONS](#get-post-put-delete-path-head-options)
+	- [GET POST PUT DELETE PATH HEAD OPTIONS template](#get-post-put-delete-path-head-options-template)
     - [Query Parameters](#Query-Parameters)
     - [http header](#http-header)
 		- [Set request header](#set-request-header)
@@ -237,6 +238,44 @@ func main() {
 
 	// 发送OPTIONS
 	gout.OPTIONS(url).Do()
+}
+
+```
+## GET POST PUT DELETE PATH HEAD OPTIONS template
+```go
+package main
+
+import (
+	"github.com/guonaihong/gout"
+)
+
+type testURLTemplateCase struct {
+	Host   string
+}
+
+func main() {
+
+	url := "https://{{.Host}}"
+	// 发送GET方法
+	gout.GET(url, testURLTemplateCase{Host:"www.qq.com"}).Do()
+
+	// 发送POST方法
+	gout.POST(url, testURLTemplateCase{Host:"www.github.com"}).Do()
+
+	// 发送PUT方法
+	gout.PUT(url, testURLTemplateCase{Host:"www.baidu.com"}).Do()
+
+	// 发送DELETE方法
+	gout.DELETE(url, testURLTemplateCase{Host:"www.google.com"}).Do()
+
+	// 发送PATH方法
+	gout.PATCH(url, testURLTemplateCase{Host:"www.google.com"}).Do()
+
+	// 发送HEAD方法
+	gout.HEAD(url, testURLTemplateCase{Host:"www.google.com"}).Do()
+
+	// 发送OPTIONS
+	gout.OPTIONS(url, testURLTemplateCase{Host:"www.google.com"}).Do()
 }
 
 ```
