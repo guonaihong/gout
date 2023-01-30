@@ -1,4 +1,4 @@
-package dataflow
+package gout
 
 import (
 	"net/http"
@@ -64,18 +64,18 @@ func Test_URL_Template(t *testing.T) {
 		code := 0
 		switch tc.Method {
 		case "get":
-			New().GET("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			GET("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
 		case "post":
-			New().POST("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			POST("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
 		case "put":
-			New().PUT("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			PUT("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
 		case "patch":
-			New().PATCH("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			PATCH("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
 		case "options":
-			New().OPTIONS("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			OPTIONS("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
 		case "head":
 			code := 0
-			New().HEAD("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			HEAD("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
 			New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Code(&code).Do()
 			assert.Equal(t, code, 200)
 			continue
