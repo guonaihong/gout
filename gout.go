@@ -48,32 +48,32 @@ func GET(url string, urlStruct ...interface{}) *dataflow.DataFlow {
 
 // POST send HTTP POST method
 func POST(url string, urlStruct ...interface{}) *dataflow.DataFlow {
-	return dataflow.New().POST(url, urlStruct)
+	return dataflow.New().POST(url, urlStruct...)
 }
 
 // PUT send HTTP PUT method
 func PUT(url string, urlStruct ...interface{}) *dataflow.DataFlow {
-	return dataflow.New().PUT(url, urlStruct)
+	return dataflow.New().PUT(url, urlStruct...)
 }
 
 // DELETE send HTTP DELETE method
 func DELETE(url string, urlStruct ...interface{}) *dataflow.DataFlow {
-	return dataflow.New().DELETE(url, urlStruct)
+	return dataflow.New().DELETE(url, urlStruct...)
 }
 
 // PATCH send HTTP PATCH method
 func PATCH(url string, urlStruct ...interface{}) *dataflow.DataFlow {
-	return dataflow.New().PATCH(url, urlStruct)
+	return dataflow.New().PATCH(url, urlStruct...)
 }
 
 // HEAD send HTTP HEAD method
 func HEAD(url string, urlStruct ...interface{}) *dataflow.DataFlow {
-	return dataflow.New().HEAD(url, urlStruct)
+	return dataflow.New().HEAD(url, urlStruct...)
 }
 
 // OPTIONS send HTTP OPTIONS method
 func OPTIONS(url string, urlStruct ...interface{}) *dataflow.DataFlow {
-	return dataflow.New().OPTIONS(url, urlStruct)
+	return dataflow.New().OPTIONS(url, urlStruct...)
 }
 
 // 设置不忽略空值
