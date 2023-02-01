@@ -2,8 +2,8 @@ package enjson
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/guonaihong/gout/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
