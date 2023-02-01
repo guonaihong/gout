@@ -2,9 +2,9 @@ package dataflow
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/guonaihong/gout/json"
 	"io/ioutil"
 	"net/http"
 	"strings"

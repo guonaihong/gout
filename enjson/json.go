@@ -2,12 +2,12 @@ package enjson
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"io"
 
 	"github.com/guonaihong/gout/core"
 	"github.com/guonaihong/gout/encoder"
+	"github.com/guonaihong/gout/json"
 )
 
 var ErrNotJSON = errors.New("Not json data")

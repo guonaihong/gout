@@ -32,6 +32,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 * 支持响应中间件ResponseUse
 * 支持设置chunked数据格式发送
 * 支持body, header的数据校验
+* 支持通过build tag自由选择不同的json序列化方式(可选jsoniter,go_json,sonic等)
 * 等等更多
 
 ## 演示
@@ -128,6 +129,27 @@ go get github.com/guonaihong/gout
  # 第一次运行需要加GOPROXY下载模块，模块已安装的直接 go run 01-color-json.go 即可
  env GOPROXY=https://goproxy.cn go run 01-color-json.go
  ```
+
+### build tag
+Gout默认使用语言内置的`encoding/json`包。但是如果你想使用其他的json包，可以通过`build tag`来修改。
+
+[jsoniter](https://github.com/json-iterator/go)
+
+```sh
+go build -tags=jsoniter .
+```
+
+[go-json](https://github.com/goccy/go-json)
+
+```sh
+go build -tags=go_json .
+```
+
+[sonic](https://github.com/bytedance/sonic)
+
+```sh
+$ go build -tags="sonic avx" .
+```
 
  # quick start
  ```go

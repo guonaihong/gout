@@ -1,7 +1,7 @@
 package decode
 
 import (
-	"encoding/json"
+	"github.com/guonaihong/gout/json"
 	"io"
 )
 

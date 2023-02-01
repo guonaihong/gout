@@ -2,7 +2,6 @@ package decode
 
 import (
 	//"net/http"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/json"
 )
 
 type setter interface {

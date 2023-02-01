@@ -2,7 +2,6 @@ package color
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/guonaihong/gout/enjson"
+	"github.com/guonaihong/gout/json"
 )
 
 // BodyType 区分body的类型
