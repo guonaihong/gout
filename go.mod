@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/andybalholm/brotli v1.0.4
 	github.com/bytedance/sonic v1.7.0
-	github.com/gin-gonic/gin v1.7.0
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator/v10 v10.4.1
