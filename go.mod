@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
-	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
+	golang.org/x/net v0.1.0
 	google.golang.org/protobuf v1.26.0
 	gopkg.in/yaml.v2 v2.2.8
 )
@@ -33,7 +33,7 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
