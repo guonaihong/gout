@@ -180,6 +180,13 @@ func (df *DataFlow) SetHeader(obj ...interface{}) *DataFlow {
 	return df
 }
 
+// SetHeader send http header, Support struct/map/slice types
+func (df *DataFlow) SetHeaderRaw(obj ...interface{}) *DataFlow {
+	df.Req.headerEncode = append([]interface{}{}, obj...)
+	df.Req.rawHeader = true
+	return df
+}
+
 // SetJSON send json to the http body, Support raw json(string, []byte)/struct/map types
 func (df *DataFlow) SetJSON(obj interface{}) *DataFlow {
 	df.ReqBodyType = "json"

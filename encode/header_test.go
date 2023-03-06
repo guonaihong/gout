@@ -2,9 +2,10 @@ package encode
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type testH map[string]interface{}
@@ -16,7 +17,7 @@ func TestHeaderStringSlice(t *testing.T) {
 		"header1", "value1",
 		"header2", "value2",
 		"header3", "value3",
-	}, NewHeaderEncode(req))
+	}, NewHeaderEncode(req, false))
 
 	assert.NoError(t, err)
 
@@ -36,7 +37,7 @@ func TestHeaderMap(t *testing.T) {
 		"header1": 1,
 		"header2": "value2",
 		"header3": 3.14,
-	}, NewHeaderEncode(req))
+	}, NewHeaderEncode(req, false))
 
 	assert.NoError(t, err)
 
@@ -83,7 +84,7 @@ func TestHeaderStruct(t *testing.T) {
 		},
 		H: &p,
 	},
-		NewHeaderEncode(req),
+		NewHeaderEncode(req, false),
 	)
 
 	assert.NoError(t, err)

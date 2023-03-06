@@ -50,6 +50,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 	- [GET POST PUT DELETE PATH HEAD OPTIONS template](#get-post-put-delete-path-head-options-template)
     - [Query Parameters](#Query-Parameters)
     - [http header](#http-header)
+		- [Do not convert http headers](#do-not-convert-http-headers)
 		- [Set request header](#set-request-header)
 		- [Parsing the response header](#parsing-the-response-header)
 		- [get all header](#get-all-header)
@@ -348,7 +349,6 @@ func main() {
 
 ```
 ### SetQuery支持的更多数据类型
-<details>
 
 ```go
 package main
@@ -412,6 +412,56 @@ SetQuery([]string{"active", "enable", "action", "drop"})`
 </details>
 
 ## http header
+#### Do not convert http headers
+与SetHeader API唯一的区别就是不修改header名. 大部分情况用SetHeader，如果有不修改header的需求再使用SetHeaderRaw。
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+    "time"
+)
+
+func main() {
+    err := gout.
+        //设置GET请求和url，:8080/test.header是127.0.0.1:8080/test.header的简写
+        GET(":8080/test.header").
+        //设置debug模式
+        Debug(true).
+        //设置请求http header
+        SetHeaderRaw(gout.H{
+            "h1": "v1",
+            "h2": 2,
+            "h3": float32(3.14),
+            "h4": 4.56,
+            "h5": time.Now().Unix(),
+            "h6": time.Now().UnixNano(),
+            "h7": time.Now().Format("2006-01-02")}).
+        Do()
+    if err != nil {
+        fmt.Printf("%s\n", err)
+        return
+    }
+
+}
+
+/*
+> GET /test.header HTTP/1.1
+> h2: 2
+> h3: 3.14
+> h4: 4.56
+> h5: 1574081686
+> h6: 1574081686471347098
+> h7: 2019-11-18
+> h1: v1
+>
+
+
+< HTTP/1.1 200 OK
+< Content-Length: 0
+*/
+```
 #### Set request header
 ```go
 package main

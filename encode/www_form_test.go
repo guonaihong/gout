@@ -35,3 +35,23 @@ func Test_WWWForm_Encode(t *testing.T) {
 func Test_WWWForm_Name(t *testing.T) {
 	assert.Equal(t, NewWWWFormEncode(setting.Setting{}).Name(), "www-form")
 }
+
+type CreateUserMetadataReqBody struct {
+	Avatarurl string `www-form:"avatarurl"`
+	Nickname  string `www-form:"nickname"`
+}
+
+func Test_WWWForm_Struct(t *testing.T) {
+
+	data := CreateUserMetadataReqBody{Avatarurl: "www.hh.com", Nickname: "good"}
+	enc := NewWWWFormEncode(setting.Setting{})
+	err := enc.Encode(&data)
+	assert.NoError(t, err)
+
+	var out bytes.Buffer
+	assert.NoError(t, enc.End(&out))
+	pos := bytes.Index(out.Bytes(), []byte("avatarurl"))
+	pos1 := bytes.Index(out.Bytes(), []byte("nickname"))
+	assert.NotEqual(t, pos, -1)
+	assert.NotEqual(t, pos1, -1)
+}
