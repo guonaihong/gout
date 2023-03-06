@@ -35,7 +35,7 @@ func testEncodeCore_Encode(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, v := range testPtr {
-		err := Encode(v.set, NewHeaderEncode(req))
+		err := Encode(v.set, NewHeaderEncode(req, false))
 		assert.NoError(t, err)
 	}
 }
@@ -60,7 +60,7 @@ func testEncodeCore_Encode_Fail(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, v := range testFail {
-		err := Encode(v.set, NewHeaderEncode(req))
+		err := Encode(v.set, NewHeaderEncode(req, false))
 		assert.Error(t, err)
 	}
 
@@ -143,7 +143,7 @@ func TestEncodeCore_parseTagAndSet(t *testing.T) {
 
 	for _, v := range test {
 		val := reflect.ValueOf(v.set)
-		err := parseTagAndSet(val.Field(0), val.Type().Field(0), NewHeaderEncode(&http.Request{}))
+		err := parseTagAndSet(val.Field(0), val.Type().Field(0), NewHeaderEncode(&http.Request{}, false))
 		assert.NoError(t, err)
 	}
 }

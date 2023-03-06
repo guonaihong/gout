@@ -1,13 +1,14 @@
 package dataflow
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/guonaihong/gout/core"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/guonaihong/gout/core"
+	"github.com/stretchr/testify/assert"
 )
 
 type testHeader2 struct {
@@ -175,5 +176,38 @@ func Test_BindHeader_empty(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, tHeader.Code, 200)
 		assert.Equal(t, tHeader.Sid, "sid-ok")
+	}
+}
+
+// 测试直接发送raw http header。
+func Test_HeaderRaw(t *testing.T) {
+	router := func() *gin.Engine {
+		router := gin.New()
+
+		router.GET("/test.header", func(c *gin.Context) {
+			h := map[string][]string(c.Request.Header)
+			c.Writer.Header().Add("sid", h["Sid"][0])
+		})
+
+		return router
+	}()
+
+	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
+
+	g := New()
+
+	type testHeader2 struct {
+		Sid  string `header:"sid"`
+		Code int
+	}
+
+	var tHeader testHeader2
+	for _, v := range []interface{}{
+		core.A{"sid", "hello"},
+	} {
+		err := g.GET(ts.URL + "/test.header").Debug(true).SetHeaderRaw(v).BindHeader(&tHeader).Code(&tHeader.Code).Do()
+		assert.NoError(t, err)
+		assert.Equal(t, tHeader.Code, 200)
+		assert.Equal(t, tHeader.Sid, "hello")
 	}
 }

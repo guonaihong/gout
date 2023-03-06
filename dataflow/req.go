@@ -38,6 +38,9 @@ type Req struct {
 
 	// http header
 	headerEncode []interface{}
+	// raw header
+	rawHeader bool
+
 	headerDecode interface{}
 
 	// query
@@ -349,7 +352,7 @@ func (r *Req) encodeHeader(req *http.Request) (err error) {
 			continue
 		}
 
-		err = encode.Encode(h, encode.NewHeaderEncode(req))
+		err = encode.Encode(h, encode.NewHeaderEncode(req, r.rawHeader))
 		if err != nil {
 			return err
 		}
