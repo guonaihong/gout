@@ -3,7 +3,6 @@ package hcutil
 import (
 	"context"
 	"errors"
-	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -84,7 +83,7 @@ func TestProxy(t *testing.T) {
 	resp, err := c.Do(req)
 	assert.NoError(t, err)
 
-	res, err := io.ReadAll(resp.Body)
+	res, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
 
 	s = string(res)
@@ -129,7 +128,7 @@ func TestUnixSocket(t *testing.T) {
 	resp, err := c.Do(req)
 
 	assert.NoError(t, err)
-	all, err := io.ReadAll(resp.Body)
+	all, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
 	s = string(all)
 
