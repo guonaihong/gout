@@ -151,7 +151,6 @@ func (df *DataFlow) SetRequest(req *http.Request) *DataFlow {
 
 // SetBody set the data to the http body, Support string/bytes/io.Reader
 func (df *DataFlow) SetBody(obj interface{}) *DataFlow {
-
 	df.Req.bodyEncoder = encode.NewBodyEncode(obj)
 	return df
 }
@@ -240,8 +239,9 @@ func (df *DataFlow) getTransport() (*http.Transport, bool) {
 }
 
 // UnixSocket 函数会修改Transport, 请像对待全局变量一样对待UnixSocket
+// 对于全局变量的解释可看下面的链接
+// https://github.com/guonaihong/gout/issues/373
 func (df *DataFlow) UnixSocket(path string) *DataFlow {
-
 	df.initTransport()
 
 	transport, ok := df.getTransport()
@@ -258,6 +258,8 @@ func (df *DataFlow) UnixSocket(path string) *DataFlow {
 }
 
 // SetProxy 函数会修改Transport，请像对待全局变量一样对待SetProxy
+// 对于全局变量的解释可看下面的链接
+// https://github.com/guonaihong/gout/issues/373
 func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
 	proxy, err := url.Parse(modifyURL(proxyURL))
 	if err != nil {
@@ -279,6 +281,8 @@ func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
 }
 
 // SetSOCKS5 函数会修改Transport,请像对待全局变量一样对待SetSOCKS5
+// 对于全局变量的解释可看下面的链接
+// https://github.com/guonaihong/gout/issues/373
 func (df *DataFlow) SetSOCKS5(addr string) *DataFlow {
 	dialer, err := proxy.SOCKS5("tcp", addr, nil, proxy.Direct)
 	if err != nil {
@@ -331,7 +335,6 @@ func (df *DataFlow) BindJSON(obj interface{}) *DataFlow {
 	df.out.RspBodyType = "json"
 	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode.NewJSONDecode(obj))
 	return df
-
 }
 
 // BindYAML parse the yaml string in http body to obj.
