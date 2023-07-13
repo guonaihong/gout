@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/guonaihong/gout/hcutil"
 	"github.com/guonaihong/gout/setting"
 )
 
 type options struct {
 	hc *http.Client
 	setting.Setting
+	err error
 }
 
 type Option interface {
@@ -71,4 +73,49 @@ func WithTimeout(t time.Duration) Option {
 
 func (t *timeout) apply(opts *options) {
 	opts.SetTimeout(time.Duration(*t))
+}
+
+// 5. 设置代理
+type proxy string
+
+func WithProxy(p string) Option {
+	return (*proxy)(&p)
+}
+
+func (p *proxy) apply(opts *options) {
+	if opts.hc == nil {
+		opts.hc = &http.Client{}
+	}
+
+	opts.err = hcutil.SetProxy(opts.hc, string(*p))
+}
+
+// 6. 设置socks5代理
+type socks5 string
+
+func WithSocks5(s string) Option {
+	return (*socks5)(&s)
+}
+
+func (s *socks5) apply(opts *options) {
+	if opts.hc == nil {
+		opts.hc = &http.Client{}
+	}
+
+	opts.err = hcutil.SetSOCKS5(opts.hc, string(*s))
+}
+
+// 7. 设置unix socket
+type unixSocket string
+
+func WithUnixSocket(u string) Option {
+	return (*unixSocket)(&u)
+}
+
+func (u *unixSocket) apply(opts *options) {
+	if opts.hc == nil {
+		opts.hc = &http.Client{}
+	}
+
+	opts.err = hcutil.UnixSocket(opts.hc, string(*u))
 }

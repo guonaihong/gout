@@ -106,8 +106,11 @@ gout 是go写的http 客户端，为提高工作效率而开发
 	- [Using chunked data format](#Using-chunked-data-format)
 	- [NewWithOpt](#NewWithOpt)
 		- [Insecure skip verify](#insecure-skip-verify)
-		- [Turn off 3xx status code automatic jump](#Turn-off-3xx-status-code-automatic-jump)
-		- [NewWithOpt set timeout](#NewWithOpt-set-timeout)
+		- [Turn off 3xx status code automatic jump](#turn-off-3xx-status-code-automatic-jump)
+		- [NewWithOpt set timeout](#new-with-opt-set-timeout)
+		- [NewWithOpt unix sock](#new-with-opt-unix-socket)
+        - [NewWithOpt proxy](#new-with-opt-proxy)
+		- [NewWithOpt socks5](#new-with-opt-socks5)
 	- [Global configuration](#Global-configuration)
 		- [set timeout](#set-timeout)
 		- [set debug](#set-debug)
@@ -2103,7 +2106,7 @@ func main() {
 	}
 }
 ```
-## Turn off 3xx status code automatic jump
+## turn off 3xx status code automatic jump
 golang client库默认遇到301的状态码会自动跳转重新发起新请求, 你希望关闭这种默认形为, 那就使用下面的功能
 ```go
 import (
@@ -2120,7 +2123,7 @@ func main() {
 	}
 }
 ```
-## NewWithOpt set timeout
+## new with opt set timeout
 ```gout.WithTimeout``` 为了让大家少用```gout.SetTimeout```而设计
 ```go
 import (
@@ -2138,6 +2141,58 @@ func main() {
 }
 ```
 
+## new with opt unix socket
+```gout.WithUnixSocket``` 为了让大家少用```.UnixSocket ```而设计
+```go
+import (
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	// globalWithOpt里面包含连接池, 这是一个全局可复用的对象, 一个进程里面可能只需创建1个, 如果有多个不同的unixsocket，可以创建多个
+	globalWithOpt := gout.NewWithOpt(gout.WithUnixSocket("/tmp/test.socket"))
+	err := globalWithOpt.GET("url").Do()
+	if err != nil {
+		fmt.Printf("err = %v\n" ,err)
+		return
+	}
+}
+```
+## new with opt proxy
+```gout.WithProxy``` 为了让大家少用```.SetProxy ```而设计
+```go
+import (
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	// globalWithOpt里面包含连接池, 这是一个全局可复用的对象, 一个进程里面可能只需创建1个, 如果有多个不同的proxy，可以创建多个
+	globalWithOpt := gout.NewWithOpt(gout.WithProxy("http://127.0.0.1:7000"))
+	err := globalWithOpt.GET("url").Do()
+	if err != nil {
+		fmt.Printf("err = %v\n" ,err)
+		return
+	}
+}
+```
+
+## new with opt socks5
+```gout.WithSocks5``` 为了让大家少用```.SetSOCKS5```而设计
+```go
+import (
+	"github.com/guonaihong/gout"
+)
+
+func main() {
+	// globalWithOpt里面包含连接池, 这是一个全局可复用的对象, 一个进程里面可能只需创建1个, 如果有多个不同的socks5，可以创建多个
+	globalWithOpt := gout.NewWithOpt(gout.WithSocks5("127.0.0.1:7000"))
+	err := globalWithOpt.GET("url").Do()
+	if err != nil {
+		fmt.Printf("err = %v\n" ,err)
+		return
+	}
+}
+```
 # Global configuration
 ##  set timeout
 
