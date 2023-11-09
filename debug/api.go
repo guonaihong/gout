@@ -25,7 +25,7 @@ func NoColor() Apply {
 type file struct{ fileName string }
 
 func (f *file) Write(p []byte) (n int, err error) {
-	fd, err := os.OpenFile(f.fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	fd, err := os.OpenFile(f.fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return
 	}
@@ -57,6 +57,22 @@ func ToWriter(w io.Writer, color bool) Apply {
 func OnlyTraceFlag() Apply {
 	return Func(func(o *Options) {
 		o.Trace = false
+	})
+}
+
+// trace信息格式化成json输出至标准输出
+func TraceJSON() Apply {
+	return TraceJSONToWriter(os.Stdout)
+}
+
+// trace信息格式化成json输出至w
+func TraceJSONToWriter(w io.Writer) Apply {
+	return Func(func(o *Options) {
+		o.Color = false
+		o.Debug = false
+		o.Trace = true
+		o.FormatTraceJSON = true
+		o.Write = w
 	})
 }
 
