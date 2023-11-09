@@ -19,9 +19,9 @@ func ToBodyType(s string) color.BodyType {
 	case "json":
 		return color.JSONType
 	case "xml":
-		//return color.XmlType //TODO open
+		// return color.XmlType //TODO open
 	case "yaml":
-		//return color.YamlType //TODO open
+		// return color.YamlType //TODO open
 	}
 
 	return color.TxtType
@@ -29,13 +29,14 @@ func ToBodyType(s string) color.BodyType {
 
 // Options Debug mode core data structure
 type Options struct {
-	EscapeHTML  bool
-	Write       io.Writer
-	Debug       bool
-	Color       bool
-	Trace       bool
-	ReqBodyType string
-	RspBodyType string
+	EscapeHTML      bool
+	Write           io.Writer
+	Debug           bool
+	Color           bool
+	Trace           bool
+	FormatTraceJSON bool
+	ReqBodyType     string
+	RspBodyType     string
 	TraceInfo
 }
 
@@ -106,7 +107,7 @@ func (do *Options) debugPrint(req *http.Request, rsp *http.Response) error {
 			return err
 		}
 
-		var r = io.Reader(b)
+		r := io.Reader(b)
 		format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.ReqBodyType), do.EscapeHTML)
 		if format != nil {
 			r = format
@@ -126,7 +127,7 @@ func (do *Options) debugPrint(req *http.Request, rsp *http.Response) error {
 
 	fmt.Fprintf(w, "\r\n\r\n")
 	// write rsp body
-	var r = io.Reader(rsp.Body)
+	r := io.Reader(rsp.Body)
 	format := color.NewFormatEncoder(r, do.Color, ToBodyType(do.RspBodyType), do.EscapeHTML)
 	if format != nil {
 		r = format

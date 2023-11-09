@@ -2,6 +2,7 @@ package debug
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -34,7 +35,6 @@ func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, 
 	if needTrace {
 		startNow = time.Now()
 		trace := &httptrace.ClientTrace{
-
 			DNSStart: func(_ httptrace.DNSStartInfo) {
 				dnsStart = time.Now()
 			},
@@ -87,7 +87,18 @@ func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, 
 		t.ResponseDuration = time.Since(respStart)
 		t.TotalDuration = time.Since(startNow)
 		t.w = w
-		t.output(opt)
+		// 格式化成json
+		if opt.FormatTraceJSON {
+			all, err := json.Marshal(t)
+			if err != nil {
+				return resp, err
+			}
+			if _, err := w.Write(all); err != nil {
+				return resp, err
+			}
+		} else {
+			t.output(opt)
+		}
 	}
 	return resp, err
 }
