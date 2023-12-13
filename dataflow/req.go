@@ -123,6 +123,10 @@ func (r *Req) addDefDebug() {
 }
 
 func (r *Req) addContextType(req *http.Request) {
+	if req.Header.Get("Content-Type") != "" {
+		return
+	}
+
 	if r.wwwForm != nil {
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	}
@@ -314,7 +318,7 @@ func (r *Req) Request() (req *http.Request, err error) {
 		req.AddCookie(c)
 	}
 
-	if r.form != nil {
+	if r.form != nil && req.Header.Get("Content-Type") == "" {
 		req.Header.Add("Content-Type", f.FormDataContentType())
 	}
 
