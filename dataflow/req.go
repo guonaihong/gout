@@ -318,7 +318,7 @@ func (r *Req) Request() (req *http.Request, err error) {
 		req.AddCookie(c)
 	}
 
-	if r.form != nil {
+	if r.form != nil && req.Header.Get("Content-Type") == "" {
 		req.Header.Add("Content-Type", f.FormDataContentType())
 	}
 
