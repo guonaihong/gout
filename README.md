@@ -89,6 +89,7 @@ gout 是go写的http 客户端，为提高工作效率而开发
 		- [trace info](#trace-info)
 		- [save to writer](#save-to-writer)
 		- [save to file](#save-to-file)
+		- [Extracting trace information](#extracting-trace-information)
 	- [benchmark](#benchmark)
 		- [benchmarking a certain number of times](#benchmarking-a-certain-number-of-times)
 		- [benchmarking for a certain time](#benchmark-duration)
@@ -1725,6 +1726,35 @@ func main() {
 		fmt.Printf("err = %v\n", err)
 	}
 }
+```
+### extracting trace information
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/guonaihong/gout"
+	"github.com/guonaihong/gout/debug"
+)
+
+func main() {
+    var buf bytes.Buffer
+    err := gout.POST(":8080/colorjson").
+        Debug(debug.TraceJSONToWriter(&buf)).
+        SetJSON(gout.H{"str": "foo",
+            "num":   100,
+            "bool":  false,
+            "null":  nil,
+            "array": gout.A{"foo", "bar", "baz"},
+            "obj":   gout.H{"a": 1, "b": 2},
+        }).Do()
+
+    if err != nil {
+        fmt.Printf("err = %v\n", err)
+    }
+    fmt.Printf("%s", buf.String())
+}
+
 ```
 ## benchmark
 ### benchmarking a certain number of times
