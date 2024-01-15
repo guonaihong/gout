@@ -16,20 +16,20 @@ import (
 )
 
 type TraceInfo struct {
-	DnsDuration         time.Duration
-	ConnDuration        time.Duration
-	TLSDuration         time.Duration
-	RequestDuration     time.Duration
-	WaitResponeDuration time.Duration
-	ResponseDuration    time.Duration
-	TotalDuration       time.Duration
-	w                   io.Writer
+	DnsDuration          time.Duration
+	ConnDuration         time.Duration
+	TLSDuration          time.Duration
+	RequestDuration      time.Duration
+	WaitResponseDuration time.Duration
+	ResponseDuration     time.Duration
+	TotalDuration        time.Duration
+	w                    io.Writer
 }
 
 func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, do middler.Do) (*http.Response, error) {
 	w := opt.Write
 	var dnsStart, connStart, reqStart, tlsStart, waitResponseStart, respStart time.Time
-	var dnsDuration, connDuration, reqDuration, tlsDuration, waitResponeDuration time.Duration
+	var dnsDuration, connDuration, reqDuration, tlsDuration, waitResponseDuration time.Duration
 	var startNow time.Time
 
 	if needTrace {
@@ -68,7 +68,7 @@ func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, 
 			},
 
 			GotFirstResponseByte: func() {
-				waitResponeDuration = time.Since(waitResponseStart)
+				waitResponseDuration = time.Since(waitResponseStart)
 				respStart = time.Now()
 			},
 		}
@@ -83,7 +83,7 @@ func (t *TraceInfo) StartTrace(opt *Options, needTrace bool, req *http.Request, 
 		t.ConnDuration = connDuration
 		t.TLSDuration = tlsDuration
 		t.RequestDuration = reqDuration
-		t.WaitResponeDuration = waitResponeDuration
+		t.WaitResponseDuration = waitResponseDuration
 		t.ResponseDuration = time.Since(respStart)
 		t.TotalDuration = time.Since(startNow)
 		t.w = w
