@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/require"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -107,7 +108,7 @@ func TestReadAll(t *testing.T) {
 			name: "reads known size",
 			resp: &http.Response{
 				ContentLength: int64(size),
-				Body:          io.NopCloser(bytes.NewBuffer(body)),
+				Body:          ioutil.NopCloser(bytes.NewBuffer(body)),
 			},
 			expBody: body,
 		},
@@ -115,7 +116,7 @@ func TestReadAll(t *testing.T) {
 			name: "reads unknown size",
 			resp: &http.Response{
 				ContentLength: -1,
-				Body:          io.NopCloser(bytes.NewBuffer(body)),
+				Body:          ioutil.NopCloser(bytes.NewBuffer(body)),
 			},
 			expBody: body,
 		},
@@ -123,7 +124,7 @@ func TestReadAll(t *testing.T) {
 			name: "supports empty with size=0",
 			resp: &http.Response{
 				ContentLength: 0,
-				Body:          io.NopCloser(bytes.NewBuffer(nil)),
+				Body:          ioutil.NopCloser(bytes.NewBuffer(nil)),
 			},
 			expBody: []byte{},
 		},
@@ -131,7 +132,7 @@ func TestReadAll(t *testing.T) {
 			name: "supports empty with unknown size",
 			resp: &http.Response{
 				ContentLength: -1,
-				Body:          io.NopCloser(bytes.NewBuffer(nil)),
+				Body:          ioutil.NopCloser(bytes.NewBuffer(nil)),
 			},
 			expBody: []byte{},
 		},
@@ -166,14 +167,14 @@ func BenchmarkReadAll(b *testing.B) {
 					name: "unknown length",
 					resp: &http.Response{
 						ContentLength: -1,
-						Body:          io.NopCloser(content),
+						Body:          ioutil.NopCloser(content),
 					},
 				},
 				{
 					name: "known length",
 					resp: &http.Response{
 						ContentLength: int64(size),
-						Body:          io.NopCloser(content),
+						Body:          ioutil.NopCloser(content),
 					},
 				},
 			}
@@ -186,7 +187,7 @@ func BenchmarkReadAll(b *testing.B) {
 						for i := 0; i < b.N; i++ {
 							_, err := content.Seek(0, io.SeekStart) // reset
 							require.NoError(b, err)
-							data, err := io.ReadAll(tc.resp.Body)
+							data, err := ioutil.ReadAll(tc.resp.Body)
 							require.NoError(b, err)
 							require.Equalf(b, size, len(data), "size does not match, expected %d, actual %d", size, len(data))
 						}
