@@ -359,6 +359,12 @@ func (df *DataFlow) BindXML(obj interface{}) *DataFlow {
 	return df
 }
 
+// BindDecoder allow user parse data by their own decoder
+func (df *DataFlow) BindDecoder(decode decode.Decoder) *DataFlow {
+	df.Req.bodyDecoder = append(df.Req.bodyDecoder, decode)
+	return df
+}
+
 // Code parse the http code into the variable httpCode
 func (df *DataFlow) Code(httpCode *int) *DataFlow {
 	df.Req.httpCode = httpCode

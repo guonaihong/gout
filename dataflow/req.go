@@ -3,6 +3,7 @@ package dataflow
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -380,15 +381,18 @@ func (r *Req) GetContext() context.Context {
 // TODO 优化代码，每个decode都有自己的指针偏移直接指向流，减少大body的内存使用
 func (r *Req) decodeBody(req *http.Request, resp *http.Response) (err error) {
 	if r.bodyDecoder != nil {
-		var all []byte
-		if len(r.bodyDecoder) > 1 {
-			all, err = ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return err
-			}
-			// 已经取走数据，直接关闭body
-			resp.Body.Close()
+		// 当只有一个解码器时，直接在流上操作，避免读取整个响应体
+		if len(r.bodyDecoder) == 1 {
+			defer resp.Body.Close() // 确保在读取完成后关闭body
+			return r.bodyDecoder[0].Decode(resp.Body)
 		}
+
+		// 当有多个解码器需要处理响应体时，才读取整个响应体到内存中
+		all, err := ReadAll(resp)
+		if err != nil {
+			return err
+		}
+		resp.Body.Close() // 已经取走数据，直接关闭body
 
 		for _, bodyDecoder := range r.bodyDecoder {
 			if len(all) > 0 {
@@ -597,4 +601,38 @@ func reqDef(method string, url string, g *Gout, urlStruct ...interface{}) Req {
 	r.Setting = GlobalSetting
 
 	return r
+}
+
+// ReadAll returns the whole response body as bytes.
+// This is an optimized version of `io.ReadAll`.
+func ReadAll(resp *http.Response) ([]byte, error) {
+	if resp == nil {
+		return nil, errors.New("response cannot be nil")
+	}
+	switch {
+	case resp.ContentLength == 0:
+		return []byte{}, nil
+	// if we know the body length we can allocate the buffer only once
+	case resp.ContentLength >= 0:
+		body := make([]byte, resp.ContentLength)
+		_, err := io.ReadFull(resp.Body, body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read the response body with a known length %d: %w", resp.ContentLength, err)
+		}
+		return body, nil
+
+	default:
+		// using `bytes.NewBuffer` + `io.Copy` is much faster than `io.ReadAll`
+		// see https://github.com/elastic/beats/issues/36151#issuecomment-1931696767
+		buf := bytes.NewBuffer(nil)
+		_, err := io.Copy(buf, resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read the response body with unknown length: %w", err)
+		}
+		body := buf.Bytes()
+		if body == nil {
+			body = []byte{}
+		}
+		return body, nil
+	}
 }
