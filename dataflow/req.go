@@ -396,7 +396,7 @@ func (r *Req) decodeBody(req *http.Request, resp *http.Response) (err error) {
 
 		for _, bodyDecoder := range r.bodyDecoder {
 			if len(all) > 0 {
-				resp.Body = io.NopCloser(bytes.NewReader(all))
+				resp.Body = ioutil.NopCloser(bytes.NewReader(all))
 			}
 
 			if err = bodyDecoder.Decode(resp.Body); err != nil {
