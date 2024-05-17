@@ -26,8 +26,29 @@ func ModifyURL(url string) string {
 	return fmt.Sprintf("http://%s", url)
 }
 
-func SetSOCKS5(c *http.Client, addr string) error {
-	dialer, err := proxy.SOCKS5("tcp", addr, nil, proxy.Direct)
+// socks5://username:password@localhost:7890
+// socks5://localhost:7890
+// localhost:7890
+func SetSOCKS5(c *http.Client, socks5URL string) error {
+	host := socks5URL
+	var auth *proxy.Auth
+	if strings.HasPrefix(socks5URL, "socks5://") {
+		proxyURL, err := url.Parse(socks5URL)
+		if err != nil {
+			return err
+		}
+
+		if proxyURL.User != nil {
+			password, _ := proxyURL.User.Password()
+			auth = &proxy.Auth{
+				User:     proxyURL.User.Username(),
+				Password: password,
+			}
+		}
+
+		host = proxyURL.Host
+	}
+	dialer, err := proxy.SOCKS5("tcp", host, auth, proxy.Direct)
 	if err != nil {
 		return err
 	}
