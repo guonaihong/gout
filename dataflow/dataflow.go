@@ -3,8 +3,6 @@ package dataflow
 import (
 	"context"
 	"errors"
-	"fmt"
-	"net"
 	"net/http"
 	"net/url"
 	"time"
@@ -13,10 +11,10 @@ import (
 	"github.com/guonaihong/gout/decode"
 	"github.com/guonaihong/gout/encode"
 	"github.com/guonaihong/gout/enjson"
+	"github.com/guonaihong/gout/hcutil"
 	"github.com/guonaihong/gout/middler"
 	"github.com/guonaihong/gout/middleware/rsp/autodecodebody"
 	"github.com/guonaihong/gout/setting"
-	"golang.org/x/net/proxy"
 )
 
 const (
@@ -38,43 +36,43 @@ type DataFlow struct {
 
 // GET send HTTP GET method
 func (df *DataFlow) GET(url string, urlStruct ...interface{}) *DataFlow {
-	df.Req = reqDef(get, cleanPaths(url), df.out, urlStruct...)
+	df.Req, df.Err = reqDef(get, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // POST send HTTP POST method
 func (df *DataFlow) POST(url string, urlStruct ...interface{}) *DataFlow {
-	df.Req = reqDef(post, cleanPaths(url), df.out, urlStruct...)
+	df.Req, df.Err = reqDef(post, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // PUT send HTTP PUT method
 func (df *DataFlow) PUT(url string, urlStruct ...interface{}) *DataFlow {
-	df.Req = reqDef(put, cleanPaths(url), df.out, urlStruct...)
+	df.Req, df.Err = reqDef(put, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // DELETE send HTTP DELETE method
 func (df *DataFlow) DELETE(url string, urlStruct ...interface{}) *DataFlow {
-	df.Req = reqDef(delete2, cleanPaths(url), df.out, urlStruct...)
+	df.Req, df.Err = reqDef(delete2, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // PATCH send HTTP PATCH method
 func (df *DataFlow) PATCH(url string, urlStruct ...interface{}) *DataFlow {
-	df.Req = reqDef(patch, cleanPaths(url), df.out, urlStruct...)
+	df.Req, df.Err = reqDef(patch, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // HEAD send HTTP HEAD method
 func (df *DataFlow) HEAD(url string, urlStruct ...interface{}) *DataFlow {
-	df.Req = reqDef(head, cleanPaths(url), df.out, urlStruct...)
+	df.Req, df.Err = reqDef(head, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
 // OPTIONS send HTTP OPTIONS method
 func (df *DataFlow) OPTIONS(url string, urlStruct ...interface{}) *DataFlow {
-	df.Req = reqDef(options, cleanPaths(url), df.out, urlStruct...)
+	df.Req, df.Err = reqDef(options, cleanPaths(url), df.out, urlStruct...)
 	return df
 }
 
@@ -135,7 +133,7 @@ func (df *DataFlow) SetURL(url string, urlStruct ...interface{}) *DataFlow {
 	}
 
 	if df.Req.url == "" && df.Req.req == nil {
-		df.Req = reqDef(df.method, cleanPaths(url), df.out, urlStruct...)
+		df.Req, df.Err = reqDef(df.method, cleanPaths(url), df.out, urlStruct...)
 		return df
 	}
 
@@ -224,36 +222,11 @@ func (df *DataFlow) SetProtoBuf(obj interface{}) *DataFlow {
 	return df
 }
 
-func (df *DataFlow) initTransport() {
-	if df.out.Client.Transport == nil {
-		df.out.Client.Transport = &http.Transport{}
-	}
-}
-
-func (df *DataFlow) getTransport() (*http.Transport, bool) {
-	// 直接return df.out.Client.Transport.(*http.Transport) 等于下面的写法
-	// ts := df.out.Client.Transport.(*http.Transport)
-	// return ts 编译会报错
-	ts, ok := df.out.Client.Transport.(*http.Transport)
-	return ts, ok
-}
-
 // UnixSocket 函数会修改Transport, 请像对待全局变量一样对待UnixSocket
 // 对于全局变量的解释可看下面的链接
 // https://github.com/guonaihong/gout/issues/373
 func (df *DataFlow) UnixSocket(path string) *DataFlow {
-	df.initTransport()
-
-	transport, ok := df.getTransport()
-	if !ok {
-		df.Req.Err = fmt.Errorf("UnixSocket:not found http.transport:%T", df.out.Client.Transport)
-		return df
-	}
-
-	transport.Dial = func(proto, addr string) (conn net.Conn, err error) {
-		return net.Dial("unix", path)
-	}
-
+	df.Err = hcutil.UnixSocket(df.out.Client, path)
 	return df
 }
 
@@ -261,22 +234,7 @@ func (df *DataFlow) UnixSocket(path string) *DataFlow {
 // 对于全局变量的解释可看下面的链接
 // https://github.com/guonaihong/gout/issues/373
 func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
-	proxy, err := url.Parse(modifyURL(proxyURL))
-	if err != nil {
-		df.Req.Err = err
-		return df
-	}
-
-	df.initTransport()
-
-	transport, ok := df.getTransport()
-	if !ok {
-		df.Req.Err = fmt.Errorf("SetProxy:not found http.transport:%T", df.out.Client.Transport)
-		return df
-	}
-
-	transport.Proxy = http.ProxyURL(proxy)
-
+	df.Err = hcutil.SetProxy(df.out.Client, proxyURL)
 	return df
 }
 
@@ -284,21 +242,7 @@ func (df *DataFlow) SetProxy(proxyURL string) *DataFlow {
 // 对于全局变量的解释可看下面的链接
 // https://github.com/guonaihong/gout/issues/373
 func (df *DataFlow) SetSOCKS5(addr string) *DataFlow {
-	dialer, err := proxy.SOCKS5("tcp", addr, nil, proxy.Direct)
-	if err != nil {
-		df.Req.Err = err
-		return df
-	}
-
-	df.initTransport()
-
-	transport, ok := df.getTransport()
-	if !ok {
-		df.Req.Err = fmt.Errorf("SetSOCKS5:not found http.transport:%T", df.out.Client.Transport)
-		return df
-	}
-
-	transport.Dial = dialer.Dial
+	df.Err = hcutil.SetSOCKS5(df.out.Client, addr)
 	return df
 }
 
@@ -391,8 +335,6 @@ func (df *DataFlow) SetTimeout(d time.Duration) *DataFlow {
 
 // WithContext set context, and SetTimeout are mutually exclusive functions
 func (df *DataFlow) WithContext(c context.Context) *DataFlow {
-	df.Req.Index++
-	df.Req.ctxIndex = df.Req.Index
 	df.Req.c = c
 	return df
 }

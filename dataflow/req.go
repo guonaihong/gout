@@ -372,8 +372,11 @@ func clearHeader(header http.Header) {
 
 // retry模块需要context.Context，所以这里也返回context.Context
 func (r *Req) GetContext() context.Context {
-	if r.Timeout > 0 && r.TimeoutIndex > r.ctxIndex {
-		r.c, r.cancel = context.WithTimeout(context.Background(), r.Timeout)
+	if r.Timeout > 0 {
+		if r.c == nil {
+			r.c = context.TODO()
+		}
+		r.c, r.cancel = context.WithTimeout(r.c, r.Timeout)
 	}
 	return r.c
 }
@@ -588,11 +591,14 @@ func modifyURL(url string) string {
 	return fmt.Sprintf("http://%s", url)
 }
 
-func reqDef(method string, url string, g *Gout, urlStruct ...interface{}) Req {
+func reqDef(method string, url string, g *Gout, urlStruct ...interface{}) (Req, error) {
 	if len(urlStruct) > 0 {
 		var out strings.Builder
 		tpl := template.Must(template.New(url).Parse(url))
-		tpl.Execute(&out, urlStruct[0])
+		err := tpl.Execute(&out, urlStruct[0])
+		if err != nil {
+			return Req{}, err
+		}
 		url = out.String()
 	}
 
@@ -600,7 +606,7 @@ func reqDef(method string, url string, g *Gout, urlStruct ...interface{}) Req {
 
 	r.Setting = GlobalSetting
 
-	return r
+	return r, nil
 }
 
 // ReadAll returns the whole response body as bytes.

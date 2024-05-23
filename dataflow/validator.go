@@ -46,19 +46,25 @@ func (v *defaultValidator) lazyinit() {
 		v.validate = validator.New()
 		v.validate.SetTagName("valid")
 		v.trans, _ = uni.GetTranslator("en")
-		en_translations.RegisterDefaultTranslations(v.validate, v.trans)
+		err := en_translations.RegisterDefaultTranslations(v.validate, v.trans)
+		if err != nil {
+			panic(err)
+		}
 
 		v.validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 			return "error: " + fld.Name
 		})
 
-		v.validate.RegisterTranslation("required", v.trans, func(ut ut.Translator) error {
+		err = v.validate.RegisterTranslation("required", v.trans, func(ut ut.Translator) error {
 			return ut.Add("required", "{0} must have a value!", true) // see universal-translator for details
 		}, func(ut ut.Translator, fe validator.FieldError) string {
 			t, _ := ut.T("required", fe.Field())
 
 			return t
 		})
+		if err != nil {
+			panic(err)
+		}
 
 		// add any custom validations etc. here
 	})

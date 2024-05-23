@@ -26,7 +26,8 @@ func Test_Global_SetDebug(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, err := io.Copy(&buf, r)
+		assert.NoError(t, err)
 		outC <- buf.String()
 	}()
 

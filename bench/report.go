@@ -184,7 +184,7 @@ func (r *Report) Process(work chan struct{}) {
 func (r *Report) WaitAll() {
 	<-r.waitQuit
 	//TODO 处理错误
-	r.outputReport() //输出最终报表
+	_ = r.outputReport() //输出最终报表
 }
 
 func (r *Report) calBody(resp *http.Response, bodySize uint64) {

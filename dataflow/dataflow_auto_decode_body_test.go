@@ -46,7 +46,10 @@ func create_AutoDecodeBody() *httptest.Server {
 		c.Header("Content-Encoding", "br")
 		var buf bytes.Buffer
 		w := brotli.NewWriter(&buf)
-		w.Write([]byte(test_autoDecodeBody_data))
+		_, err := w.Write([]byte(test_autoDecodeBody_data))
+		if err != nil {
+			log.Fatal(err)
+		}
 		w.Flush()
 		w.Close()
 		c.String(200, buf.String())
@@ -56,7 +59,10 @@ func create_AutoDecodeBody() *httptest.Server {
 
 		var buf bytes.Buffer
 		w := zlib.NewWriter(&buf)
-		w.Write([]byte(test_autoDecodeBody_data))
+		_, err := w.Write([]byte(test_autoDecodeBody_data))
+		if err != nil {
+			log.Fatal(err)
+		}
 		w.Close()
 		c.Header("Content-Encoding", "deflate")
 		c.String(200, buf.String())

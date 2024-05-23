@@ -50,8 +50,6 @@ func Test_Global_SetTimeout(t *testing.T) {
 	// 期望的结果是返回错误
 	assert.Error(t, err)
 
-	// 使用互斥api的原则，后面的覆盖前面的
-	// 这里是WithContext生效, 预期超时时间400ms
 	ctx, cancel := context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
 	defer cancel()
 
@@ -62,7 +60,7 @@ func Test_Global_SetTimeout(t *testing.T) {
 		Do()
 
 	assert.Error(t, err)
-	assert.GreaterOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
+	assert.LessOrEqual(t, time.Since(s), shortTimeout*time.Millisecond+time.Millisecond*50)
 
 	SetTimeout(time.Duration(0))
 }
@@ -96,6 +94,7 @@ func Test_NewWithOpt_Timeout(t *testing.T) {
 		Do()
 
 	assert.Error(t, err)
-	assert.GreaterOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
+
+	assert.LessOrEqual(t, time.Since(s), shortTimeout*time.Millisecond+time.Millisecond*50)
 
 }

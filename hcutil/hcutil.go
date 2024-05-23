@@ -1,6 +1,7 @@
 package hcutil
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -96,8 +97,9 @@ func UnixSocket(c *http.Client, path string) error {
 		return fmt.Errorf("UnixSocket:not found http.transport:%T", c.Transport)
 	}
 
-	transport.Dial = func(proto, addr string) (conn net.Conn, err error) {
-		return net.Dial("unix", path)
+	transport.DialContext = func(ctx context.Context, proto, addr string) (conn net.Conn, err error) {
+		var d net.Dialer
+		return d.DialContext(ctx, "unix", path)
 	}
 
 	return nil

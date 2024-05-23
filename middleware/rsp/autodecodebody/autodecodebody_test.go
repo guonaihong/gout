@@ -47,7 +47,8 @@ func TestAutoDecodeBody(t *testing.T) {
 			rv.Header.Set("Content-Encoding", "deflate")
 			var b bytes.Buffer
 			w := zlib.NewWriter(&b)
-			w.Write([]byte(data))
+			_, err := w.Write([]byte(data))
+			assert.NoError(t, err)
 			w.Close()
 
 			rv.Body = ioutil.NopCloser(&b)
@@ -59,7 +60,8 @@ func TestAutoDecodeBody(t *testing.T) {
 			rv.Header.Set("Content-Encoding", "br")
 			var b bytes.Buffer
 			w := brotli.NewWriter(&b)
-			w.Write([]byte(data))
+			_, err := w.Write([]byte(data))
+			assert.NoError(t, err)
 			w.Flush()
 			w.Close()
 			rv.Body = ioutil.NopCloser(&b)

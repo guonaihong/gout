@@ -453,7 +453,6 @@ func testWithContextCancel(t *testing.T, ts *httptest.Server) {
 	assert.Error(t, err)
 }
 
-//
 func TestWithContext(t *testing.T) {
 	router := setupContext(t)
 	ts := httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
@@ -566,8 +565,7 @@ func Test_DataFlow_Timeout(t *testing.T) {
 		Do()
 	assert.Error(t, err)
 
-	// 使用互斥api的原则，后面的覆盖前面的
-	// 这里是SetTimeout生效, 超时时间200ms
+	//
 	ctx, cancel := context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
 	defer cancel()
 
@@ -579,10 +577,9 @@ func Test_DataFlow_Timeout(t *testing.T) {
 
 	assert.Error(t, err)
 
-	assert.LessOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
+	assert.LessOrEqual(t, time.Since(s), shortTimeout*time.Millisecond+time.Millisecond*50)
 
-	// 使用互斥api的原则，后面的覆盖前面的
-	// 这里是WithContext生效, 超时时间400ms
+	//
 	ctx, cancel = context.WithTimeout(context.Background(), longTimeout*time.Millisecond)
 	defer cancel()
 	s = time.Now()
@@ -592,7 +589,7 @@ func Test_DataFlow_Timeout(t *testing.T) {
 		Do()
 
 	assert.Error(t, err)
-	assert.GreaterOrEqual(t, int(time.Since(s)), int(middleTimeout*time.Millisecond))
+	assert.GreaterOrEqual(t, int(time.Since(s)), int(shortTimeout*time.Millisecond))
 }
 
 func Test_DataFlow_SetURL(t *testing.T) {
