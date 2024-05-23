@@ -2,13 +2,13 @@ package dataflow
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"github.com/guonaihong/gout/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/guonaihong/gout/json"
 
 	core "github.com/guonaihong/gout/core"
 
@@ -58,7 +58,7 @@ func (d *demoResponseMiddler) ModifyResponse(response *http.Response) error {
 
 	// Go中json中的数字经过反序列化会成为float64类型
 	if float64(200) != code {
-		return errors.New(fmt.Sprintf("请求失败, code %d msg %s", code, msg))
+		return fmt.Errorf("请求失败, code %d msg %s", code, msg)
 	} else {
 		byt, _ := json.Marshal(&data)
 		response.Body = ioutil.NopCloser(bytes.NewReader(byt))

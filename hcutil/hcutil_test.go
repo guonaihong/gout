@@ -118,10 +118,12 @@ func TestUnixSocket(t *testing.T) {
 	}()
 
 	c := http.Client{}
-	UnixSocket(&c, path)
+	err := UnixSocket(&c, path)
+	assert.NoError(t, err)
 	s := ""
 
 	req, err := http.NewRequest("POST", "http://xxx/test/unix/", nil)
+	assert.NoError(t, err)
 	req.Header.Add("h1", "v1")
 	req.Header.Add("h2", "v2")
 
@@ -139,7 +141,7 @@ func TestUnixSocket(t *testing.T) {
 	// 错误情况1
 	c.Transport = &TransportFail{}
 
-	resp, err = c.Do(req)
+	_, err = c.Do(req)
 
 	assert.Error(t, err)
 }

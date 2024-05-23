@@ -64,25 +64,33 @@ func Test_URL_Template(t *testing.T) {
 		code := 0
 		switch tc.Method {
 		case "get":
-			New().GET("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			err := New().GET("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "post":
-			New().POST("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := New().POST("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "put":
-			New().PUT("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := New().PUT("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "patch":
-			New().PATCH("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := New().PATCH("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "options":
-			New().OPTIONS("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := New().OPTIONS("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "head":
 			code := 0
-			New().HEAD("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
-			New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Code(&code).Do()
+			err := New().HEAD("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
+			err = New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Code(&code).Do()
+			assert.NoError(t, err)
 			assert.Equal(t, code, 200)
 			continue
 		}
 		assert.Equal(t, code, 200)
 
-		New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Do()
+		err := New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Do()
+		assert.NoError(t, err)
 		assert.Equal(t, body, tc.Method)
 		b := assert.Equal(t, body2, tc.Method)
 		if !b {

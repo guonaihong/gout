@@ -7,52 +7,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout/color"
 	"github.com/guonaihong/gout/core"
 	"github.com/stretchr/testify/assert"
 )
-
-func createGeneralEcho() *httptest.Server {
-	router := func() *gin.Engine {
-		router := gin.New()
-
-		router.POST("/", func(c *gin.Context) {
-			_, err := io.Copy(c.Writer, c.Request.Body)
-			if err != nil {
-				fmt.Printf("createGeneralEcho fail:%v\n", err)
-			}
-		})
-
-		return router
-	}()
-
-	return httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-}
-
-func createGeneral(data string) *httptest.Server {
-	router := func() *gin.Engine {
-		router := gin.New()
-
-		router.POST("/", func(c *gin.Context) {
-			if len(data) > 0 {
-				c.String(200, data)
-			}
-		})
-
-		return router
-	}()
-
-	return httptest.NewServer(http.HandlerFunc(router.ServeHTTP))
-}
-
-type data struct {
-	ID   int    `json:"id" xml:"id"`
-	Data string `json:"data" xml:"data"`
-}
 
 // 测试resetBodyAndPrint出错
 func TestResetBodyAndPrintFail(t *testing.T) {

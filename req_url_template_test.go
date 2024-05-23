@@ -64,25 +64,33 @@ func Test_URL_Template(t *testing.T) {
 		code := 0
 		switch tc.Method {
 		case "get":
-			GET("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			err := GET("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "post":
-			POST("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := POST("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "put":
-			PUT("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := PUT("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "patch":
-			PATCH("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := PATCH("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "options":
-			OPTIONS("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			err := OPTIONS("{{.Host}}/{{.Method}}", tc).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
 		case "head":
 			code := 0
-			HEAD("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
-			New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Code(&code).Do()
+			err := HEAD("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body).Code(&code).Do()
+			assert.NoError(t, err)
+			err = New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Code(&code).Do()
+			assert.NoError(t, err)
 			assert.Equal(t, code, 200)
 			continue
 		}
 		assert.Equal(t, code, 200)
 
-		New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Do()
+		err := New().SetMethod(strings.ToUpper(tc.Method)).SetURL("{{.Host}}/{{.Method}}", tc).Debug(true).BindBody(&body2).Do()
+		assert.NoError(t, err)
 		assert.Equal(t, body, tc.Method)
 		b := assert.Equal(t, body2, tc.Method)
 		if !b {

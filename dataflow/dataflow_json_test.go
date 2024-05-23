@@ -14,10 +14,12 @@ func Test_SetJSONNotEscape(t *testing.T) {
 	fmt.Println("url", ts.URL)
 	var buf bytes.Buffer
 	//POST(ts.URL).Debug(true).SetJSONNotEscape(map[string]any{"url": "http://www.com?a=b&c=d"}).Do()
-	POST(ts.URL).Debug(debug.ToWriter(&buf, false)).SetJSONNotEscape(map[string]interface{}{"url": "http://www.com?a=b&c=d"}).Do()
+	err := POST(ts.URL).Debug(debug.ToWriter(&buf, false)).SetJSONNotEscape(map[string]interface{}{"url": "http://www.com?a=b&c=d"}).Do()
+	assert.NoError(t, err)
 	assert.True(t, bytes.Contains(buf.Bytes(), []byte("&")), buf.String())
 	buf.Reset()
 	//POST(ts.URL).Debug(true).SetJSON(map[string]any{"url": "http://www.com?a=b&c=d"}).Do()
-	POST(ts.URL).Debug(debug.ToWriter(&buf, false)).SetJSON(map[string]interface{}{"url": "http://www.com?a=b&c=d"}).Do()
+	err = POST(ts.URL).Debug(debug.ToWriter(&buf, false)).SetJSON(map[string]interface{}{"url": "http://www.com?a=b&c=d"}).Do()
+	assert.NoError(t, err)
 	assert.False(t, bytes.Contains(buf.Bytes(), []byte("&")), buf.String())
 }
