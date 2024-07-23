@@ -23,13 +23,19 @@ type Option interface {
 type insecureSkipVerifyOption bool
 
 func (i insecureSkipVerifyOption) apply(opts *options) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
+
+	if opts.hc.Transport == nil {
+		opts.hc.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+		return
+	}
+	opts.hc.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: true,
 	}
 
-	opts.hc.Transport = tr
 }
 
 // 1.忽略ssl验证
