@@ -18,6 +18,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/guonaihong/gout/core"
+	"github.com/guonaihong/gout/middler"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -216,6 +217,7 @@ func setupForm(t *testing.T, reqTestForm testForm) *gin.Engine {
 			assert.Equal(t, reqTestForm.Text, t2.Text)
 		*/
 	})
+
 	return router
 }
 
@@ -616,6 +618,29 @@ func Test_DataFlow_SetURL(t *testing.T) {
 	err = New().GET("123456").SetURL(ts.URL).SetBody(body).BindBody(&s).Do()
 	assert.NoError(t, err)
 	assert.Equal(t, body, s)
+
+	// New test case to check if the body can be read when SetBody is called before SetMethod
+	s = ""
+	ts2 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bodyBytes, _ := io.ReadAll(r.Body)
+		w.Write(bodyBytes)
+	}))
+	defer ts2.Close()
+
+	err = New().
+		WithContext(context.Background()).
+		SetTimeout(time.Second * 100).
+		SetURL(ts2.URL).
+		SetBody("22222").
+		SetMethod("POST").
+		RequestUse(middler.WithRequestMiddlerFunc(func(req *http.Request) error {
+			bytes, _ := io.ReadAll(req.Body)
+			assert.Equal(t, "22222", string(bytes))
+			req.Body = io.NopCloser(strings.NewReader("22222"))
+			return nil
+		})).
+		Do()
+	assert.NoError(t, err)
 }
 
 func Test_DataFlow_SetHost(t *testing.T) {
@@ -695,6 +720,7 @@ func Test_DataFlow_Bind(t *testing.T) {
 	// 测试错误的情况
 	router := func() *gin.Engine {
 		router := gin.New()
+
 		router.GET("/", func(c *gin.Context) {
 			c.String(200, "test SetDecod3")
 		})

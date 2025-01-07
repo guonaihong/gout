@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/guonaihong/gout/debug"
@@ -132,13 +134,18 @@ func (df *DataFlow) SetURL(url string, urlStruct ...interface{}) *DataFlow {
 		return df
 	}
 
-	if df.Req.url == "" && df.Req.req == nil {
-		df.Req, df.Err = reqDef(df.method, cleanPaths(url), df.out, urlStruct...)
-		return df
+	if len(urlStruct) > 0 {
+		var out strings.Builder
+		tpl := template.Must(template.New(url).Parse(url))
+		err := tpl.Execute(&out, urlStruct[0])
+		if err != nil {
+			df.Err = err
+			return df
+		}
+		url = out.String()
 	}
 
 	df.Req.url = modifyURL(cleanPaths(url))
-
 	return df
 }
 
